@@ -1,9 +1,19 @@
 <template>
-  <main class="px-4 py-10 text-center text-gray-700 dark:text-gray-200">
-    <RouterView />
-    <Footer />
-    <div class="mt-5 mx-auto text-center opacity-75 dark:opacity-50 text-sm">
-      [Default Layout]
+  <div
+    flex flex-row
+    h-full w-full
+    m-a
+  >
+    <div
+      flex
+      m-a
+    >
+      <RouterView />
     </div>
-  </main>
+    <div
+      left-a
+    >
+      <Sidebar />
+    </div>
+  </div>
 </template>
