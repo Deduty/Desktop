@@ -1,5 +1,13 @@
 <script setup lang="ts">
+const Router = useRouter()
+
+const haveHistory = ref(false)
 const isHomePage = ref(true)
+
+watch(Router, (router) => {
+  isHomePage.value = router.currentRoute.value.path === '/'
+  haveHistory.value = window.history.length > 1
+})
 </script>
 
 <template>
@@ -12,38 +20,66 @@ const isHomePage = ref(true)
       border="~ rounded gray-200 dark:gray-700"
       class="vertical-line"
     />
-    <nav p-2>
-      <a>
+    <nav
+      flex flex-col
+      p-2
+    >
+      <button
+        class="button"
+      >
         <div i-carbon-account />
-      </a>
-      <a>
+      </button>
+      <button
+        class="button"
+      >
         <div i-carbon-settings />
-      </a>
-      <a mt-a>
+      </button>
+      <button
+        class="button"
+        mt-a
+        :disabled="!haveHistory"
+        @click="Router.back()"
+      >
         <div
-          v-show="!isHomePage"
           i-carbon-arrow-left
         />
+      </button>
+      <button
+        class="button"
+        :disabled="isHomePage"
+      >
         <div
-          v-show="isHomePage"
           i-carbon-home
         />
-      </a>
+      </button>
     </nav>
   </div>
 </template>
 
 <style scoped lang="sass">
+.button
+  cursor: pointer
+  transition: all 200ms ease-in-out
+
+.button:hover
+  color: green
+  transition: all 200ms ease-in-out
+
+.button:disabled
+  cursor: default
+  opacity: 0.5
+
 div.vertical-line
   height: calc(100% - 1rem)
   margin-block: auto
 
 nav
-  display: grid
-  grid-template-rows: max-content
   gap: 1rem
 
-  a
+  button
+    height: fit-content
+    width: fit-content
+
     div
       font-size: 2.25rem
 </style>
