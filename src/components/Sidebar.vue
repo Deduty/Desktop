@@ -22,6 +22,7 @@ watch(Router, (router) => {
     />
     <nav
       flex flex-col
+      gap-4
       p-2
     >
       <button
@@ -74,8 +75,6 @@ div.vertical-line
   margin-block: auto
 
 nav
-  gap: 1rem
-
   button
     height: fit-content
     width: fit-content
