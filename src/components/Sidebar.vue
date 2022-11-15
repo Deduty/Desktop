@@ -4,10 +4,14 @@ const Router = useRouter()
 const haveHistory = ref(false)
 const isHomePage = ref(true)
 
-watch(Router, (router) => {
-  isHomePage.value = router.currentRoute.value.path === '/'
-  haveHistory.value = window.history.length > 1
-})
+const hookRouterPath = (to: { path: String }) => {
+  haveHistory.value = window.history.state.back !== null
+  isHomePage.value = to.path === '/'
+}
+
+Router.afterEach(hookRouterPath)
+
+onMounted(() => hookRouterPath({ path: window.location.pathname }))
 </script>
 
 <template>
@@ -48,6 +52,7 @@ watch(Router, (router) => {
       <button
         class="button"
         :disabled="isHomePage"
+        @click="Router.push('/')"
       >
         <div
           i-carbon-home
