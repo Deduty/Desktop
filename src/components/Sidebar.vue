@@ -63,7 +63,7 @@ watch(Router, (router) => {
   transition: all 200ms ease-in-out
 
 .button:hover
-  color: green
+  color: darkcyan
   transition: all 200ms ease-in-out
 
 .button:disabled
