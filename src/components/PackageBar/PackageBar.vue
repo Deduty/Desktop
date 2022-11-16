@@ -5,15 +5,20 @@
     class="container"
     h-full
     p-4
+    gap-4
   >
     <div m-0>
       <PackageSearch />
     </div>
-    <div mt-a />
+    <div
+      flex-grow
+      overflow-hidden
+      m-0
+    >
+      <PackageList />
+    </div>
   </div>
 </template>
 
 <style scoped lang="sass">
-div.container
-  min-width: fit-content
 </style>
