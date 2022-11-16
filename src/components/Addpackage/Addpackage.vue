@@ -2,7 +2,7 @@
   <div
     flex flex-col
     border="~ rounded gray-200 dark:gray-700"
-    class="container"
+    w-xs
     p-4
     gap-4
   >
@@ -41,9 +41,6 @@
 </template>
 
 <style scoped lang="sass">
-div.container
-  width: 20rem
-
 button
   transition: all 200ms ease-in-out
 
