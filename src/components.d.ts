@@ -13,6 +13,7 @@ declare module '@vue/runtime-core' {
     Footer: typeof import('./components/Footer.vue')['default']
     Packagebar: typeof import('./components/PackageBar/Packagebar.vue')['default']
     PackageBar: typeof import('./components/PackageBar/PackageBar.vue')['default']
+    PackageList: typeof import('./components/PackageBar/PackageList.vue')['default']
     PackageSearch: typeof import('./components/PackageBar/PackageSearch.vue')['default']
     README: typeof import('./components/README.md')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
