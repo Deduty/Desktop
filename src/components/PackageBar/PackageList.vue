@@ -61,17 +61,24 @@ onMounted(() => {
         <div
           flex flex-row
           border="~ rounded gray-200 dark:gray-700"
+          class="package item"
           m-2 p-2
         >
           <div
             flex flex-col
             gap-2
           >
-            <div text-lg>
+            <div
+              class="black-text"
+              text-lg
+            >
               {{ pkg.name }}
             </div>
             <div m-a />
-            <div text="sm gray-400 dark:gray-500">
+            <div
+              class="gray-text"
+              text="sm gray-400 dark:gray-500"
+            >
               Version: {{ pkg.version }}
             </div>
           </div>
@@ -81,12 +88,14 @@ onMounted(() => {
             gap-2
           >
             <div
+              class="black-text"
               text="sm right"
             >
               {{ sizeToString(pkg.size) }}
             </div>
             <div m-a />
             <div
+              class="gray-text"
               text="sm right gray-400 dark:gray-500"
             >
               {{ pkg.source }}
@@ -97,3 +106,21 @@ onMounted(() => {
     </ul>
   </div>
 </template>
+
+<style scoped lang="sass">
+div.package.item
+  cursor: pointer
+  transition: all 200ms ease-in-out
+
+div.package.item:hover
+  background-color: darkcyan
+  transition: all 200ms ease-in-out
+
+div.package.item:hover .black-text
+  color: white
+  transition: all 200ms ease-in-out
+
+div.package.item:hover .gray-text
+  color: black
+  transition: all 200ms ease-in-out
+</style>
