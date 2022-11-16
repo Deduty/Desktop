@@ -45,6 +45,6 @@ button
   transition: all 200ms ease-in-out
 
 button:hover
-  background-color: cadetblue
+  background-color: darkcyan
   transition: all 200ms ease-in-out
 </style>
