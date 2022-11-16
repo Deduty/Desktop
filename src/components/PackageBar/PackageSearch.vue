@@ -75,6 +75,10 @@ onMounted(() => {
 </template>
 
 <style scoped lang="sass">
+// ================================ INPUT BAR =================================
+html.dark input
+  background-color: #121212
+
 // ================================ CONTAINER =================================
 // ---------------------------------- REMOVE ----------------------------------
 div.container:hover > button.remove
