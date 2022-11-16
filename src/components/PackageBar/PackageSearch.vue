@@ -45,7 +45,6 @@ onMounted(() => {
   >
     <input
       v-model="inputString"
-      class="search-field"
       :placeholder="placeHolderString"
       w-full
       p-2
@@ -78,29 +77,29 @@ onMounted(() => {
 <style scoped lang="sass">
 // ================================ CONTAINER =================================
 // ---------------------------------- REMOVE ----------------------------------
-div.container:hover button.remove
+div.container:hover > button.remove
   opacity: 0%
   transition: all 200ms ease-in-out
 
-div.container:hover button.remove:hover
+div.container:hover > button.remove:hover
   opacity: 0%
   transition: all 200ms ease-in-out
 
 // ------------------------------ REMOVE.SOME ---------------------------------
-div.container:hover button.remove.some
+div.container:hover > button.remove.some
   opacity: 60%
   transition: all 200ms ease-in-out
 
-div.container:hover button.remove.some:hover
+div.container:hover > button.remove.some:hover
   opacity: 90%
   transition: all 200ms ease-in-out
 
 // ---------------------------------- SEARCH ----------------------------------
-div.container:hover button.search
+div.container:hover > button.search
   background-color: cadetblue
   transition: all 200ms ease-in-out
 
-div.container:hover button.search:hover
+div.container:hover > button.search:hover
   background-color: darkcyan
   transition: all 200ms ease-in-out
 // ================================== REMOVE ==================================
