@@ -7,13 +7,14 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    Addpackage: typeof import('./components/Addpackage/Addpackage.vue')['default']
     AddPackage: typeof import('./components/AddPackage/AddPackage.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
-    Packagebar: typeof import('./components/PackageBar/Packagebar.vue')['default']
+    Overlay: typeof import('./components/Overlay.vue')['default']
     PackageBar: typeof import('./components/PackageBar/PackageBar.vue')['default']
-    PackageList: typeof import('./components/PackageBar/PackageList.vue')['default']
+    PackageItem: typeof import('./components/PackageBar/PackageList/PackageItem.vue')['default']
+    PackageList: typeof import('./components/PackageBar/PackageList/PackageList.vue')['default']
+    PackageMenu: typeof import('./components/PackageBar/PackageMenu.vue')['default']
     PackageSearch: typeof import('./components/PackageBar/PackageSearch.vue')['default']
     README: typeof import('./components/README.md')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
