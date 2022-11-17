@@ -2,7 +2,6 @@
   <div
     flex flex-col
     border="~ rounded gray-200 dark:gray-700"
-    class="container"
     h-full
     p-4
     gap-4
@@ -19,6 +18,3 @@
     </div>
   </div>
 </template>
-
-<style scoped lang="sass">
-</style>

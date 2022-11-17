@@ -41,7 +41,7 @@ onMounted(() => {
   <div
     flex flex-row
     border="~ rounded gray-200 dark:gray-700"
-    class="container"
+    class="box"
   >
     <input
       v-model="inputString"
@@ -81,29 +81,29 @@ html.dark input
 
 // ================================ CONTAINER =================================
 // ---------------------------------- REMOVE ----------------------------------
-div.container:hover > button.remove
+div.box:hover > button.remove
   opacity: 0%
   transition: all 200ms ease-in-out
 
-div.container:hover > button.remove:hover
+div.box:hover > button.remove:hover
   opacity: 0%
   transition: all 200ms ease-in-out
 
 // ------------------------------ REMOVE.SOME ---------------------------------
-div.container:hover > button.remove.some
+div.box:hover > button.remove.some
   opacity: 60%
   transition: all 200ms ease-in-out
 
-div.container:hover > button.remove.some:hover
+div.box:hover > button.remove.some:hover
   opacity: 90%
   transition: all 200ms ease-in-out
 
 // ---------------------------------- SEARCH ----------------------------------
-div.container:hover > button.search
+div.box:hover > button.search
   background-color: cadetblue
   transition: all 200ms ease-in-out
 
-div.container:hover > button.search:hover
+div.box:hover > button.search:hover
   background-color: darkcyan
   transition: all 200ms ease-in-out
 // ================================== REMOVE ==================================
