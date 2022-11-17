@@ -1,25 +1,51 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-
 import { Package, PackageSize, PackageSource } from '~/composables/deduty'
 
+const { searchString } = defineProps<{ searchString: string }>()
+
+interface PackageSearchItem {
+  package: Package
+  showed: boolean
+}
+
+const packageSearchList: Ref<PackageSearchItem[]> = ref([])
 const currentPackage: Ref<Package | null> = ref(null)
-const packageList: Ref<Package[]> = ref([])
 
 const packageMenuElement = ref<HTMLElement>()
 
 onMounted(() => {
   for (let i = 0; i < 1000; i += 1) {
-    packageList.value.push(
-      Package.fromOptions({
-        name: `Template ${i}`,
-        version: `1.${i}.${i * 2}`,
-        source: Object.values(PackageSource)[i % 3] as PackageSource,
-        size: new PackageSize(1024 * (i + 1)),
-        language: ['English', 'Russian'][i % 2],
-      }))
+    packageSearchList.value.push(
+      {
+        package: Package.fromOptions({
+          name: `Template ${i}`,
+          version: `1.${i}.${i * 2}`,
+          source: Object.values(PackageSource)[i % 3] as PackageSource,
+          size: new PackageSize(1024 * (i + 1)),
+          language: ['English', 'Russian'][i % 2],
+        }),
+        showed: true,
+      },
+    )
   }
 })
+
+watch(
+  () => searchString,
+  (searchString) => {
+    packageSearchList.value.forEach((pair) => {
+      const searchResult = pair.package.name.match(searchString)
+      pair.showed = (
+        (
+          searchResult !== null
+          && searchResult.length > 0
+        )
+        || pair.package.name.includes(searchString)
+      )
+    })
+  },
+)
 </script>
 
 <template>
@@ -52,10 +78,11 @@ onMounted(() => {
   >
     <ul overflow-y-scroll>
       <li
-        v-for="(pkg, index) in packageList" :key="index"
-        @click="currentPackage = pkg"
+        v-for="(pair, index) in packageSearchList" v-show="pair.showed"
+        :key="index"
+        @click="currentPackage = pair.package"
       >
-        <PackageItem :pkg="pkg" />
+        <PackageItem :pkg="pair.package" />
       </li>
     </ul>
   </div>

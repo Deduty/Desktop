@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const inputString = ref('')
+const emit = defineEmits<{ (event: 'searchStringUpdated', newSearchString: string): void }>()
+
+const searchString = ref('')
 
 const placeHolderString = ref('')
 const placeHolderVariants = [
@@ -10,6 +12,12 @@ const placeHolderVariants = [
   'English',
   'Easter egg',
 ]
+
+watchThrottled(
+  searchString,
+  newSearchString => emit('searchStringUpdated', newSearchString),
+  { throttle: 400 },
+)
 
 onMounted(() => {
   let placeHolderIndex: number
@@ -44,7 +52,7 @@ onMounted(() => {
     class="box"
   >
     <input
-      v-model="inputString"
+      v-model="searchString"
       :placeholder="placeHolderString"
       w-full
       p-2
@@ -52,9 +60,9 @@ onMounted(() => {
     >
     <button
       class="remove"
-      :class="inputString === '' ? '' : 'some'"
+      :class="searchString === '' ? '' : 'some'"
       p-2
-      @click="inputString = ''"
+      @click="searchString = ''"
     >
       <div
         i-carbon-filter-remove
