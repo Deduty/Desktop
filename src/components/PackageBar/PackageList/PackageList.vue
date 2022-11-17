@@ -76,7 +76,7 @@ watch(
     h-full
     m-0 p-2
   >
-    <ul overflow-y-scroll>
+    <ul overflow-y-auto>
       <li
         v-for="(pair, index) in packageSearchList" v-show="pair.showed"
         :key="index"
