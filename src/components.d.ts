@@ -7,9 +7,13 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AddLocalPackage: typeof import('./components/AddPackage/AddLocalPackage.vue')['default']
     AddPackage: typeof import('./components/AddPackage/AddPackage.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
+    CreatePackage: typeof import('./components/AddPackage/CreatePackage.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
+    GitPackage: typeof import('./components/AddPackage/GitPackage.vue')['default']
+    LocalPackage: typeof import('./components/AddPackage/LocalPackage.vue')['default']
     Overlay: typeof import('./components/Overlay.vue')['default']
     PackageBar: typeof import('./components/PackageBar/PackageBar.vue')['default']
     PackageItem: typeof import('./components/PackageBar/PackageList/PackageItem.vue')['default']
