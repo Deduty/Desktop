@@ -56,11 +56,11 @@ watch(
     left-0 right-0 top-0 bottom-0
     fixed
     class="overlay"
-    @click="currentPackage = null"
   >
     <div
       flex flex-grow
       justify-center items-center
+      @click.self="currentPackage = null"
     >
       <div
         ref="packageMenuElement"
