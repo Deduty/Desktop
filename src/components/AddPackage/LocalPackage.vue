@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { dialog } from '@tauri-apps/api'
+import { Package, PackageSize, PackageSource } from '~/composables/deduty'
+
+const packageStore = usePackageStore()
 
 const pathString = ref('')
 const selectPath = () => {
@@ -17,6 +20,20 @@ const selectPath = () => {
         pathString.value = ''
     })
 }
+
+watch(pathString, () => {
+  if (pathString.value === '')
+    return
+
+  packageStore.include(
+    new Package(
+      pathString.value,
+      '0.0.0',
+      PackageSource.Local,
+      new PackageSize(pathString.value.length * 13112),
+      'en',
+    ))
+})
 </script>
 
 <template>

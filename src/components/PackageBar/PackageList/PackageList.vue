@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { Package, PackageSize, PackageSource } from '~/composables/deduty'
+import type { Package } from '~/composables/deduty'
+import { usePackageStore } from '~/store/package'
 
 const { searchString } = defineProps<{ searchString: string }>()
 
@@ -9,43 +10,35 @@ interface PackageSearchItem {
   showed: boolean
 }
 
+const packageStore = usePackageStore()
+
 const packageSearchList: Ref<PackageSearchItem[]> = ref([])
 const currentPackage: Ref<Package | null> = ref(null)
 
-const packageMenuElement = ref<HTMLElement>()
-
-onMounted(() => {
-  for (let i = 0; i < 1000; i += 1) {
-    packageSearchList.value.push(
-      {
-        package: Package.fromOptions({
-          name: `Template ${i}`,
-          version: `1.${i}.${i * 2}`,
-          source: Object.values(PackageSource)[i % 3] as PackageSource,
-          size: new PackageSize(1024 * (i + 1)),
-          language: ['English', 'Russian'][i % 2],
-        }),
-        showed: true,
-      },
+const filterShowedPackages = (searchString: string) => {
+  packageSearchList.value.forEach((pair) => {
+    const searchResult = pair.package.name.match(searchString)
+    pair.showed = (
+      (
+        searchResult !== null
+        && searchResult.length > 0
+      )
+      || pair.package.name.includes(searchString)
     )
-  }
+  })
+}
+
+watch(packageStore.packages, () => {
+  packageSearchList.value = packageStore.packages.map(pkg =>
+    ({ package: pkg, showed: true } as PackageSearchItem))
+
+  if (searchString !== '')
+    filterShowedPackages(searchString)
 })
 
-watch(
-  () => searchString,
-  (searchString) => {
-    packageSearchList.value.forEach((pair) => {
-      const searchResult = pair.package.name.match(searchString)
-      pair.showed = (
-        (
-          searchResult !== null
-          && searchResult.length > 0
-        )
-        || pair.package.name.includes(searchString)
-      )
-    })
-  },
-)
+watch(() => searchString, filterShowedPackages)
+
+onMounted(() => packageStore.init())
 </script>
 
 <template>
@@ -63,7 +56,6 @@ watch(
       @click.self="currentPackage = null"
     >
       <div
-        ref="packageMenuElement"
         class="overlay box"
       >
         <PackageMenu :pkg="currentPackage" />

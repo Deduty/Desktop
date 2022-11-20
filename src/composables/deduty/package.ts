@@ -1,7 +1,7 @@
 export enum PackageSource {
-  Git,
-  Local,
-  Web,
+  Git = 'Git',
+  Local = 'Local',
+  Web = 'Web',
 }
 
 export class PackageSize {
