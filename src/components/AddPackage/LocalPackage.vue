@@ -1,6 +1,12 @@
 <script setup lang="ts">
-import { dialog } from '@tauri-apps/api'
+import { dialog, invoke } from '@tauri-apps/api'
 import { Package, PackageSize, PackageSource } from '~/composables/deduty'
+
+interface ISerializedDedutyPackage {
+  name: string
+  version: string
+  language: string
+}
 
 const packageStore = usePackageStore()
 
@@ -11,29 +17,32 @@ const selectPath = () => {
     multiple: false,
     title: 'Select folder',
   })
-    .then((value) => {
-      if (typeof value === 'string')
-        pathString.value = value
-      else if (Array.isArray(value))
-        pathString.value = value[0]
-      else
-        pathString.value = ''
+    .then((path: string[] | string | null) => {
+      if (typeof path !== 'string')
+        throw new Error(`Internal error: Path is not an array, but ${path}`)
+
+      return invoke('addLocalPackage', { path })
     })
+    .then((pkg: unknown) => {
+      if (typeof pkg !== 'object' || !pkg)
+        throw new Error('Internal error: Serialized package must be an object')
+
+      // TODO: Unsafe cast
+      return pkg as ISerializedDedutyPackage
+    })
+    .then((pkg: ISerializedDedutyPackage) => {
+      packageStore.include(
+        new Package(
+          pkg.name,
+          pkg.version,
+          PackageSource.Local,
+          new PackageSize(0),
+          pkg.language,
+        ),
+      )
+    })
+    .catch(console.error)
 }
-
-watch(pathString, () => {
-  if (pathString.value === '')
-    return
-
-  packageStore.include(
-    new Package(
-      pathString.value,
-      '0.0.0',
-      PackageSource.Local,
-      new PackageSize(pathString.value.length * 13112),
-      'en',
-    ))
-})
 </script>
 
 <template>
