@@ -1,9 +1,18 @@
 .DS_Store
 .vite-ssg-dist
 .vite-ssg-temp
+
 *.local
+
 dist
 dist-ssr
+
 node_modules
+
 .idea/
+
 *.log
+
+# Exact folders (In case if target will be valid in some other place of project)
+src-tauri/crates/deduty_package/target/
+src-tauri/crates/deduty_package_premier/target/
