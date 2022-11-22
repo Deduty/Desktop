@@ -2,30 +2,35 @@ import { acceptHMRUpdate, defineStore } from 'pinia'
 import { Package, PackageSize, PackageSource } from '~/composables/deduty'
 
 export const usePackageStore = defineStore('DedutyPackage', () => {
-  const packages = ref<Package[]>([])
+  const packages = reactive<Package[]>([])
 
   function include(pkg: Package): void {
-    packages.value.push(pkg)
+    packages.push(pkg)
     // TODO: INCLUDE IN TAURI DATABASE
   }
 
   function exclude(pkg: Package): void {
-    packages.value = packages.value.filter(storedPackage =>
-      storedPackage.name === pkg.name
-      && storedPackage.version === pkg.version
-      && storedPackage.source === pkg.source)
+    const previousPackages = [...packages]
+
+    packages.length = 0
+    packages.push(
+      ...previousPackages.filter(storedPackage =>
+        storedPackage.name === pkg.name
+        && storedPackage.version === pkg.version
+        && storedPackage.source === pkg.source),
+    )
     // TODO: EXCLUDE IN TAURI DATABASE
   }
 
   function init() {
-    if (packages.value.length === 0)
+    if (packages.length === 0)
       refresh()
   }
 
   function refresh() {
     // TODO: REFRESH DATA, GET TAURI DATABASE
     for (let i = 0; i < 4; i += 1) {
-      packages.value.push(
+      packages.push(
         Package.fromOptions({
           name: `Template ${i}`,
           version: `1.${i}.${i * 2}`,
