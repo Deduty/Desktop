@@ -28,7 +28,7 @@ export class PackageSize {
     for (const { prefix, division } of sizes) {
       shrinkedSize = shrinkedSize / division
       if (shrinkedSize < 1024) {
-        this.sizeString = `${shrinkedSize.toFixed(2).replace(/(\.0+|0+)/g, '')} ${prefix}`
+        this.sizeString = `${shrinkedSize.toFixed(2).replace(/(\.0+0)/g, '')} ${prefix}`
         return this.sizeString
       }
     }
