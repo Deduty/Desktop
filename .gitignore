@@ -14,5 +14,7 @@ node_modules
 *.log
 
 # Exact folders (In case if target will be valid in some other place of project)
-src-tauri/crates/deduty_package/target/
-src-tauri/crates/deduty_package_premier/target/
+src-tauri/target/
+src-tauri/crates/*/target/
+src-tauri/crates/*/crates/*/target/
+src-tauri/crates/schemes/*/target/
