@@ -19,14 +19,14 @@ const { pkg } = defineProps<{ pkg: Package }>()
         class="black-text"
         text-lg
       >
-        {{ pkg.name }}
+        {{ pkg.meta.name }}
       </div>
       <div m-a />
       <div
         class="gray-text"
         text="sm gray-400 dark:gray-500"
       >
-        Version: {{ pkg.version }}
+        Version: {{ pkg.meta.version }}
       </div>
     </div>
     <div m-a />
@@ -38,14 +38,14 @@ const { pkg } = defineProps<{ pkg: Package }>()
         class="black-text"
         text="sm right"
       >
-        {{ pkg.size.toString() }}
+        Unknown size
       </div>
       <div m-a />
       <div
         class="gray-text"
         text="sm right gray-400 dark:gray-500"
       >
-        {{ pkg.source }}
+        Local
       </div>
     </div>
   </div>

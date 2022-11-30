@@ -10,9 +10,17 @@ const { pkg } = defineProps<{ pkg: Package | null }>()
     border="~ rounded gray-200 dark:gray-700"
     bg-op-0
     m-0 p-4
+    flex flex-col
     class="box"
   >
-    {{ pkg?.name }}
+    <div
+      m-0 p-4
+    >
+      {{ pkg?.meta.name }}
+    </div>
+    <div flex-grow>
+      <PackageMenuAbout :pkg="pkg" />
+    </div>
   </div>
 </template>
 

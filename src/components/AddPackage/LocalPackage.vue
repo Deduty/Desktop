@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { dialog, invoke } from '@tauri-apps/api'
-import { Package, PackageSize, PackageSource } from '~/composables/deduty'
-
-interface ISerializedDedutyPackage {
-  name: string
-  version: string
-  language: string
-}
+import type { IDedutyPackage } from '~/composables/deduty'
+import { Package } from '~/composables/deduty'
 
 const packageStore = usePackageStore()
 
@@ -23,23 +18,21 @@ const selectPath = () => {
 
       return invoke('addLocalPackage', { path })
     })
+    .then((id: unknown) => {
+      if (typeof id !== 'string' || !id)
+        throw new Error(`Internal error: Invalid package id '${id}'`)
+      return id as string
+    })
+    .then((id: string) => invoke('getLocalPackage', { id }))
     .then((pkg: unknown) => {
       if (typeof pkg !== 'object' || !pkg)
         throw new Error('Internal error: Serialized package must be an object')
 
       // TODO: Unsafe cast
-      return pkg as ISerializedDedutyPackage
+      return pkg as IDedutyPackage
     })
-    .then((pkg: ISerializedDedutyPackage) => {
-      packageStore.include(
-        new Package(
-          pkg.name,
-          pkg.version,
-          PackageSource.Local,
-          new PackageSize(0),
-          pkg.language,
-        ),
-      )
+    .then((pkg: IDedutyPackage) => {
+      packageStore.include(Package.fromOptions(pkg))
     })
     .catch(console.error)
 }

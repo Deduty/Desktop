@@ -1,1 +1,13 @@
-export { type IPackage, Package, PackageSize, PackageSource } from './package'
+export type {
+  IDedutyPackage,
+  IDedutyPackageMeta,
+  IDedutyFile,
+  IDedutyFileCollection,
+} from './package/scheme'
+
+export {
+  Package,
+  PackageMeta,
+  PackageFile,
+  PackageFiles,
+} from './package'

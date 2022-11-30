@@ -1,5 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
-import { Package, PackageSize, PackageSource } from '~/composables/deduty'
+import { Package } from '~/composables/deduty'
 
 export const usePackageStore = defineStore('DedutyPackage', () => {
   const packages = reactive<Package[]>([])
@@ -13,12 +13,7 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
     const previousPackages = [...packages]
 
     packages.length = 0
-    packages.push(
-      ...previousPackages.filter(storedPackage =>
-        storedPackage.name === pkg.name
-        && storedPackage.version === pkg.version
-        && storedPackage.source === pkg.source),
-    )
+    packages.push(...previousPackages.filter(storedPackage => storedPackage.id !== pkg.id))
     // TODO: EXCLUDE IN TAURI DATABASE
   }
 
@@ -29,17 +24,9 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
 
   function refresh() {
     // TODO: REFRESH DATA, GET TAURI DATABASE
-    for (let i = 0; i < 4; i += 1) {
-      packages.push(
-        Package.fromOptions({
-          name: `Template ${i}`,
-          version: `1.${i}.${i * 2}`,
-          source: [PackageSource.Git, PackageSource.Local, PackageSource.Web][i % 3],
-          size: new PackageSize(1024 * (i + 1)),
-          language: ['English', 'Russian'][i % 2],
-        }),
-      )
-    }
+    const meta = { language: 'wrong-lang', name: 'wrong-name', tags: ['wrong', 'package'], version: '1.0.0-rc1' }
+    const files = { files: [{ extension: 'md', location: 'nowhere.md', alias: 'about' }] }
+    packages.push(Package.fromOptions({ id: 'wrong-id', meta, files }))
   }
 
   return { packages, include, exclude, init, refresh }

@@ -17,13 +17,13 @@ const currentPackage: Ref<Package | null> = ref(null)
 
 const filterShowedPackages = (searchString: string) => {
   packageSearchList.value.forEach((pair) => {
-    const searchResult = pair.package.name.match(searchString)
+    const searchResult = pair.package.meta.name.match(searchString)
     pair.showed = (
       (
         searchResult !== null
         && searchResult.length > 0
       )
-      || pair.package.name.includes(searchString)
+      || pair.package.meta.name.includes(searchString)
     )
   })
 }
