@@ -1,0 +1,13 @@
+[package]
+name = "premier"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+package = { path = "../../deduty/crates/package" }
+
+async-std = "1.12.0"
+async-trait = "0.1.58"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.5"
+uuid = "1.2.2"
