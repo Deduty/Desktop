@@ -7,7 +7,6 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AddLocalPackage: typeof import('./components/AddPackage/AddLocalPackage.vue')['default']
     AddPackage: typeof import('./components/AddPackage/AddPackage.vue')['default']
     Counter: typeof import('./components/Counter.vue')['default']
     CreatePackage: typeof import('./components/AddPackage/CreatePackage.vue')['default']
@@ -16,7 +15,6 @@ declare module '@vue/runtime-core' {
     GitPackage: typeof import('./components/AddPackage/GitPackage.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']
     LocalPackage: typeof import('./components/AddPackage/LocalPackage.vue')['default']
-    Overlay: typeof import('./components/Overlay.vue')['default']
     PackageBar: typeof import('./components/PackageBar/PackageBar.vue')['default']
     PackageItem: typeof import('./components/PackageBar/PackageList/PackageItem.vue')['default']
     PackageList: typeof import('./components/PackageBar/PackageList/PackageList.vue')['default']
@@ -24,7 +22,6 @@ declare module '@vue/runtime-core' {
     PackageMenuAbout: typeof import('./components/PackageBar/PackageMenu/PackageMenuAbout/PackageMenuAbout.vue')['default']
     PackageMenuAboutContent: typeof import('./components/PackageBar/PackageMenu/PackageMenuAbout/PackageMenuAboutContent.vue')['default']
     PackageSearch: typeof import('./components/PackageBar/PackageSearch.vue')['default']
-    README: typeof import('./components/README.md')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./components/Sidebar.vue')['default']
