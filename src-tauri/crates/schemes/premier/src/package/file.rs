@@ -1,12 +1,11 @@
-use std::error::Error;
-use std::fmt::Display;
-use std::str::FromStr;
-
 use async_std::fs::File;
 use async_std::path::PathBuf;
 use async_trait::async_trait;
 
 use package::file::traits::DedutyFile;
+
+use crate::error::{ PremierError, XResult };
+
 
 pub enum PremierFileAlias {
     Alias(String),
@@ -19,24 +18,6 @@ impl Into<Option<String>> for PremierFileAlias {
             PremierFileAlias::Alias(string) => Some(string),
             PremierFileAlias::NoAlias => None
         }
-    }
-}
-
-#[derive(Debug)]
-pub struct PremierFileError {
-    message: String
-}
-
-impl PremierFileError {
-    pub fn new(message: String) -> Self {
-        Self { message }
-    }
-}
-
-impl Error for PremierFileError {}
-impl Display for PremierFileError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.write_fmt(format_args!("Internal error: {}", self.message))
     }
 }
 
@@ -70,23 +51,20 @@ impl DedutyFile for PremierFile {
         self.alias.as_ref()
     }
 
-    fn location(&self) -> PathBuf {
+    async fn location(&self) -> XResult<PathBuf> {
         match self.path.is_absolute() {
-            true => self.path.clone(),
-            false => {
-                // TODO: ASYNC, may PANIC
-                // self.root.join(self.path.clone()).canonicalize().await.unwrap()
-
-                // SYNC WAY AROUND
-                let std_root = std::path::PathBuf::from_str(self.root.as_os_str().to_string_lossy().as_ref()).unwrap();
-                let std_path = std::path::PathBuf::from_str(self.path.as_os_str().to_string_lossy().as_ref()).unwrap();
-                let std_absolute = std_root
-                    .join(std_path.as_path())
-                    .canonicalize()
-                    .unwrap();
-
-                PathBuf::from_str(std_absolute.as_os_str().to_string_lossy().as_ref()).unwrap()
-             }
+            true => Ok(self.path.clone()),
+            false => Ok(self.root.join(self.path.clone()))
+                //
+                // CANON WAY (COULD NOT FOR NOW)
+                // .canonicalize()
+                // .await
+                // .map_err(|err|
+                //     Box::new(
+                //         PremierError::new(
+                //             format!("Internal error: Unable to resolve location due to: {}",
+                //             err.to_string())))
+                //     .into())
         }
     }
 
@@ -100,12 +78,12 @@ impl DedutyFile for PremierFile {
             .unwrap_or("".into())
     }
 
-    async fn load(&self) -> Result<File, Box<dyn Error + Send>> {
-        let target = self.location();
+    async fn load(&self) -> XResult<File> {
+        let target = self.location().await?;
         if !target.exists().await {
             return Err(
                 Box::new(
-                    PremierFileError::new(
+                    PremierError::new(
                         format!(
                             "Location not exist: '{}'",
                             target.as_os_str()
@@ -115,7 +93,7 @@ impl DedutyFile for PremierFile {
         if !target.is_file().await {
             return Err(
                 Box::new(
-                    PremierFileError::new(
+                    PremierError::new(
                         format!(
                             "Location is not a folder: '{}'",
                             target.as_os_str()
@@ -127,14 +105,14 @@ impl DedutyFile for PremierFile {
             .await
             .map_err(|error|
                 Box::new(
-                    PremierFileError::new(
+                    PremierError::new(
                         format!(
                             "Error occurred while opening file at location '{}':\n {}",
                             target.as_os_str()
                                 .to_str()
                                 .unwrap_or("<error>"),
                             error.to_string())))
-                as Box<dyn Error + Send>
+                .into()
             )
     }
 }

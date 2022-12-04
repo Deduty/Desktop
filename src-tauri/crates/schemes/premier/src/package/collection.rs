@@ -1,9 +1,13 @@
 use std::collections::HashMap;
 
+use async_trait::async_trait;
+
 use package::file::traits::{
     DedutyFile,
     DedutyFileCollection
 };
+
+use crate::error::XResult;
 
 use super::file::PremierFile;
 
@@ -21,24 +25,31 @@ impl PremierPackageFileCollection {
     }
 }
 
+#[async_trait]
 impl DedutyFileCollection for PremierPackageFileCollection {
-    fn alias(&self, alias: &String) -> Option<&dyn DedutyFile> {
-        self.collection
-            .get(alias)
-            .map(|file| file as &dyn DedutyFile)
+    async fn alias(&self, alias: &String) -> XResult<Option<&dyn DedutyFile>> {
+        Ok(
+            self.collection
+                .get(alias)
+                .map(|file| file as &dyn DedutyFile)
+        )
     }
 
-    fn file(&self, location: &async_std::path::Path) -> Option<&dyn DedutyFile> {
-        self.collection
-            .values()
-            .find(|&file| file.location().as_path() == location)
-            .map(|file| file as &dyn DedutyFile)
+    async fn file(&self, location: &async_std::path::Path) -> XResult<Option<&dyn DedutyFile>> {
+        for file in self.collection.values() {
+            if file.location().await?.as_path() == location {
+                return Ok(Some(file))
+            }
+        }
+        Ok(None)
     }
 
-    fn files(&self) -> Vec<&dyn DedutyFile> {
-        self.collection
-            .iter()
-            .map(|(_, file)| file as &dyn DedutyFile)
-            .collect()
+    async fn files(&self) -> XResult<Vec<&dyn DedutyFile>> {
+        Ok(
+            self.collection
+                .iter()
+                .map(|(_, file)| file as &dyn DedutyFile)
+                .collect()
+        )
     }
 }

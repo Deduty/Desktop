@@ -20,7 +20,7 @@ pub struct PremierPackage {
 
 impl PremierPackage {
     pub fn from(schema: schemes::package::PremierPackage, root: &Path) -> Self {
-        let path = schema.package.about.clone().unwrap_or("./ABOUT.md".into());
+        let path = schema.package.about.clone().unwrap_or("ABOUT.md".into());
         let about = super::file::PremierFile::new(
             super::file::PremierFileAlias::Alias("about".into()),
             root.to_path_buf(),
