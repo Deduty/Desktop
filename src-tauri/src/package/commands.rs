@@ -81,9 +81,19 @@ pub async fn getLocalPackage<'s>(storage: StateStorage<'s>, id: &str) -> Result<
         }
         None => Err(format!("Internal error: Package with uuid '{}' not found", id))
     }
-
 }
 
+#[tauri::command]
+pub async fn listLocalPackage<'s>(storage: StateStorage<'s>) -> Result<Vec<String>, String> {
+    Ok(
+        storage
+            .list()
+            .await
+            .iter()
+            .map(|uuid| uuid.to_string())
+            .collect()
+    )
+}
 
 #[tauri::command]
 pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &str) -> Result<String, String> {
