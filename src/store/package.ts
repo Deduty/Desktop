@@ -1,15 +1,17 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
+import { invoke } from '@tauri-apps/api'
+import type { IDedutyPackage } from '~/composables/deduty'
 import { Package } from '~/composables/deduty'
 
 export const usePackageStore = defineStore('DedutyPackage', () => {
   const packages = reactive<Package[]>([])
 
-  function include(pkg: Package): void {
+  async function include(pkg: Package): Promise<void> {
     packages.push(pkg)
     // TODO: INCLUDE IN TAURI DATABASE
   }
 
-  function exclude(pkg: Package): void {
+  async function exclude(pkg: Package): Promise<void> {
     const previousPackages = [...packages]
 
     packages.length = 0
@@ -17,19 +19,39 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
     // TODO: EXCLUDE IN TAURI DATABASE
   }
 
-  function init() {
-    if (packages.length === 0)
-      refresh()
-  }
+  async function refresh(totally = false) {
+    if (totally)
+      packages.length = 0
 
-  function refresh() {
-    // TODO: REFRESH DATA, GET TAURI DATABASE
+    const updated: Set<string> = new Set(await invoke('listLocalPackage'))
+    const stored: Set<string> = new Set(packages.map(pkg => pkg.id))
+
+    for (const uuid of stored)
+      updated.delete(uuid)
+
+    for (const uuid of updated) {
+      try {
+        const serialized: IDedutyPackage = await invoke('getLocalPackage', { id: uuid })
+        if (!serialized)
+          continue
+
+        packages.push(Package.fromOptions(serialized))
+      }
+      catch (error) {
+        console.error(`Internal error: Unable to fetch Package '${uuid}' due to: ${error}`)
+      }
+    }
+
+    // WRONG PACKAGE FOR DEV NEEDS
     const meta = { language: 'wrong-lang', name: 'wrong-name', tags: ['wrong', 'package'], version: '1.0.0-rc1' }
     const files = { files: [{ extension: 'md', location: 'nowhere.md', alias: 'about' }] }
     packages.push(Package.fromOptions({ id: 'wrong-id', meta, files }))
   }
 
-  return { packages, include, exclude, init, refresh }
+  refresh()
+    .catch(error => console.error(`Internal error: Unable to init Frontend Package storage due to: ${error}`))
+
+  return { packages, include, exclude, refresh }
 })
 
 if (import.meta.hot)
