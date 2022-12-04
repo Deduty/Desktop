@@ -7,6 +7,7 @@ use async_std::path::{ Path, PathBuf };
 
 use deduty::package::package::traits::DedutyPackage;
 use deduty::package::package::serde::DedutyPackage as SerDedutyPackage;
+
 use deduty::storage::ActiveStorage;
 use deduty::storage::active::ActivePackage;
 
@@ -47,14 +48,14 @@ pub async fn addLocalPackage<'s>(storage: StateStorage<'s>, path: &str) -> Resul
     // PACKAGE MANIFEST
     let manifest: super::manifest::PackageManifest = 
         toml::from_slice(&package_toml_content)
-            .map_err(|error| error.to_string())?;
+            .map_err(|error| format!("Internal error: {}", error.to_string()))?;
 
     match manifest.to_enum() {
         // PREMIER PACKAGE
         Some(super::manifest::PackageManifestVariants::Premier) => {
             let package = premier::actions::load(path.into())
                 .await
-                .map_err(|error| error.to_string())?;
+                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
             let uuid = package.id().clone();
 
             storage.add(uuid.clone(), package as Box<dyn DedutyPackage>).await;
@@ -75,7 +76,13 @@ pub async fn getLocalPackage<'s>(storage: StateStorage<'s>, id: &str) -> Result<
     match storage.get(&uuid).await {
         Some(package) => {
             match *package.read().await {
-                ActivePackage::Online(ref real) => Ok(Some(real.as_ref().into())),
+                ActivePackage::Online(ref real) => Ok(
+                    Some(
+                        SerDedutyPackage::try_from(real.as_ref())
+                            .await
+                            .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    )
+                ),
                 ActivePackage::Offline => Err(format!("Internal error: Package '{}' is not available", id))
             }
         }
@@ -109,7 +116,14 @@ pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &
         Some(package) => {
             match *package.read().await {
                 ActivePackage::Online(ref real) => {
-                    match real.as_ref().files().file(path.as_path()) {
+                    let maybe_file = real
+                        .as_ref()
+                        .files()
+                        .file(path.as_path())
+                        .await
+                        .map_err(|error| error.to_string())?;
+
+                    match maybe_file {
                         Some(file) => {
                             file.load()
                                 .await
