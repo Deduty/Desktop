@@ -6,14 +6,15 @@ const { pkg } = defineProps<{ pkg: Package }>()
 
 <template>
   <div
-    flex flex-row
+    flex flex-col
     border="~ rounded gray-200 dark:gray-700"
     class="package item"
+    gap-2
     m-2 p-2
   >
     <div
-      flex flex-col
-      gap-2
+      flex flex-row
+      items-baseline
     >
       <div
         class="black-text"
@@ -21,24 +22,27 @@ const { pkg } = defineProps<{ pkg: Package }>()
       >
         {{ pkg.meta.name }}
       </div>
-      <div m-a />
       <div
-        class="gray-text"
-        text="sm gray-400 dark:gray-500"
-      >
-        Version: {{ pkg.meta.version }}
-      </div>
-    </div>
-    <div m-a />
-    <div
-      flex flex-col
-      gap-2
-    >
+        m-a
+        min-w-1
+        w-1
+      />
       <div
         class="black-text"
         text="sm right"
       >
         Unknown size
+      </div>
+    </div>
+    <div
+      flex flex-row
+      items-baseline
+    >
+      <div
+        class="gray-text"
+        text="sm gray-400 dark:gray-500"
+      >
+        Version: {{ pkg.meta.version }}
       </div>
       <div m-a />
       <div
