@@ -21,6 +21,7 @@ fn main() {
           self::package::commands::addLocalPackage,
           self::package::commands::getLocalPackage,
           self::package::commands::getPackageFile,
+          self::package::commands::listLocalPackage,
         ])
         .manage(storage.clone())
         .run(tauri::generate_context!())
