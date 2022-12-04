@@ -58,10 +58,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 540,
         "resizable": true,
-        "title": "desktop",
-        "width": 800
+        "title": "Deduty Desktop",
+        "width": 960
       }
     ]
   }
