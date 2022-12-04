@@ -27,6 +27,13 @@ impl ActiveStorage {
         Self { packages: RwLock::new(HashMap::new()) }
     }
 
+    pub async fn add(&self, id: Uuid, package: Box<dyn DedutyPackage>) -> Option<ActiveItem> { 
+        self.packages
+            .write()
+            .await
+            .insert(id, Arc::new(RwLock::new(ActivePackage::Online(package))))
+    }
+
     pub async fn get(&self, id: &Uuid) -> Option<ActiveItem> {
         self.packages
             .read()
@@ -35,11 +42,13 @@ impl ActiveStorage {
             .cloned()
     }
 
-    pub async fn add(&self, id: Uuid, package: Box<dyn DedutyPackage>) -> Option<ActiveItem> { 
+    pub async fn list(&self) -> Vec<Uuid> {
         self.packages
-            .write()
+            .read()
             .await
-            .insert(id, Arc::new(RwLock::new(ActivePackage::Online(package))))
+            .keys()
+            .copied()
+            .collect()
     }
 
     pub async fn sub(&self, id: Uuid) -> Option<ActiveItem> {
