@@ -51,10 +51,10 @@ impl ActiveStorage {
             .collect()
     }
 
-    pub async fn sub(&self, id: Uuid) -> Option<ActiveItem> {
+    pub async fn sub(&self, id: &Uuid) -> Option<ActiveItem> {
         self.packages
             .write()
             .await
-            .remove(&id)
+            .remove(id)
     }
 }
