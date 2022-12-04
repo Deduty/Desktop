@@ -37,8 +37,6 @@ watch(packageStore.packages, () => {
 })
 
 watch(() => searchString, filterShowedPackages)
-
-onMounted(() => packageStore.init())
 </script>
 
 <template>
