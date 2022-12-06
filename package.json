@@ -21,6 +21,7 @@
     "@unocss/reset": "^0.46.2",
     "@vueuse/core": "^9.4.0",
     "@vueuse/head": "^0.9.8",
+    "markdown-it": "^13.0.1",
     "nprogress": "^0.2.0",
     "pinia": "^2.0.23",
     "vue": "^3.2.41",

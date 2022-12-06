@@ -84,6 +84,6 @@ div.overlay
   z-index: 100
 
 div.overlay.box
-  width: 40%
+  width: 55rem
   height: 90%
 </style>

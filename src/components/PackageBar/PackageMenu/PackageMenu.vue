@@ -18,7 +18,10 @@ const { pkg } = defineProps<{ pkg: Package | null }>()
     >
       {{ pkg?.meta.name }}
     </div>
-    <div flex-grow>
+    <div
+      flex-grow
+      overflow-auto
+    >
       <PackageMenuAbout :pkg="pkg" />
     </div>
   </div>
