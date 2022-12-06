@@ -74,11 +74,18 @@ watchEffect(async () => {
     <!-- NOTHING SCREEN (When no file with 'about' alias) -->
     <div
       v-if="aboutScreen === AboutScreen.Nothing"
+      h-full w-full
       m-0
-      align-middle
-      justify-center
+      grid
     >
-      About is not represented
+      <div
+        m-a
+        grid-cols-none
+        grid-rows-none
+        text-2xl
+      >
+        About is not represented
+      </div>
     </div>
   </div>
 </template>
