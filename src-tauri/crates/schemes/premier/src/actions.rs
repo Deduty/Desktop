@@ -39,5 +39,6 @@ pub async fn load(
         toml::from_slice::<PremierPackageScheme>(&buffer)?
     };
 
-    Ok(Box::new(PremierPackage::from(package, &path)) as Box<dyn DedutyPackage>)
+    let package = PremierPackage::from(package, &path).await;
+    Ok(Box::new(package) as Box<dyn DedutyPackage>)
 }

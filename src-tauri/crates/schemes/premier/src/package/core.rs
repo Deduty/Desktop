@@ -1,7 +1,12 @@
-use async_std::path::{Path, PathBuf};
+use std::collections::HashMap;
+
+use async_std::path::{ Path, PathBuf };
 use uuid::Uuid;
 
-use package::file::traits::DedutyFileCollection;
+use package::file::traits::{
+    DedutyFileCollection,
+    DedutyFile
+};
 use package::package::traits::{
     DedutyPackageMeta,
     DedutyPackage,
@@ -19,17 +24,32 @@ pub struct PremierPackage {
 }
 
 impl PremierPackage {
-    pub fn from(schema: schemes::package::PremierPackage, root: &Path) -> Self {
-        let path = schema.package.about.clone().unwrap_or("ABOUT.md".into());
-        let about = super::file::PremierFile::new(
-            super::file::PremierFileAlias::Alias("about".into()),
-            root.to_path_buf(),
-            PathBuf::from(&path)
-        );
-        let files = PremierPackageFileCollection::from([("about".into(), about)].into());
+    pub async fn from(schema: schemes::package::PremierPackage, root: &Path) -> Self {
+        let mut files = HashMap::new();
 
-        let meta = schema.package.into();
-        PremierPackage { id: Uuid::new_v4(), meta, files }
+        // About file: test, include
+        {
+            let about = super::file::PremierFile::new(
+                super::file::PremierFileAlias::Alias("about".into()),
+                root.to_path_buf(),
+                PathBuf::from(&schema.package.about.clone().unwrap_or("ABOUT.md".into())),
+            );
+
+            match about.location().await {
+                Ok(location) => {
+                    if location.exists().await {
+                        files.insert("about".to_string(), about);
+                    }
+                },
+                Err(_) => {}
+            }
+        }
+
+        PremierPackage {
+            id: Uuid::new_v4(),
+            meta: schema.package.into(),
+            files: PremierPackageFileCollection::from(files),
+        }
     }
 }
 
