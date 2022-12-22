@@ -118,7 +118,7 @@ impl PremierPackage {
             lections.push(Box::new(PremierLection::from(lection, &lection_root).await?));
         }
 
-        lections.sort_by(|lhs, rhs| lhs.meta().order().cmp(&rhs.meta().order()));
+        lections.sort_by_key(|l| l.meta().order());
 
         Ok(
             PremierPackage {
