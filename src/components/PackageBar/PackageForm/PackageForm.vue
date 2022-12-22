@@ -12,17 +12,16 @@ const { pkg } = defineProps<{ pkg: Package | null }>()
     m-0 p-4
     flex flex-col
     class="box"
+    gap-4
   >
-    <div
-      m-0 p-4
-    >
-      {{ pkg?.meta.name }}
+    <div>
+      <PackageFormMenu :pkg="pkg" />
     </div>
     <div
       flex-grow
       overflow-auto
     >
-      <PackageMenuAbout :pkg="pkg" />
+      <PackageFormAbout :pkg="pkg" />
     </div>
   </div>
 </template>

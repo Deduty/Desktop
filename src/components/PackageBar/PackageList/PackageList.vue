@@ -56,7 +56,7 @@ watch(() => searchString, filterShowedPackages)
       <div
         class="overlay box"
       >
-        <PackageMenu :pkg="currentPackage" />
+        <PackageForm :pkg="currentPackage" />
       </div>
     </div>
   </div>
