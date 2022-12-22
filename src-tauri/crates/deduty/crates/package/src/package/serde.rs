@@ -33,7 +33,6 @@ pub struct DedutyPackage {
     pub files: DedutyFileCollection
 }
 
-
 impl DedutyPackage {
     pub async fn try_from(object: &dyn crate::package::traits::DedutyPackage) -> XResult<DedutyPackage> {
         Ok(

@@ -4,7 +4,8 @@ use crate::file::traits::DedutyFileCollection;
 
 
 pub trait DedutyLectionMeta: Sync + Send {
-    fn name(&self) -> String;
+    fn name(&self) -> &String;
+    fn order(&self) -> u64;
 }
 
 pub trait DedutyLection: Sync + Send {
