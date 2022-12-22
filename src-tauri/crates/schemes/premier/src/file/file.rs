@@ -30,7 +30,6 @@ pub struct PremierFile {
 
 impl PremierFile {
     pub fn new(alias: PremierFileAlias, root: PathBuf, path: PathBuf) -> Self {
-
         Self { alias: alias.into(), root, path }
     }
 
