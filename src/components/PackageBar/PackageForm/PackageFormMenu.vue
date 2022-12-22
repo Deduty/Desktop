@@ -2,6 +2,7 @@
 import type { Package } from '~/composables/deduty'
 
 const { pkg } = defineProps<{ pkg: Package | null }>()
+const router = useRouter()
 </script>
 
 <template>
@@ -51,6 +52,7 @@ const { pkg } = defineProps<{ pkg: Package | null }>()
         text-3xl
         border-rounded
         class="package form button"
+        @click="router.push(`/package/${pkg?.id}`)"
       >
         <div i-carbon-book />
       </div>
