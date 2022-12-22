@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use async_std::io::ReadExt;
 use async_std::fs::File;
 
@@ -7,10 +5,11 @@ use package::package::traits::DedutyPackage;
 
 use crate::schemes::package::PremierPackage as PremierPackageScheme;
 use crate::package::PremierPackage;
+use crate::error::XResult;
 
 pub async fn load(
     path: async_std::path::PathBuf
-) -> Result<Box<dyn DedutyPackage>, Box<dyn Error>> {
+) -> XResult<Box<dyn DedutyPackage>> {
     if !path.exists().await {
         return Err(format!("Path '{:#?}' is not exist", path).into());
     }
@@ -39,6 +38,6 @@ pub async fn load(
         toml::from_slice::<PremierPackageScheme>(&buffer)?
     };
 
-    let package = PremierPackage::from(package, &path).await;
+    let package = PremierPackage::from(package, &path).await?;
     Ok(Box::new(package) as Box<dyn DedutyPackage>)
 }
