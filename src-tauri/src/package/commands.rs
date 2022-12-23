@@ -7,6 +7,7 @@ use async_std::path::{ Path, PathBuf };
 
 use deduty::package::package::traits::DedutyPackage;
 use deduty::package::package::serde::DedutyPackage as SerDedutyPackage;
+use deduty::package::lection::serde::DedutyLection as SerDedutyLection;
 
 use deduty::storage::ActiveStorage;
 use deduty::storage::active::ActivePackage;
@@ -161,4 +162,33 @@ pub async fn listPackageLections<'s>(storage: StateStorage<'s>, package: &str) -
         },
         None => Err(format!("Internal error: Package with ID `{}` is not exist", package))
     }
+}
+
+#[tauri::command]
+pub async fn getPackageLection<'s>(storage: StateStorage<'s>, package: &str, lection: &str) -> Result<SerDedutyLection, String> {
+    let package_uuid = uuid::Uuid::from_str(package)
+        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+    let lection_uuid = uuid::Uuid::from_str(lection)
+        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+        match storage.get(&package_uuid).await {
+            Some(active) => {
+                match *active.read().await {
+                    ActivePackage::Online(ref real) => {
+                        let lection = real
+                            .lections()
+                            .iter()
+                            .find(|lection| lection.id() == &lection_uuid)
+                            .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection_uuid))?;
+
+                        SerDedutyLection::try_from(lection.as_ref())
+                            .await
+                            .map_err(|error| format!("Internal error: While serialize lection object: {}", error.to_string()))
+                    }
+                    ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package))
+                }
+            },
+            None => Err(format!("Internal error: Package with ID `{}` is not exist", package))
+        }
 }
