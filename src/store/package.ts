@@ -1,17 +1,17 @@
 import { acceptHMRUpdate, defineStore } from 'pinia'
 import { invoke } from '@tauri-apps/api'
 import type { IDedutyPackage } from '~/composables/deduty'
-import { Package } from '~/composables/deduty'
+import { DedutyPackage } from '~/composables/deduty'
 
 export const usePackageStore = defineStore('DedutyPackage', () => {
-  const packages = reactive<Package[]>([])
+  const packages = reactive<DedutyPackage[]>([])
 
-  async function include(pkg: Package): Promise<void> {
+  async function include(pkg: DedutyPackage): Promise<void> {
     packages.push(pkg)
     // TODO: INCLUDE IN TAURI DATABASE
   }
 
-  async function exclude(pkg: Package): Promise<void> {
+  async function exclude(pkg: DedutyPackage): Promise<void> {
     const previousPackages = [...packages]
 
     packages.length = 0
@@ -35,7 +35,7 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
         if (!serialized)
           continue
 
-        packages.push(Package.fromOptions(serialized))
+        packages.push(DedutyPackage.fromOptions(serialized))
       }
       catch (error) {
         console.error(`Internal error: Unable to fetch Package '${uuid}' due to: ${error}`)
@@ -45,7 +45,7 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
     // WRONG PACKAGE FOR DEV NEEDS
     const meta = { language: 'wrong-lang', name: 'wrong-name', tags: ['wrong', 'package'], version: '1.0.0-rc1' }
     const files = { files: [{ extension: 'md', location: 'nowhere.md', alias: 'about' }] }
-    packages.push(Package.fromOptions({ id: 'wrong-id', meta, files }))
+    packages.push(DedutyPackage.fromOptions({ id: 'wrong-id', meta, files }))
   }
 
   refresh()
