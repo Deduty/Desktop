@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api'
-import type { Package } from '~/composables/deduty'
+import type { DedutyPackage } from '~/composables/deduty'
 
-const { pkg } = defineProps<{ pkg: Package | null }>()
+const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
 
 enum AboutScreen {
   Content = 'Content',

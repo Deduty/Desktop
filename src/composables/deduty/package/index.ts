@@ -1,1 +1,2 @@
-export { Package, PackageMeta, PackageFile, PackageFiles } from './package'
+export type { IDedutyPackage, IDedutyPackageMeta } from './scheme'
+export { DedutyPackage, DedutyPackageMeta } from './package'

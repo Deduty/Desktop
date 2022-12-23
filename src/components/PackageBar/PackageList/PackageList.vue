@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import type { Package } from '~/composables/deduty'
+import type { DedutyPackage } from '~/composables/deduty'
 import { usePackageStore } from '~/store/package'
 
 const { searchString } = defineProps<{ searchString: string }>()
 
 interface PackageSearchItem {
-  package: Package
+  package: DedutyPackage
   showed: boolean
 }
 
 const packageStore = usePackageStore()
 
 const packageSearchList: Ref<PackageSearchItem[]> = ref([])
-const currentPackage: Ref<Package | null> = ref(null)
+const currentPackage: Ref<DedutyPackage | null> = ref(null)
 
 const filterShowedPackages = (searchString: string) => {
   packageSearchList.value.forEach((pair) => {

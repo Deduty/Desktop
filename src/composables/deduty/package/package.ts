@@ -1,28 +1,7 @@
-import type { IDedutyFile, IDedutyFileCollection, IDedutyPackage, IDedutyPackageMeta } from './scheme'
+import { DedutyFileCollection } from '../file'
+import type { IDedutyPackage, IDedutyPackageMeta } from './scheme'
 
-export class PackageFile implements IDedutyFile {
-  constructor(
-    public location: string,
-    public extension: string,
-    public alias?: string,
-  ) {}
-
-  static fromOptions({ alias, location, extension }: IDedutyFile): PackageFile {
-    return new PackageFile(location, extension, alias)
-  }
-}
-
-export class PackageFiles implements IDedutyFileCollection {
-  constructor(
-    public files: PackageFile[],
-  ) {}
-
-  static fromOptions({ files }: IDedutyFileCollection): PackageFiles {
-    return new PackageFiles(files.map(file => PackageFile.fromOptions(file)))
-  }
-}
-
-export class PackageMeta implements IDedutyPackageMeta {
+export class DedutyPackageMeta implements IDedutyPackageMeta {
   constructor(
     public name: string,
     public version: string,
@@ -30,20 +9,20 @@ export class PackageMeta implements IDedutyPackageMeta {
     public tags: string[],
   ) {}
 
-  static fromOptions({ name, version, language, tags }: IDedutyPackageMeta): PackageMeta {
-    return new PackageMeta(name, version, language, tags)
+  static fromOptions({ name, version, language, tags }: IDedutyPackageMeta): DedutyPackageMeta {
+    return new DedutyPackageMeta(name, version, language, tags)
   }
 }
 
-export class Package implements IDedutyPackage {
+export class DedutyPackage implements IDedutyPackage {
   constructor(
     public id: string,
-    public meta: PackageMeta,
-    public files: PackageFiles,
+    public meta: DedutyPackageMeta,
+    public files: DedutyFileCollection,
   ) {}
 
-  static fromOptions({ id, meta, files }: IDedutyPackage): Package {
-    return new Package(id, PackageMeta.fromOptions(meta), PackageFiles.fromOptions(files))
+  static fromOptions({ id, meta, files }: IDedutyPackage): DedutyPackage {
+    return new DedutyPackage(id, DedutyPackageMeta.fromOptions(meta), DedutyFileCollection.fromOptions(files))
   }
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dialog, invoke } from '@tauri-apps/api'
 import type { IDedutyPackage } from '~/composables/deduty'
-import { Package } from '~/composables/deduty'
+import { DedutyPackage } from '~/composables/deduty'
 
 const packageStore = usePackageStore()
 
@@ -32,7 +32,7 @@ const selectPath = () => {
       return pkg as IDedutyPackage
     })
     .then((pkg: IDedutyPackage) => {
-      packageStore.include(Package.fromOptions(pkg))
+      packageStore.include(DedutyPackage.fromOptions(pkg))
     })
     .catch(console.error)
 }

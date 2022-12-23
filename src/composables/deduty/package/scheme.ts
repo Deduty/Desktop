@@ -1,4 +1,4 @@
-import type { IDedutyFileCollection } from './files'
+import type { IDedutyFileCollection } from '../file'
 
 export interface IDedutyPackageMeta {
   name: string
