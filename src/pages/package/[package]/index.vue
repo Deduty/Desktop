@@ -3,7 +3,9 @@ const properties = defineProps<{ package: string }>()
 </script>
 
 <template>
-  <div m-a text-3xl>
-    PACKAGE: {{ properties.package }}
+  <div
+    h-full w-full
+  >
+    <LectionBar :pkg="properties.package" />
   </div>
 </template>
