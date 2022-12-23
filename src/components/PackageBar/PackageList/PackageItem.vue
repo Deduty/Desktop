@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Package } from '~/composables/deduty'
+import type { DedutyPackage } from '~/composables/deduty'
 
-const { pkg } = defineProps<{ pkg: Package }>()
+const { pkg } = defineProps<{ pkg: DedutyPackage }>()
 </script>
 
 <template>
