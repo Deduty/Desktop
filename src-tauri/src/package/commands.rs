@@ -142,3 +142,23 @@ pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &
         None => Err(format!("Internal error: Package with uuid '{}' not found", id))
     }
 }
+
+#[tauri::command]
+pub async fn listPackageLections<'s>(storage: StateStorage<'s>, package: &str) -> Result<Vec<String>, String> {
+    let package_uuid = uuid::Uuid::from_str(package)
+        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+    match storage.get(&package_uuid).await {
+        Some(active) => {
+            match *active.read().await {
+                ActivePackage::Online(ref real) => Ok(
+                    real
+                        .lections()
+                        .iter()
+                        .map(|lection| lection.id().to_string()).collect()),
+                ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package))
+            }
+        },
+        None => Err(format!("Internal error: Package with ID `{}` is not exist", package))
+    }
+}
