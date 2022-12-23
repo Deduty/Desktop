@@ -37,6 +37,11 @@ watch(packageStore.packages, () => {
 })
 
 watch(() => searchString, filterShowedPackages)
+
+onMounted(() => {
+  packageSearchList.value = packageStore.packages.map(pkg =>
+    ({ package: pkg, showed: true } as PackageSearchItem))
+})
 </script>
 
 <template>
