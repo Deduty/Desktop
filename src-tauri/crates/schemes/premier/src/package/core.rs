@@ -3,6 +3,8 @@ use std::collections::HashMap;
 use async_std::io::ReadExt;
 use async_std::fs::File;
 use async_std::path::{ Path, PathBuf };
+use async_std::stream::StreamExt;
+use regex::Regex;
 use uuid::Uuid;
 
 use package::file::traits::{
@@ -90,9 +92,33 @@ impl PremierPackage {
         }
 
         // REGEX
-        if let Some(_expression) = schema.lections.regex {
-            println!("REGEX IS NOT SUPPORT FOR NOW");
-            todo!();
+        if let Some(expression) = schema.lections.regex {
+            let regex = Regex::new(&expression)
+                .map_err(|error| Box::new(PremierError::new(format!("Error on regex parsing: {}", error.to_string()))))?;
+
+            let mut folders = vec![root.to_path_buf()];
+            while !folders.is_empty() {
+                // UNWRAP: Directory already non empty
+                let folder = folders.pop().unwrap();
+
+                let mut content = async_std::fs::read_dir(&folder).await?;
+                while let Some(target) = content.next().await {
+                    let path = target
+                        .map_err(|error|
+                            Box::new(PremierError::new(format!("Error while getting target path: {}", error.to_string()))))?
+                        .path();
+
+                    if path.is_dir().await {
+                        folders.push(path.clone())
+                    }
+
+                    // SLASH NORMALIZATION
+                    let repr = path.to_string_lossy().to_string().replace("\\", "/");
+                    if regex.is_match(&repr) {
+                        candidates.push(path);
+                    }
+                }
+            }
         }
 
         // Exact Lections

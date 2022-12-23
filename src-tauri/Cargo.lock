@@ -2018,6 +2018,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "package",
+ "regex",
  "serde",
  "toml",
  "uuid 1.2.2",
