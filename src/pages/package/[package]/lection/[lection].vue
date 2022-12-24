@@ -32,9 +32,19 @@ invoke('getPackageLection', properties)
 </script>
 
 <template>
-  <div m-a text-3xl>
-    <div v-for="(file, index) in contentArray" :key="index">
-      <Reader :content="file.content" :extension="file.extension" />
+  <div
+    h-full w-full
+    p-2
+  >
+    <div
+      h-full w-full
+      overflow-y-auto
+    >
+      <div m-a>
+        <div v-for="(file, index) in contentArray" :key="index">
+          <Reader :content="file.content" :extension="file.extension" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
