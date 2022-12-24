@@ -8,10 +8,8 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AddPackage: typeof import('./components/AddPackage/AddPackage.vue')['default']
-    Counter: typeof import('./components/Counter.vue')['default']
     CreatePackage: typeof import('./components/AddPackage/CreatePackage.vue')['default']
     Error: typeof import('./components/Error.vue')['default']
-    Footer: typeof import('./components/Footer.vue')['default']
     GitPackage: typeof import('./components/AddPackage/GitPackage.vue')['default']
     LectionBar: typeof import('./components/LectionBar/LectionBar.vue')['default']
     LectionItem: typeof import('./components/LectionBar/LectionList/LectionItem.vue')['default']
@@ -26,7 +24,6 @@ declare module '@vue/runtime-core' {
     PackageFormMenu: typeof import('./components/PackageBar/PackageForm/PackageFormMenu.vue')['default']
     PackageItem: typeof import('./components/PackageBar/PackageList/PackageItem.vue')['default']
     PackageList: typeof import('./components/PackageBar/PackageList/PackageList.vue')['default']
-    PackageMenu: typeof import('./components/PackageBar/PackageMenu/PackageMenu.vue')['default']
     PackageMenuAboutContent: typeof import('./components/PackageBar/PackageForm/PackageMenuAboutContent.vue')['default']
     PackageSearch: typeof import('./components/PackageBar/PackageSearch.vue')['default']
     Reader: typeof import('./components/Reader.vue')['default']
