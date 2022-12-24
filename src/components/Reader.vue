@@ -22,7 +22,7 @@ const ConfiguredMarkdownIt = MarkdownIt()
 //   },
 // })
 
-const RuntimeMarkdown = computed(async () => {
+const RuntimeMarkdown = computed(() => {
   return {
     template: ConfiguredMarkdownIt.render(content),
   }
