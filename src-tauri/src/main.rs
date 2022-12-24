@@ -24,6 +24,7 @@ fn main() {
           self::package::commands::listLocalPackage,
           self::package::commands::listPackageLections,
           self::package::commands::getPackageLection,
+          self::package::commands::getLectionFile,
         ])
         .manage(storage.clone())
         .run(tauri::generate_context!())

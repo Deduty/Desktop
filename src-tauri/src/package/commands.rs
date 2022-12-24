@@ -192,3 +192,46 @@ pub async fn getPackageLection<'s>(storage: StateStorage<'s>, package: &str, lec
             None => Err(format!("Internal error: Package with ID `{}` is not exist", package))
         }
 }
+
+#[tauri::command]
+pub async fn getLectionFile<'s>(storage: StateStorage<'s>, package: &str, lection: &str, location: &str) -> Result<String, String> {
+    let package_uuid = uuid::Uuid::from_str(package)
+    .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+    let lection_uuid = uuid::Uuid::from_str(lection)
+        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+    let path = PathBuf::from_str(location)
+        .map_err(|_| format!("Internal error: Invalid file location: '{location}'"))?;
+
+    match storage.get(&package_uuid).await {
+        Some(active) => {
+            match *active.read().await {
+                ActivePackage::Online(ref real) => {
+                    let lection = real
+                        .lections()
+                        .iter()
+                        .find(|lection| lection.id() == &lection_uuid)
+                        .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection_uuid))?;
+
+                    let mut content = String::new();
+
+                    lection.files()
+                        .file(&path)
+                        .await
+                        .map_err(|error| format!("Internal error: While getting file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?
+                        .ok_or_else(|| format!("File is not exist at {}", location))?
+                        .load()
+                        .await
+                        .map_err(|error| format!("Internal error: While load file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?
+                        .read_to_string(&mut content)
+                        .await;
+                    
+                    Ok(content)
+                }
+                ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package))
+            }
+        },
+        None => Err(format!("Internal error: Package with ID `{}` is not exist", package))
+    }
+}
