@@ -27,7 +27,8 @@ pub struct PremierLection {
 impl PremierLection {
     pub async fn from(schema: crate::schemes::lection::PremierLection, root: &Path) -> XResult<Self> {
         let mut mapping = HashMap::new();
-        if let Some(pages) = schema.pages {
+
+        if let Some(ref pages) = schema.lection.pages {
             for page in pages {
                 let path = root.join(PathBuf::from(&page.relative));
                 if !path.exists().await {
