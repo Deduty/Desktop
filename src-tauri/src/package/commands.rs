@@ -225,8 +225,9 @@ pub async fn getLectionFile<'s>(storage: StateStorage<'s>, package: &str, lectio
                         .await
                         .map_err(|error| format!("Internal error: While load file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?
                         .read_to_string(&mut content)
-                        .await;
-                    
+                        .await
+                        .map_err(|error| format!("Internal error: While load file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?;
+
                     Ok(content)
                 }
                 ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package))
