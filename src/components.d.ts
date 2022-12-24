@@ -29,6 +29,7 @@ declare module '@vue/runtime-core' {
     PackageMenu: typeof import('./components/PackageBar/PackageMenu/PackageMenu.vue')['default']
     PackageMenuAboutContent: typeof import('./components/PackageBar/PackageForm/PackageMenuAboutContent.vue')['default']
     PackageSearch: typeof import('./components/PackageBar/PackageSearch.vue')['default']
+    Reader: typeof import('./components/Reader.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sidebar: typeof import('./components/Sidebar.vue')['default']

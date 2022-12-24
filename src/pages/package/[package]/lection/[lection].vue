@@ -1,10 +1,40 @@
 <script setup lang="ts">
+import type { Ref } from 'vue'
+import { invoke } from '@tauri-apps/api'
+
+import { DedutyLection, type IDedutyLection } from '~/composables/deduty'
+
 const properties = defineProps<{ package: string; lection: string }>()
+
+interface ContentFile {
+  content: string
+  extension: string
+}
+
+const contentArray: Ref<ContentFile[]> = ref([])
+
+invoke('getPackageLection', properties)
+  .then((serialized: unknown) => {
+    // TODO: UNSAFE CAST
+    return DedutyLection.fromOptions(serialized as IDedutyLection)
+  })
+  .then((lection: DedutyLection) => {
+    for (const file of lection.files.files) {
+      contentArray.value.push({
+        extension: file.extension,
+        content: await invoke('getLectionFile', {
+          ...properties,
+          location: file.location,
+        }),
+      })
+    }
+  })
 </script>
 
 <template>
   <div m-a text-3xl>
-    PACKAGE: {{ properties.package }}
-    LECTION: {{ properties.lection }}
+    <div v-for="(file, index) in contentArray" :key="index">
+      <Reader :content="file.content" :extension="file.extension" />
+    </div>
   </div>
 </template>

@@ -45,7 +45,7 @@ invoke('listPackageLections', { package: pkg })
     }
   })
 
-watch(() => searchString, (searchString: string) => { console.log('CHANGE IN LIST', searchString); filterShowedLections(searchString) })
+watch(() => searchString, (searchString: string) => filterShowedLections(searchString))
 </script>
 
 <template>
