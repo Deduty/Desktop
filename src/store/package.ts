@@ -41,11 +41,6 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
         console.error(`Internal error: Unable to fetch Package '${uuid}' due to: ${error}`)
       }
     }
-
-    // WRONG PACKAGE FOR DEV NEEDS
-    const meta = { language: 'wrong-lang', name: 'wrong-name', tags: ['wrong', 'package'], version: '1.0.0-rc1' }
-    const files = { files: [{ extension: 'md', location: 'nowhere.md', alias: 'about' }] }
-    packages.push(DedutyPackage.fromOptions({ id: 'wrong-id', meta, files }))
   }
 
   refresh()
