@@ -3,9 +3,33 @@ import type { Ref } from 'vue'
 import { invoke } from '@tauri-apps/api'
 import { DedutyLection, type IDedutyLection } from '~/composables/deduty'
 
-const { pkg } = defineProps<{ pkg: string }>()
-const lections: Ref<DedutyLection[]> = ref([])
+const { pkg, searchString } = defineProps<{ pkg: string; searchString: string }>()
+
 const router = useRouter()
+
+interface DedutyLectionItem {
+  lection: DedutyLection
+  showed: boolean
+}
+
+const lections: Ref<DedutyLectionItem[]> = ref([])
+
+const testSearchString = (searchString: string, lection: DedutyLection): boolean => {
+  const searchResult = lection.meta.name.match(searchString)
+
+  return (
+    searchResult !== null
+    && searchResult.length > 0
+  )
+  || searchString === ''
+  || lection.meta.name.includes(searchString)
+}
+
+const filterShowedLections = (searchString: string) => {
+  lections.value.forEach((pair) => {
+    pair.showed = testSearchString(searchString, pair.lection)
+  })
+}
 
 invoke('listPackageLections', { package: pkg })
   .then((lections: unknown) => {
@@ -17,23 +41,26 @@ invoke('listPackageLections', { package: pkg })
   .then(async (ids: string[]) => {
     for (const id of ids) {
       const lection: IDedutyLection = await invoke('getPackageLection', { package: pkg, lection: id })
-      lections.value.push(DedutyLection.fromOptions(lection))
+      lections.value.push({ lection: DedutyLection.fromOptions(lection), showed: searchString === '' })
     }
   })
+
+watch(() => searchString, (searchString: string) => { console.log('CHANGE IN LIST', searchString); filterShowedLections(searchString) })
 </script>
 
 <template>
   <div
     flex flex-col
     h-full
-    m-0 p-2
+    m-0 p-0
   >
-    <ul overflow-y-auto>
+    <ul overflow-y-auto flex flex-col gap-2>
       <li
-        v-for="(lection, index) in lections" :key="index"
+        v-for="(pair, index) in lections" v-show="pair.showed"
+        :key="index"
         @click="router.push(`/package/${pkg}/lection/${lection.id}`)"
       >
-        <LectionItem :lection="lection" />
+        <LectionItem :lection="pair.lection" />
       </li>
     </ul>
   </div>

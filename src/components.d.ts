@@ -17,6 +17,7 @@ declare module '@vue/runtime-core' {
     LectionItem: typeof import('./components/LectionBar/LectionList/LectionItem.vue')['default']
     LectionList: typeof import('./components/LectionBar/LectionList/LectionList.vue')['default']
     LectionMenu: typeof import('./components/LectionBar/LectionMenu.vue')['default']
+    LectionSearch: typeof import('./components/LectionBar/LectionSearch.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']
     LocalPackage: typeof import('./components/AddPackage/LocalPackage.vue')['default']
     PackageBar: typeof import('./components/PackageBar/PackageBar.vue')['default']
