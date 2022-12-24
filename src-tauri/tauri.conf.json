@@ -7,8 +7,8 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "desktop",
-    "version": "0.0.0"
+    "productName": "Deduty Desktop",
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
@@ -31,8 +31,8 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
-      "longDescription": "",
+      "identifier": "helltraitor.deduty.desktop",
+      "longDescription": "Deduty desktop is an application for education",
       "macOS": {
         "entitlements": null,
         "exceptionDomain": "",
