@@ -58,7 +58,7 @@ watch(() => searchString, (searchString: string) => { console.log('CHANGE IN LIS
       <li
         v-for="(pair, index) in lections" v-show="pair.showed"
         :key="index"
-        @click="router.push(`/package/${pkg}/lection/${lection.id}`)"
+        @click="router.push(`/package/${pkg}/lection/${pair.lection.id}`)"
       >
         <LectionItem :lection="pair.lection" />
       </li>
