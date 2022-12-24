@@ -18,7 +18,7 @@ invoke('getPackageLection', properties)
     // TODO: UNSAFE CAST
     return DedutyLection.fromOptions(serialized as IDedutyLection)
   })
-  .then((lection: DedutyLection) => {
+  .then(async (lection: DedutyLection) => {
     for (const file of lection.files.files) {
       contentArray.value.push({
         extension: file.extension,
