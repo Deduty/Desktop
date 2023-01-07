@@ -4,7 +4,7 @@ import MarkdownIt from 'markdown-it'
 // import LinkAttributes from 'markdown-it-link-attributes'
 // import Shiki from 'markdown-it-shiki'
 
-const { content, extension } = defineProps<{ content: string; extension: string }>()
+const { content, extension } = defineProps<{ content: Uint8Array; extension: string }>()
 
 // MARKDOWN SETUP
 const ConfiguredMarkdownIt = MarkdownIt()
@@ -24,9 +24,17 @@ const ConfiguredMarkdownIt = MarkdownIt()
 
 const RuntimeMarkdown = computed(() => {
   return {
-    template: ConfiguredMarkdownIt.render(content),
+    template: ConfiguredMarkdownIt.render(
+      (new TextDecoder()).decode(content.buffer),
+    ),
   }
 })
+
+// const RuntimeImage = computed(() => {
+//   // ElementAttrs<ImgHTMLAttributes>
+//   const RuntimeImageElement: Ref<ImgHTMLAttributes> = $ref()
+//   RuntimeImageElement
+// })
 </script>
 
 <template>
@@ -37,6 +45,14 @@ const RuntimeMarkdown = computed(() => {
     justify-center
   >
     <div
+      v-if="['png', 'jpeg', 'jpg'].includes(extension)"
+      class="prose prose-sm m-auto"
+    >
+      <img id="RuntimeImageElement" src="">
+    </div>
+
+    <div
+      v-if="extension === 'md'"
       class="prose shiki prose-sm m-auto text-left"
     >
       <component :is="RuntimeMarkdown" />
