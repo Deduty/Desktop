@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use async_std::path::{Path, PathBuf};
 use uuid::Uuid;
 
@@ -12,21 +10,21 @@ use package::lection::traits::{
 use crate::error::{ XResult, PremierError };
 use crate::file::{
     PremierFile,
-    PremierFileAlias,
-    PremierPackageFileCollection
+    PremierFileAlias
 };
+use super::PremierLectionFileCollection;
 use super::meta::PremierLectionMeta;
 
 
 pub struct PremierLection {
     id: Uuid,
     meta: PremierLectionMeta,
-    files: PremierPackageFileCollection
+    files: PremierLectionFileCollection
 }
 
 impl PremierLection {
     pub async fn from(schema: crate::schemes::lection::PremierLection, root: &Path) -> XResult<Self> {
-        let mut mapping = HashMap::new();
+        let mut files = Vec::new();
 
         if let Some(ref pages) = schema.lection.pages {
             for page in pages {
@@ -37,7 +35,7 @@ impl PremierLection {
                 if !path.is_file().await {
                     return Err(Box::new(PremierError::new(format!("{} is not a lection page", path.as_os_str().to_string_lossy()))));
                 }
-                mapping.insert(mapping.len().to_string(), PremierFile::new(PremierFileAlias::NoAlias, root.to_path_buf(), path));
+                files.push(PremierFile::new(PremierFileAlias::NoAlias, root.to_path_buf(), path));
             }
         }
 
@@ -45,7 +43,7 @@ impl PremierLection {
             Self {
                 id: uuid::Uuid::new_v4(),
                 meta: schema.lection.into(),
-                files: PremierPackageFileCollection::from(mapping)
+                files: PremierLectionFileCollection::from(files)
             }
         )
     }

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use async_trait::async_trait;
 
 use package::file::traits::{
@@ -9,34 +7,34 @@ use package::file::traits::{
 
 use crate::error::XResult;
 
-use super::file::PremierFile;
+use crate::file::PremierFile;
 
-pub struct PremierPackageFileCollection {
-    collection: HashMap<String, PremierFile>
+pub struct PremierLectionFileCollection {
+    collection: Vec<PremierFile>
 }
 
-impl PremierPackageFileCollection {
+impl PremierLectionFileCollection {
     pub fn new() -> Self {
-        Self { collection: HashMap::new() }
+        Self { collection: Vec::new() }
     }
 
-    pub fn from(map: HashMap<String, PremierFile>) -> Self {
-        Self { collection: map }
+    pub fn from(vector: Vec<PremierFile>) -> Self {
+        Self { collection: vector }
     }
 }
 
 #[async_trait]
-impl DedutyFileCollection for PremierPackageFileCollection {
+impl DedutyFileCollection for PremierLectionFileCollection {
     async fn alias(&self, alias: &String) -> XResult<Option<&dyn DedutyFile>> {
         Ok(
             self.collection
-                .get(alias)
+                .get(alias.parse::<usize>()?)
                 .map(|file| file as &dyn DedutyFile)
         )
     }
 
     async fn file(&self, location: &async_std::path::Path) -> XResult<Option<&dyn DedutyFile>> {
-        for file in self.collection.values() {
+        for file in &self.collection {
             if file.location().await?.as_path() == location {
                 return Ok(Some(file))
             }
@@ -48,7 +46,7 @@ impl DedutyFileCollection for PremierPackageFileCollection {
         Ok(
             self.collection
                 .iter()
-                .map(|(_, file)| file as &dyn DedutyFile)
+                .map(|file| file as &dyn DedutyFile)
                 .collect()
         )
     }

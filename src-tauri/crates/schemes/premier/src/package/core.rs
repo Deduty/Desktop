@@ -21,11 +21,11 @@ use crate::error::{XResult, PremierError};
 use crate::schemes;
 use crate::file::{
     PremierFile,
-    PremierFileAlias,
-    PremierPackageFileCollection
+    PremierFileAlias
 };
 use crate::lection::PremierLection;
 
+use super::collection::PremierPackageFileCollection;
 use super::meta::PremierPackageMeta;
 
 pub struct PremierPackage {
