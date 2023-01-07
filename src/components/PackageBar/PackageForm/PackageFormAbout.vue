@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { invoke } from '@tauri-apps/api'
+import type { Ref } from 'vue'
 import type { DedutyPackage } from '~/composables/deduty'
 
 const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
@@ -13,7 +14,7 @@ enum AboutScreen {
 
 const aboutScreen = ref(AboutScreen.Loading)
 const contentExtension = ref('')
-const contentString = ref('')
+const contentArray: Ref<Uint8Array> = ref(new Uint8Array())
 const errorMessage = ref('')
 
 watchEffect(async () => {
@@ -41,14 +42,14 @@ watchEffect(async () => {
 
   invoke('getPackageFile', { id: pkg.id, location: about.location })
     .then((value: unknown) => {
-      if (typeof value !== 'string')
+      if (!Array.isArray(value))
         throw new Error(`Internal error: Application provides wrong type '${typeof value}' when 'string' was expected`)
-      return value as string
+      return new Uint8Array(value)
     })
-    .then((content: string) => {
+    .then((content: Uint8Array) => {
       aboutScreen.value = AboutScreen.Content
       contentExtension.value = about.extension
-      contentString.value = content
+      contentArray.value = content
     })
     .catch((error) => {
       errorMessage.value = `Unable to get about file: ${error}`
@@ -66,9 +67,9 @@ watchEffect(async () => {
     <Error v-if="aboutScreen === AboutScreen.Error" :message="errorMessage" />
     <Loading v-if="aboutScreen === AboutScreen.Loading" />
     <!-- CONTENT SCREEN -->
-    <PackageMenuAboutContent
+    <Reader
       v-if="aboutScreen === AboutScreen.Content"
-      :content="contentString"
+      :content="contentArray"
       :extension="contentExtension"
     />
     <!-- NOTHING SCREEN (When no file with 'about' alias) -->
