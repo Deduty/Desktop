@@ -104,14 +104,14 @@ pub async fn listLocalPackage<'s>(storage: StateStorage<'s>) -> Result<Vec<Strin
 }
 
 #[tauri::command]
-pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &str) -> Result<String, String> {
+pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &str) -> Result<Vec<u8>, String> {
     let uuid = uuid::Uuid::parse_str(id)
         .map_err(|error| error.to_string())?;
 
     let path = PathBuf::from_str(location)
         .map_err(|_| format!("Internal error: Invalid file location: '{location}'"))?;
 
-    let mut content = String::new();
+    let mut content = Vec::new();
 
     match storage.get(&uuid).await {
         Some(package) => {
@@ -129,7 +129,7 @@ pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &
                             file.load()
                                 .await
                                 .map_err(|error| format!("Internal error: While loading file, getting this error: {}", error.to_string()))?
-                                .read_to_string(&mut content)
+                                .read_to_end(&mut content)
                                 .await
                                 .map_err(|error| format!("Internal error: While loading file, getting this error: {}", error.to_string()))?;
                             Ok(content)
