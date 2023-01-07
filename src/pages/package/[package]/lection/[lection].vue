@@ -7,7 +7,7 @@ import { DedutyLection, type IDedutyLection } from '~/composables/deduty'
 const properties = defineProps<{ package: string; lection: string }>()
 
 interface ContentFile {
-  content: string
+  content: Uint8Array
   extension: string
 }
 
@@ -22,10 +22,12 @@ invoke('getPackageLection', properties)
     for (const file of lection.files.files) {
       contentArray.value.push({
         extension: file.extension,
-        content: await invoke('getLectionFile', {
-          ...properties,
-          location: file.location,
-        }),
+        content: new Uint8Array(
+          await invoke('getLectionFile', {
+            ...properties,
+            location: file.location,
+          }),
+        ),
       })
     }
   })
