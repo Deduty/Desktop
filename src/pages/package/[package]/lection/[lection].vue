@@ -42,7 +42,11 @@ invoke('getPackageLection', properties)
       h-full w-full
       overflow-y-auto
     >
-      <div m-a>
+      <div
+        flex flex-col
+        m-a
+        gap-4
+      >
         <div v-for="(file, index) in contentArray" :key="index">
           <Reader :content="file.content" :extension="file.extension" />
         </div>

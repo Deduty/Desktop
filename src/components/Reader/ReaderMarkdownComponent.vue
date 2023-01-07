@@ -6,6 +6,12 @@ import MarkdownIt from 'markdown-it'
 
 const { content } = defineProps<{ content: Uint8Array }>()
 
+const emit = defineEmits<{
+  (event: 'error', message: string): void
+  (event: 'loading'): void
+  (event: 'success'): void
+}>()
+
 // MARKDOWN SETUP
 const ConfiguredMarkdownIt = MarkdownIt()
 // .use(Shiki, {
@@ -23,6 +29,8 @@ const ConfiguredMarkdownIt = MarkdownIt()
 // })
 
 const RuntimeMarkdown = computed(() => {
+  emit('success')
+
   return {
     template: ConfiguredMarkdownIt.render(
       (new TextDecoder()).decode(content.buffer),

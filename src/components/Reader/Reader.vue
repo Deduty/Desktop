@@ -13,6 +13,33 @@ class Extension {
   }
 }
 
+enum ReaderState {
+  Error = 'Error',
+  Loading = 'Loading',
+  Success = 'Success',
+}
+
+/* STATE KEEPERS */
+const currentState = ref(ReaderState.Loading)
+const errorMessage = ref('')
+
+/* READER STATE HANDLERS */
+const handleErrorState = (message: string) => {
+  errorMessage.value = message
+  currentState.value = ReaderState.Error
+}
+
+const handleLoadingState = () => {
+  currentState.value = ReaderState.Loading
+  errorMessage.value = ''
+}
+
+const handleSuccessState = () => {
+  currentState.value = ReaderState.Success
+  errorMessage.value = ''
+}
+/* --------------------- */
+
 const ExtensionInstance = new Extension(extension)
 </script>
 
@@ -23,14 +50,33 @@ const ExtensionInstance = new Extension(extension)
     align-middle
     justify-center
   >
-    <div
-      v-if="ExtensionInstance.isImage()"
-    >
-      <ReaderImageComponent :content="content" :extension="extension" />
+    <div v-show="currentState === ReaderState.Success">
+      <!-- READER SUB-COMPONENTS -->
+      <div v-if="ExtensionInstance.isImage()">
+        <ReaderImageComponent
+          :content="content"
+          :extension="extension"
+          @error="handleErrorState"
+          @loading="handleLoadingState"
+          @success="handleSuccessState"
+        />
+      </div>
+      <div v-if="ExtensionInstance.isMarkdown()">
+        <ReaderMarkdownComponent
+          :content="content"
+          @error="handleErrorState"
+          @loading="handleLoadingState"
+          @success="handleSuccessState"
+        />
+      </div>
     </div>
-
-    <div v-if="ExtensionInstance.isMarkdown()">
-      <ReaderMarkdownComponent :content="content" />
+    <!-- OTHER SCREENS -->
+    <div v-show="currentState === ReaderState.Loading">
+      <Loading />
+      Textjlkasjfl;kj asl;kfdjasl;kfjasl;kd
+    </div>
+    <div v-show="currentState === ReaderState.Error">
+      <Error :message="errorMessage" />
     </div>
   </div>
 </template>
