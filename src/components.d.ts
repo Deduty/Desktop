@@ -28,6 +28,7 @@ declare module '@vue/runtime-core' {
     PackageMenuAboutContent: typeof import('./components/PackageBar/PackageForm/PackageMenuAboutContent.vue')['default']
     PackageSearch: typeof import('./components/PackageBar/PackageSearch.vue')['default']
     Reader: typeof import('./components/Reader/Reader.vue')['default']
+    ReaderHtmlComponent: typeof import('./components/Reader/ReaderHtmlComponent.vue')['default']
     ReaderImageComponent: typeof import('./components/Reader/ReaderImageComponent.vue')['default']
     ReaderMarkdownComponent: typeof import('./components/Reader/ReaderMarkdownComponent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

@@ -4,6 +4,10 @@ const { content, extension } = defineProps<{ content: Uint8Array; extension: str
 class Extension {
   constructor(public origin: string) {}
 
+  isHtml(): boolean {
+    return this.origin === 'html'
+  }
+
   isImage(): boolean {
     return ['png', 'jpeg', 'jpg', 'bmp', 'gif'].includes(this.origin)
   }
@@ -55,7 +59,15 @@ const ExtensionInstance = new Extension(extension)
     >
       <div v-show="currentState === ReaderState.Success">
         <!-- READER SUB-COMPONENTS -->
-        <div v-if="ExtensionInstance.isImage()">
+        <div v-if="ExtensionInstance.isHtml()">
+          <ReaderHtmlComponent
+            :content="content"
+            @error="handleErrorState"
+            @loading="handleLoadingState"
+            @success="handleSuccessState"
+          />
+        </div>
+        <div v-else-if="ExtensionInstance.isImage()">
           <ReaderImageComponent
             :content="content"
             :extension="extension"
