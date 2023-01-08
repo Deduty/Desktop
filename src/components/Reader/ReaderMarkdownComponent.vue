@@ -41,7 +41,7 @@ const RuntimeMarkdown = computed(() => {
 
 <template>
   <div
-    class="prose shiki prose-sm m-auto text-left"
+    class="shiki text-left"
   >
     <component :is="RuntimeMarkdown" />
   </div>

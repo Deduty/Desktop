@@ -20,7 +20,7 @@ enum ReaderState {
 }
 
 /* STATE KEEPERS */
-const currentState = ref(ReaderState.Loading)
+const currentState = ref(ReaderState.Success)
 const errorMessage = ref('')
 
 /* READER STATE HANDLERS */
@@ -50,33 +50,43 @@ const ExtensionInstance = new Extension(extension)
     align-middle
     justify-center
   >
-    <div v-show="currentState === ReaderState.Success">
-      <!-- READER SUB-COMPONENTS -->
-      <div v-if="ExtensionInstance.isImage()">
-        <ReaderImageComponent
-          :content="content"
-          :extension="extension"
-          @error="handleErrorState"
-          @loading="handleLoadingState"
-          @success="handleSuccessState"
-        />
+    <div
+      prose m-auto
+    >
+      <div v-show="currentState === ReaderState.Success">
+        <!-- READER SUB-COMPONENTS -->
+        <div v-if="ExtensionInstance.isImage()">
+          <ReaderImageComponent
+            :content="content"
+            :extension="extension"
+            @error="handleErrorState"
+            @loading="handleLoadingState"
+            @success="handleSuccessState"
+          />
+        </div>
+        <div v-else-if="ExtensionInstance.isMarkdown()">
+          <ReaderMarkdownComponent
+            :content="content"
+            @error="handleErrorState"
+            @loading="handleLoadingState"
+            @success="handleSuccessState"
+          />
+        </div>
+        <div v-else>
+          <Error :message="`The following file format is not supported (may be not yet): ${extension}`" />
+        </div>
       </div>
-      <div v-if="ExtensionInstance.isMarkdown()">
-        <ReaderMarkdownComponent
-          :content="content"
-          @error="handleErrorState"
-          @loading="handleLoadingState"
-          @success="handleSuccessState"
-        />
+      <!-- OTHER SCREENS -->
+      <div v-show="currentState === ReaderState.Loading">
+        <div m-auto prose>
+          <Loading />
+        </div>
       </div>
-    </div>
-    <!-- OTHER SCREENS -->
-    <div v-show="currentState === ReaderState.Loading">
-      <Loading />
-      Textjlkasjfl;kj asl;kfdjasl;kfjasl;kd
-    </div>
-    <div v-show="currentState === ReaderState.Error">
-      <Error :message="errorMessage" />
+      <div v-show="currentState === ReaderState.Error">
+        <div m-auto prose>
+          <Error :message="errorMessage" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
