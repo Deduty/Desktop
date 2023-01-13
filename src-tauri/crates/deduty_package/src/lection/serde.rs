@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::error::XResult;
+use xresult::XResult;
 use crate::file::serde::DedutyFileCollection;
 
 

@@ -6,7 +6,7 @@ use async_std::sync::RwLock;
 
 use uuid::Uuid;
 
-use package::package::traits::DedutyPackage;
+use deduty_package::package::traits::DedutyPackage;
 
 // Arc + RwLock - because can be used in several places at the same time
 // Option - because package can be sub while using by other

@@ -1,28 +1,20 @@
 use serde::Serialize;
-
-use crate::error::{ PackageError, XResult };
-
+use xresult::XResult;
 
 #[derive(Serialize)]
 pub struct DedutyFile {
     pub alias: Option<String>,
-    pub location: String,
-    pub extension: String
+    pub extension: String,
+    pub id: String
 }
 
 impl DedutyFile {
     pub async fn try_from(object: &dyn crate::file::traits::DedutyFile) -> XResult<DedutyFile> {
-        let alias = object.alias().cloned();
-        let extension = object.extension().clone();
-        let location = match object.location().await?.clone().to_str() {
-            Some(value) => value.to_string(),
-            None => return Err(
-                Box::new(
-                    PackageError::new(
-                        "Serialization error: Unable convert location into UTF-8 string".to_string())))
-        };
-
-        Ok(DedutyFile { alias, location, extension })
+        Ok(DedutyFile {
+            alias: object.alias(),
+            extension: object.extension(),
+            id: object.id().to_string()
+        })
     }
 }
 
