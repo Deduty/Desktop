@@ -3,20 +3,26 @@ use std::sync::Arc;
 
 use async_std::io::ReadExt;
 use async_std::fs::File;
-use async_std::path::{ Path, PathBuf };
+use async_std::sync::RwLock;
+use async_std::path::Path;
+use uuid::Uuid;
 
-use deduty::package::package::traits::DedutyPackage;
-use deduty::package::package::serde::DedutyPackage as SerDedutyPackage;
-use deduty::package::lection::serde::DedutyLection as SerDedutyLection;
+use deduty_package::package::traits::DedutyPackage;
+use deduty_package::package::serde::DedutyPackage as SerDedutyPackage;
+use deduty_package::lection::serde::DedutyLection as SerDedutyLection;
 
-use deduty::storage::ActiveStorage;
-use deduty::storage::active::ActivePackage;
+use deduty_storage::active::{ ActivePackage, ActiveStorage };
 
-type StateStorage<'l> = tauri::State<'l, Arc<ActiveStorage>>;
+use crate::index::package::{ FileAffinity, FilePackageIndex };
+use crate::index::reader::FileReaderIndex;
+
+type StateActiveStorage<'l> = tauri::State<'l, Arc<ActiveStorage>>;
+type StateFilePackageIndex<'l> = tauri::State<'l, Arc<RwLock<FilePackageIndex>>>;
+type StateFileReaderIndex<'l> = tauri::State<'l, Arc<RwLock<FileReaderIndex>>>;
 
 
 #[tauri::command]
-pub async fn addLocalPackage<'s>(storage: StateStorage<'s>, path: &str) -> Result<String, String> {
+pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, path: &str) -> Result<String, String> {
     // PATH
 	let path = Path::new(path);
     if !path.exists().await {
@@ -68,9 +74,8 @@ pub async fn addLocalPackage<'s>(storage: StateStorage<'s>, path: &str) -> Resul
     }
 }
 
-
 #[tauri::command]
-pub async fn getLocalPackage<'s>(storage: StateStorage<'s>, id: &str) -> Result<Option<SerDedutyPackage>, String> {
+pub async fn getLocalPackage<'s>(storage: StateActiveStorage<'s>, id: &str) -> Result<Option<SerDedutyPackage>, String> {
     let uuid = uuid::Uuid::parse_str(id)
         .map_err(|error| format!("Internal error: {}", error.to_string()))?;
 
@@ -92,7 +97,7 @@ pub async fn getLocalPackage<'s>(storage: StateStorage<'s>, id: &str) -> Result<
 }
 
 #[tauri::command]
-pub async fn listLocalPackage<'s>(storage: StateStorage<'s>) -> Result<Vec<String>, String> {
+pub async fn listLocalPackage<'s>(storage: StateActiveStorage<'s>) -> Result<Vec<String>, String> {
     Ok(
         storage
             .list()
@@ -104,48 +109,7 @@ pub async fn listLocalPackage<'s>(storage: StateStorage<'s>) -> Result<Vec<Strin
 }
 
 #[tauri::command]
-pub async fn getPackageFile<'s>(storage: StateStorage<'s>, id: &str, location: &str) -> Result<Vec<u8>, String> {
-    let uuid = uuid::Uuid::parse_str(id)
-        .map_err(|error| error.to_string())?;
-
-    let path = PathBuf::from_str(location)
-        .map_err(|_| format!("Internal error: Invalid file location: '{location}'"))?;
-
-    let mut content = Vec::new();
-
-    match storage.get(&uuid).await {
-        Some(package) => {
-            match *package.read().await {
-                ActivePackage::Online(ref real) => {
-                    let maybe_file = real
-                        .as_ref()
-                        .files()
-                        .file(path.as_path())
-                        .await
-                        .map_err(|error| error.to_string())?;
-
-                    match maybe_file {
-                        Some(file) => {
-                            file.load()
-                                .await
-                                .map_err(|error| format!("Internal error: While loading file, getting this error: {}", error.to_string()))?
-                                .read_to_end(&mut content)
-                                .await
-                                .map_err(|error| format!("Internal error: While loading file, getting this error: {}", error.to_string()))?;
-                            Ok(content)
-                        },
-                        None => Err(format!("Internal error: Package file not found at location '{location}'"))
-                    }
-                },
-                ActivePackage::Offline => Err(format!("Internal error: Package '{}' is not available", id))
-            }
-        },
-        None => Err(format!("Internal error: Package with uuid '{}' not found", id))
-    }
-}
-
-#[tauri::command]
-pub async fn listPackageLections<'s>(storage: StateStorage<'s>, package: &str) -> Result<Vec<String>, String> {
+pub async fn listPackageLections<'s>(storage: StateActiveStorage<'s>, package: &str) -> Result<Vec<String>, String> {
     let package_uuid = uuid::Uuid::from_str(package)
         .map_err(|error| format!("Internal error: {}", error.to_string()))?;
 
@@ -165,7 +129,7 @@ pub async fn listPackageLections<'s>(storage: StateStorage<'s>, package: &str) -
 }
 
 #[tauri::command]
-pub async fn getPackageLection<'s>(storage: StateStorage<'s>, package: &str, lection: &str) -> Result<SerDedutyLection, String> {
+pub async fn getPackageLection<'s>(storage: StateActiveStorage<'s>, package: &str, lection: &str) -> Result<SerDedutyLection, String> {
     let package_uuid = uuid::Uuid::from_str(package)
         .map_err(|error| format!("Internal error: {}", error.to_string()))?;
 
@@ -194,45 +158,117 @@ pub async fn getPackageLection<'s>(storage: StateStorage<'s>, package: &str, lec
 }
 
 #[tauri::command]
-pub async fn getLectionFile<'s>(storage: StateStorage<'s>, package: &str, lection: &str, location: &str) -> Result<Vec<u8>, String> {
-    let package_uuid = uuid::Uuid::from_str(package)
-    .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-    let lection_uuid = uuid::Uuid::from_str(lection)
+pub async fn openFileChunked<'s>(storage: StateActiveStorage<'s>, package: StateFilePackageIndex<'s>, index: StateFileReaderIndex<'s>, id: &str) -> Result<String, String> {
+    let file_uuid = uuid::Uuid::from_str(id)
         .map_err(|error| format!("Internal error: {}", error.to_string()))?;
 
-    let path = PathBuf::from_str(location)
-        .map_err(|_| format!("Internal error: Invalid file location: '{location}'"))?;
+    // Find out which package and / or lection
+    match package.write().await.index().get(&file_uuid) {
 
-    match storage.get(&package_uuid).await {
-        Some(active) => {
-            match *active.read().await {
-                ActivePackage::Online(ref real) => {
-                    let lection = real
-                        .lections()
-                        .iter()
-                        .find(|lection| lection.id() == &lection_uuid)
-                        .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection_uuid))?;
+        // CREATE TOKEN ON PACKAGE FILE
+        Some(FileAffinity::Package { package: package_uuid}) => {
+            match storage.get(package_uuid).await {
+                Some(active) => {
+                    match *active.read().await {
 
-                    let mut content = Vec::new();
+                        // GETTING PACKAGE
+                        ActivePackage::Online(ref real) => {
+                            match real.files().file(&file_uuid).await {
+                                Ok(Some(file)) => {
 
-                    lection.files()
-                        .file(&path)
-                        .await
-                        .map_err(|error| format!("Internal error: While getting file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?
-                        .ok_or_else(|| format!("File is not exist at {}", location))?
-                        .load()
-                        .await
-                        .map_err(|error| format!("Internal error: While load file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?
-                        .read_to_end(&mut content)
-                        .await
-                        .map_err(|error| format!("Internal error: While load file of package {} of lection {}: {}", package_uuid, lection_uuid, error.to_string()))?;
-
-                    Ok(content)
+                                    // GETTING READER
+                                    match file.load().await {
+                                        Ok(reader) => {
+                                            let token = Uuid::new_v4();
+                                            index.write().await.index().insert(token.clone(), reader);
+                                            Ok(token.to_string())
+                                        }
+                                        Err(error) => Err(format!("Internal error: {}", error.to_string()))
+                                    }
+                                },
+                                Ok(None) => Err(format!("Internal error: Unable to find file with id `{}`", file_uuid)),
+                                Err(error) => Err(format!("Internal error: {}", error.to_string()))
+                            }
+                        }
+                        ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package_uuid))
+                    }
                 }
-                ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package))
+                None => Err(format!("Internal error: Package with ID `{}` is not exist", package_uuid))
             }
         },
-        None => Err(format!("Internal error: Package with ID `{}` is not exist", package))
+
+        // CREATE TOKEN ON LECTION FILE
+        Some(FileAffinity::Lection { package: package_uuid,  lection: lection_uuid}) => {
+            match storage.get(package_uuid).await {
+                Some(active) => {
+                    match *active.read().await {
+
+                        // GETTING PACKAGE
+                        ActivePackage::Online(ref real) => {
+                            let lection = real
+                                .lections()
+                                .iter()
+                                .find(|lection| lection.id() == lection_uuid)
+                                .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection_uuid))?;
+
+                            // GETTING READER
+                            match lection.files().file(&file_uuid).await {
+                                Ok(Some(file)) => {
+
+                                    // GETTING READER
+                                    match file.load().await {
+                                        Ok(reader) => {
+                                            let token = Uuid::new_v4();
+                                            index.write().await.index().insert(token.clone(), reader);
+                                            Ok(token.to_string())
+                                        }
+                                        Err(error) => Err(format!("Internal error: {}", error.to_string()))
+                                    }
+                                },
+                                Ok(None) => Err(format!("Internal error: Unable to find file with id `{}`", file_uuid)),
+                                Err(error) => Err(format!("Internal error: {}", error.to_string()))
+                            }
+                        }
+                        ActivePackage::Offline => Err(format!("Internal error: Package with ID `{}` is not available", package_uuid))
+                    }
+                }
+                None => Err(format!("Internal error: Package with ID `{}` is not exist", package_uuid))
+            }
+        },
+        None => Err(format!("File with id `{}` is not in program index", file_uuid))
+    }
+}
+
+#[tauri::command]
+pub async fn closeFileChunked<'s>(index: StateFileReaderIndex<'s>, id: &str) -> Result<bool, String> {
+    let file_uuid = uuid::Uuid::from_str(id)
+        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+    Ok(
+        index
+            .write()
+            .await
+            .index()
+            .remove(&file_uuid)
+            .is_some()
+    )
+}
+
+#[tauri::command]
+pub async fn getFileChunked<'s>(index: StateFileReaderIndex<'s>, id: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
+    let file_uuid = uuid::Uuid::from_str(id)
+        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+
+    match index.write().await.index().get_mut(&file_uuid) {
+        Some(buffer) => {
+            match buffer.closed() {
+                true => Err(format!("File `{}` have been closed", id)),
+                false => buffer
+                    .next(chunk)
+                    .await
+                    .map_err(|err| format!("Error while reading file `{}`: {}", id, err.to_string()))
+            }
+        }
+        None => Err(format!("File `{}` is not opened (or have been read)", id))
     }
 }
