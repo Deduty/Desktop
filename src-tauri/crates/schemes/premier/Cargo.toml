@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-package = { path = "../../deduty/crates/package" }
+deduty_package = { path = "../../deduty_package" }
+xresult = { path = "../../xresult" }
 
 async-std = "1.12.0"
 async-trait = "0.1.58"

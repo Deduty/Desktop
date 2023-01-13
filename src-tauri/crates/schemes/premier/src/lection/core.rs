@@ -1,13 +1,13 @@
 use async_std::path::{Path, PathBuf};
 use uuid::Uuid;
 
-use package::file::traits::DedutyFileCollection;
-use package::lection::traits::{
+use deduty_package::file::traits::DedutyFileCollection;
+use deduty_package::lection::traits::{
     DedutyLection,
     DedutyLectionMeta
 };
+use xresult::{ XError, XResult };
 
-use crate::error::{ XResult, PremierError };
 use crate::file::{
     PremierFile,
     PremierFileAlias
@@ -30,12 +30,14 @@ impl PremierLection {
             for page in pages {
                 let path = root.join(PathBuf::from(&page.relative));
                 if !path.exists().await {
-                    return Err(Box::new(PremierError::new(format!("Lection page doesn't exist at {}", path.as_os_str().to_string_lossy()))));
+                    let location = path.as_os_str().to_string_lossy();
+                    return Err(Box::new(XError::from(("PremierLectionError", format!("Lection page doesn't exist at `{}`", location)))));
                 }
                 if !path.is_file().await {
-                    return Err(Box::new(PremierError::new(format!("{} is not a lection page", path.as_os_str().to_string_lossy()))));
+                    let location = path.as_os_str().to_string_lossy();
+                    return Err(Box::new(XError::from(("PremierLectionError", format!("{} is not a lection page", location)))));
                 }
-                files.push(PremierFile::new(PremierFileAlias::NoAlias, root.to_path_buf(), path));
+                files.push(PremierFile::new(PremierFileAlias::NoAlias, root.to_path_buf(), path, uuid::Uuid::new_v4()));
             }
         }
 

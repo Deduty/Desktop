@@ -1,4 +1,4 @@
-use package::package::traits::DedutyPackageMeta;
+use deduty_package::package::traits::DedutyPackageMeta;
 
 pub struct PremierPackageMeta {
     name: String,

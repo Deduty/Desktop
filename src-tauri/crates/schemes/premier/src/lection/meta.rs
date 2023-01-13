@@ -1,4 +1,4 @@
-use package::lection::traits::DedutyLectionMeta;
+use deduty_package::lection::traits::DedutyLectionMeta;
 
 
 pub struct PremierLectionMeta {

@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
 use async_trait::async_trait;
+use uuid::Uuid;
 
-use package::file::traits::{
+use deduty_package::file::traits::{
     DedutyFile,
     DedutyFileCollection
 };
-
-use crate::error::XResult;
+use xresult::XResult;
 
 use crate::file::PremierFile;
 
@@ -35,13 +35,13 @@ impl DedutyFileCollection for PremierPackageFileCollection {
         )
     }
 
-    async fn file(&self, location: &async_std::path::Path) -> XResult<Option<&dyn DedutyFile>> {
-        for file in self.collection.values() {
-            if file.location().await?.as_path() == location {
-                return Ok(Some(file))
-            }
-        }
-        Ok(None)
+    async fn file(&self, uuid: &Uuid) -> XResult<Option<&dyn DedutyFile>> {
+        Ok(
+            self.collection
+                .values()
+                .find(|file| file.id() == *uuid)
+                .map(|object| object as &dyn DedutyFile)
+        )
     }
 
     async fn files(&self) -> XResult<Vec<&dyn DedutyFile>> {

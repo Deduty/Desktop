@@ -7,17 +7,17 @@ use async_std::stream::StreamExt;
 use regex::Regex;
 use uuid::Uuid;
 
-use package::file::traits::{
+use deduty_package::file::traits::{
     DedutyFileCollection,
     DedutyFile
 };
-use package::package::traits::{
+use deduty_package::package::traits::{
     DedutyPackageMeta,
     DedutyPackage,
 };
-use package::lection::traits::DedutyLection;
+use deduty_package::lection::traits::DedutyLection;
+use xresult::{ XError, XResult };
 
-use crate::error::{XResult, PremierError};
 use crate::schemes;
 use crate::file::{
     PremierFile,
@@ -45,6 +45,7 @@ impl PremierPackage {
                 PremierFileAlias::Alias("about".into()),
                 root.to_path_buf(),
                 PathBuf::from(&schema.package.about.clone().unwrap_or("ABOUT.md".into())),
+                Uuid::new_v4()
             );
 
             match about.location().await {
@@ -65,14 +66,16 @@ impl PremierPackage {
             for lection in lections {
                 let mut lection_root = root.join(lection.relative);
                 if !lection_root.exists().await {
-                    return Err(Box::new(PremierError::new(format!("Lection doesn't exist at {}", lection_root.as_os_str().to_string_lossy()))));
+                    let location = lection_root.as_os_str().to_string_lossy();
+                    return Err(Box::new(XError::from(("PremierPackageError", format!("Lection doesn't exist at {}", location)))));
                 }
 
                 match lection_root.is_file().await {
                     // Exact is a lection.toml path
                     true => {
                         if !lection_root.ends_with("lection.toml") {
-                            return Err(Box::new(PremierError::new(format!("{} is not a `lection.toml` file", lection_root.as_os_str().to_string_lossy()))));
+                            let location = lection_root.as_os_str().to_string_lossy();
+                            return Err(Box::new(XError::from(("PremierPackageError", format!("Location `{}` is not a `lection.toml` file", location)))));
                         }
                         candidates.push(lection_root);
                     }
@@ -80,10 +83,12 @@ impl PremierPackage {
                     false => {
                         lection_root = lection_root.join("lection.toml");
                         if !lection_root.exists().await {
-                            return Err(Box::new(PremierError::new(format!("Lection doesn't exist at {}", lection_root.as_os_str().to_string_lossy()))));
+                            let location = lection_root.as_os_str().to_string_lossy();
+                            return Err(Box::new(XError::from(("PremierPackageError", format!("Location doesn't exist at `{}`", location)))));
                         }
                         if !lection_root.ends_with("lection.toml") {
-                            return Err(Box::new(PremierError::new(format!("{} is not a `lection.toml` file", lection_root.as_os_str().to_string_lossy()))));
+                            let location = lection_root.as_os_str().to_string_lossy();
+                            return Err(Box::new(XError::from(("PremierPackageError", format!("Location `{}` is not a `lection.toml` file", location)))));
                         }
                         candidates.push(lection_root);
                     }
@@ -94,7 +99,7 @@ impl PremierPackage {
         // REGEX
         if let Some(expression) = schema.lections.regex {
             let regex = Regex::new(&expression)
-                .map_err(|error| Box::new(PremierError::new(format!("Error on regex parsing: {}", error.to_string()))))?;
+                .map_err(|error| Box::new(XError::from(("PremierPackageError", error.to_string()))))?;
 
             let mut folders = vec![root.to_path_buf()];
             while !folders.is_empty() {
@@ -104,8 +109,7 @@ impl PremierPackage {
                 let mut content = async_std::fs::read_dir(&folder).await?;
                 while let Some(target) = content.next().await {
                     let path = target
-                        .map_err(|error|
-                            Box::new(PremierError::new(format!("Error while getting target path: {}", error.to_string()))))?
+                        .map_err(|error| Box::new(XError::from(("PremierPackageError", error.to_string()))))?
                         .path();
 
                     if path.is_dir().await {
@@ -128,7 +132,7 @@ impl PremierPackage {
             let lection_toml = candidate.clone();
             let lection_root = candidate
                 .parent()
-                .ok_or_else(|| Box::new(PremierError::new(format!("Lection path have no parents at {}", candidate.as_os_str().to_string_lossy()))))?;
+                .ok_or_else(|| Box::new(XError::from(("PremierPackageError", format!("Lection path have no parents at {}", candidate.as_os_str().to_string_lossy())))))?;
 
             // CHECKS MUST BE PERFORMED BEFORE
     

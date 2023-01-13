@@ -1,20 +1,20 @@
 use async_std::io::ReadExt;
 use async_std::fs::File;
 
-use package::package::traits::DedutyPackage;
+use deduty_package::package::traits::DedutyPackage;
+use xresult::{ XError, XResult };
 
 use crate::schemes::package::PremierPackage as PremierPackageScheme;
 use crate::package::PremierPackage;
-use crate::error::XResult;
 
 pub async fn load(
     path: async_std::path::PathBuf
 ) -> XResult<Box<dyn DedutyPackage>> {
     if !path.exists().await {
-        return Err(format!("Path '{:#?}' is not exist", path).into());
+        return Err(Box::new(XError::from(("PremierLoadError", format!("Path '{:#?}' is not exist", path)))));
     }
   	if !path.is_dir().await {
-    	return Err(format!("Path '{:#?}' is not a directory", path).into());
+        return Err(Box::new(XError::from(("PremierLoadError", format!("Path '{:#?}' is not a directory", path)))));
   	}
 
     // PACKAGE
