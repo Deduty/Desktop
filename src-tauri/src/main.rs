@@ -5,31 +5,40 @@
 
 use std::sync::Arc;
 
-use deduty::storage::ActiveStorage;
+use async_std::sync::RwLock;
+
+use deduty_storage::active::ActiveStorage;
 
 mod package;
+mod index;
 
 
 fn main() {
-    let storage = Arc::new(ActiveStorage::new());
+    let active_storage = Arc::new(ActiveStorage::new());
+    let package_index = Arc::new(RwLock::new(index::package::FilePackageIndex::new()));
+    let reader_index = Arc::new(RwLock::new(index::reader::FileReaderIndex::new()));
 
-    // TODO: Async load task 
-    // storage.load()
+    // TODO: Async load (storage, then package index)
 
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
           self::package::commands::addLocalPackage,
           self::package::commands::getLocalPackage,
-          self::package::commands::getPackageFile,
+          
           self::package::commands::listLocalPackage,
           self::package::commands::listPackageLections,
           self::package::commands::getPackageLection,
-          self::package::commands::getLectionFile,
+
+          self::package::commands::closeFileChunked,
+          self::package::commands::openFileChunked,
+          self::package::commands::getFileChunked,
         ])
-        .manage(storage.clone())
+        .manage(active_storage.clone())
+        .manage(package_index)
+        .manage(reader_index.clone())
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Error while running tauri application");
     
-    // TODO: Save storage on the disk
+    // TODO: Save
     // storage.save()
 }

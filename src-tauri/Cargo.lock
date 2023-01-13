@@ -613,11 +613,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "deduty"
+name = "deduty_package"
+version = "0.2.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "serde",
+ "uuid 1.2.2",
+ "xresult",
+]
+
+[[package]]
+name = "deduty_storage"
 version = "0.1.0"
 dependencies = [
- "package",
- "storage",
+ "async-std",
+ "deduty_package",
+ "uuid 1.2.2",
 ]
 
 [[package]]
@@ -648,7 +660,9 @@ name = "desktop"
 version = "0.1.0"
 dependencies = [
  "async-std",
- "deduty",
+ "async-trait",
+ "deduty_package",
+ "deduty_storage",
  "premier",
  "serde",
  "serde_json",
@@ -656,6 +670,7 @@ dependencies = [
  "tauri-build",
  "toml",
  "uuid 1.2.2",
+ "xresult",
 ]
 
 [[package]]
@@ -1746,16 +1761,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
-name = "package"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "async-trait",
- "serde",
- "uuid 1.2.2",
-]
-
-[[package]]
 name = "pango"
 version = "0.15.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2017,11 +2022,12 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
- "package",
+ "deduty_package",
  "regex",
  "serde",
  "toml",
  "uuid 1.2.2",
+ "xresult",
 ]
 
 [[package]]
@@ -2544,15 +2550,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dbe866e1e51e8260c9eed836a042a5e7f6726bb2b411dffeaa712e19c388f23b"
 dependencies = [
  "loom",
-]
-
-[[package]]
-name = "storage"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "package",
- "uuid 1.2.2",
 ]
 
 [[package]]
@@ -3680,3 +3677,7 @@ name = "xml-rs"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2d7d3948613f75c98fd9328cfdcc45acc4d360655289d0a7d4ec931392200a3"
+
+[[package]]
+name = "xresult"
+version = "0.1.0"
