@@ -100,8 +100,8 @@ div.overlay
   z-index: 100
 
 div.overlay.box
-  width: 80%
-  height: 80%
+  max-width: 80%
+  max-height: 80%
 
 button
   transition: all 200ms ease-in-out
