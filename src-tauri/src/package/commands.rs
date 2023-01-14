@@ -1,3 +1,4 @@
+use std::collections::{ HashMap, HashSet };
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -22,7 +23,7 @@ type StateFileReaderIndex<'l> = tauri::State<'l, Arc<RwLock<FileReaderIndex>>>;
 
 
 #[tauri::command]
-pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, path: &str) -> Result<String, String> {
+pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, index: StateFilePackageIndex<'s>, path: &str) -> Result<String, String> {
     // PATH
 	let path = Path::new(path);
     if !path.exists().await {
@@ -65,6 +66,41 @@ pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, path: &str) ->
                 .map_err(|error| format!("Internal error: {}", error.to_string()))?;
             let uuid = package.id().clone();
 
+            // COLLISION CHECK
+            // CREATING VIRTUAL INDEX
+            let mut virtual_index = HashMap::new();
+            // COLLECT PACKAGES IDs FOR VIRTUAL INDEX
+            match package.files().files().await {
+                Err(error) => return Err(format!("Unable to update program index for `{:?}`: {}", path, error.to_string())),
+                Ok(files) => {
+                    for file in files {
+                        virtual_index.insert(file.id(), FileAffinity::Package { package: uuid.clone() });
+                    }
+                }
+            }
+            for lection in package.lections() {
+                match lection.files().files().await {
+                    Err(error) => return Err(format!("Unable to update program index for `{:?}`: {}", path, error.to_string())),
+                    Ok(files) => {
+                        for file in files {
+                            virtual_index.insert(file.id(), FileAffinity::Lection { package: uuid, lection: lection.id().clone() });
+                        }
+                    }
+                }
+            }
+
+            // COLLISION CHECK BEGIN
+            let mut rwlock_index = index.write().await;
+            let virtual_index_keys = virtual_index.keys().collect::<HashSet<_>>();
+            let package_index_keys = rwlock_index.index().keys().collect::<HashSet<_>>();
+
+            let intersected = package_index_keys.intersection(&virtual_index_keys).collect::<Vec<_>>();
+            if intersected.len() > 0 {
+                return Err(format!("Unable to update program index for `{:?}`: Several files have occupied indexes: `{:?}`", path, intersected));
+            }
+            // COLLISION CHECK END
+
+            rwlock_index.index().extend(virtual_index);
             storage.add(uuid.clone(), package as Box<dyn DedutyPackage>).await;
 
             Ok(uuid.to_string())
