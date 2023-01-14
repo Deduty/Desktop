@@ -3,15 +3,16 @@ import type { Ref } from 'vue'
 import { invoke } from '@tauri-apps/api'
 
 import { DedutyLection, type IDedutyLection } from '~/composables/deduty'
+import type { DedutyFileReader } from '~/composables/deduty/file/reader'
 
 const properties = defineProps<{ package: string; lection: string }>()
 
-interface ContentFile {
-  content: Uint8Array
+interface ReaderFile {
+  reader: DedutyFileReader
   extension: string
 }
 
-const contentArray: Ref<ContentFile[]> = ref([])
+const readerArray: Ref<ReaderFile[]> = ref([])
 
 invoke('getPackageLection', properties)
   .then((serialized: unknown) => {
@@ -20,14 +21,9 @@ invoke('getPackageLection', properties)
   })
   .then(async (lection: DedutyLection) => {
     for (const file of lection.files.files) {
-      contentArray.value.push({
+      readerArray.value.push({
         extension: file.extension,
-        content: new Uint8Array(
-          await invoke('getLectionFile', {
-            ...properties,
-            location: file.location,
-          }),
-        ),
+        reader: await file.createReader(),
       })
     }
   })
@@ -47,8 +43,8 @@ invoke('getPackageLection', properties)
         m-a
         gap-4
       >
-        <div v-for="(file, index) in contentArray" :key="index">
-          <Reader :content="file.content" :extension="file.extension" />
+        <div v-for="(file, index) in readerArray" :key="index">
+          <Reader :reader="file.reader" :extension="file.extension" />
         </div>
       </div>
     </div>
