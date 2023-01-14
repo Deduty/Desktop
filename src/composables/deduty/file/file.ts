@@ -10,6 +10,11 @@ export class DedutyFile implements IDedutyFile {
     public id: string,
   ) {}
 
+  async createReader(): Promise<DedutyFileReader> {
+    const token: string = await invoke('openFileChunked', { id: this.id })
+    return new DedutyFileReader(token)
+  }
+
   static fromOptions({ alias, extension, id }: IDedutyFile): DedutyFile {
     return new DedutyFile(alias, extension, id)
   }
