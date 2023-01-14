@@ -1,14 +1,17 @@
+import { invoke } from '@tauri-apps/api'
+
+import { DedutyFileReader } from './reader'
 import type { IDedutyFile, IDedutyFileCollection } from './scheme'
 
 export class DedutyFile implements IDedutyFile {
   constructor(
-    public location: string,
+    public alias: string | undefined,
     public extension: string,
-    public alias?: string,
+    public id: string,
   ) {}
 
-  static fromOptions({ alias, location, extension }: IDedutyFile): DedutyFile {
-    return new DedutyFile(location, extension, alias)
+  static fromOptions({ alias, extension, id }: IDedutyFile): DedutyFile {
+    return new DedutyFile(alias, extension, id)
   }
 }
 

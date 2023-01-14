@@ -1,7 +1,7 @@
 export interface IDedutyFile {
   alias?: string
-  location: string
   extension: string
+  id: string
 }
 
 export interface IDedutyFileCollection {
