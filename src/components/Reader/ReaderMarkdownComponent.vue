@@ -1,16 +1,11 @@
 <script setup lang="ts">
 // MARKDOWN IMPORTS
 import MarkdownIt from 'markdown-it'
+import type { DedutyFileReader } from '~/composables/deduty/file/reader'
 // import LinkAttributes from 'markdown-it-link-attributes'
 // import Shiki from 'markdown-it-shiki'
 
-const { content } = defineProps<{ content: Uint8Array }>()
-
-const emit = defineEmits<{
-  (event: 'error', message: string): void
-  (event: 'loading'): void
-  (event: 'success'): void
-}>()
+const { reader } = defineProps<{ reader: DedutyFileReader }>()
 
 // MARKDOWN SETUP
 const ConfiguredMarkdownIt = MarkdownIt()
@@ -28,15 +23,16 @@ const ConfiguredMarkdownIt = MarkdownIt()
 //   },
 // })
 
-const RuntimeMarkdown = computed(() => {
-  emit('success')
+const readerBlob = await reader.readAll()
+if (!readerBlob)
+  throw new Error('Reader return null value. Probably file empty or already was read. Try to reload page')
 
-  return {
-    template: ConfiguredMarkdownIt.render(
-      (new TextDecoder()).decode(content.buffer),
-    ),
-  }
-})
+const readerBuffer = await readerBlob.arrayBuffer()
+const decodedContent = (new TextDecoder()).decode(readerBuffer)
+
+const RuntimeMarkdown = {
+  template: ConfiguredMarkdownIt.render(decodedContent),
+}
 </script>
 
 <template>

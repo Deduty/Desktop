@@ -1,5 +1,12 @@
 <script setup lang="ts">
-const { content, extension } = defineProps<{ content: Uint8Array; extension: string }>()
+// COMPONENT IMPORTS
+import ReaderHtmlComponent from './ReaderHtmlComponent.vue'
+import ReaderImageComponent from './ReaderImageComponent.vue'
+import ReaderMarkdownComponent from './ReaderMarkdownComponent.vue'
+
+import type { DedutyFileReader } from '~/composables/deduty/file/reader'
+
+const { reader, extension } = defineProps<{ reader: DedutyFileReader; extension: string }>()
 
 class Extension {
   constructor(public origin: string) {}
@@ -17,34 +24,44 @@ class Extension {
   }
 }
 
-enum ReaderState {
-  Error = 'Error',
-  Loading = 'Loading',
-  Success = 'Success',
+class ReaderComponent {
+  private m_component
+  private m_properties: object
+
+  constructor(ext: Extension) {
+    if (ext.isHtml()) {
+      this.m_component = ReaderHtmlComponent
+      this.m_properties = { reader }
+    }
+    else if (ext.isImage()) {
+      this.m_component = ReaderImageComponent
+      this.m_properties = { reader, extension }
+    }
+    else if (ext.isMarkdown()) {
+      this.m_component = ReaderMarkdownComponent
+      this.m_properties = { reader }
+    }
+    else {
+      this.m_component = Error
+      this.m_properties = { message: `File extension \`${ext.origin}\` is not supported` }
+    }
+  }
+
+  get component() {
+    return this.m_component
+  }
+
+  get properties() {
+    return this.m_properties
+  }
 }
 
-/* STATE KEEPERS */
-const currentState = ref(ReaderState.Success)
-const errorMessage = ref('')
+const ComponentInstance = new ReaderComponent(new Extension(extension))
+const ErrorMessage = ref('')
 
-/* READER STATE HANDLERS */
-const handleErrorState = (message: string) => {
-  errorMessage.value = message
-  currentState.value = ReaderState.Error
-}
-
-const handleLoadingState = () => {
-  currentState.value = ReaderState.Loading
-  errorMessage.value = ''
-}
-
-const handleSuccessState = () => {
-  currentState.value = ReaderState.Success
-  errorMessage.value = ''
-}
-/* --------------------- */
-
-const ExtensionInstance = new Extension(extension)
+onErrorCaptured((error) => {
+  ErrorMessage.value = error.message
+})
 </script>
 
 <template>
@@ -57,48 +74,20 @@ const ExtensionInstance = new Extension(extension)
     <div
       prose m-auto
     >
-      <div v-show="currentState === ReaderState.Success">
-        <!-- READER SUB-COMPONENTS -->
-        <div v-if="ExtensionInstance.isHtml()">
-          <ReaderHtmlComponent
-            :content="content"
-            @error="handleErrorState"
-            @loading="handleLoadingState"
-            @success="handleSuccessState"
-          />
-        </div>
-        <div v-else-if="ExtensionInstance.isImage()">
-          <ReaderImageComponent
-            :content="content"
-            :extension="extension"
-            @error="handleErrorState"
-            @loading="handleLoadingState"
-            @success="handleSuccessState"
-          />
-        </div>
-        <div v-else-if="ExtensionInstance.isMarkdown()">
-          <ReaderMarkdownComponent
-            :content="content"
-            @error="handleErrorState"
-            @loading="handleLoadingState"
-            @success="handleSuccessState"
-          />
-        </div>
-        <div v-else>
-          <Error :message="`The following file format is not supported (may be not yet): ${extension}`" />
-        </div>
+      <!-- ERROR - SHOW ERROR WHEN CHILD COMPONENT ERROR MESSAGE CAUGHT -->
+      <div v-if="ErrorMessage">
+        <Error :message="ErrorMessage" />
       </div>
-      <!-- OTHER SCREENS -->
-      <div v-show="currentState === ReaderState.Loading">
-        <div m-auto prose>
+      <Suspense v-else>
+        <!-- DONE - SHOW DYNAMIC COMPONENT -->
+        <template #default>
+          <component :is="ComponentInstance.component" v-bind="ComponentInstance.properties" />
+        </template>
+        <!-- LOADING - SHOW LOADING ANIMATION -->
+        <template #fallback>
           <Loading />
-        </div>
-      </div>
-      <div v-show="currentState === ReaderState.Error">
-        <div m-auto prose>
-          <Error :message="errorMessage" />
-        </div>
-      </div>
+        </template>
+      </Suspense>
     </div>
   </div>
 </template>
