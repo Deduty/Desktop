@@ -20,7 +20,7 @@ const { lection } = defineProps<{ lection: DedutyLection }>()
         class="black-text"
         text-lg
       >
-        {{ lection.meta.name }} - {{ lection.meta.order }}
+        {{ lection.meta.name }}
       </div>
       <div
         m-a
