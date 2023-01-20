@@ -29,6 +29,6 @@ ImageEncoder.readAsDataURL(readerBlob)
   <div
     class="prose m-auto"
   >
-    <img ref="ReaderImageComponentElement" src="">
+    <img ref="ReaderImageComponentElement" class="rounded" src="">
   </div>
 </template>
