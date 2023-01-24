@@ -1,4 +1,3 @@
-use uuid::Uuid;
 use async_trait::async_trait;
 
 use xresult::{ XReason, XResult };
@@ -14,7 +13,7 @@ pub trait DedutyFileReader: Sync + Send {
 
 #[async_trait]
 pub trait DedutyFile: Sync + Send {
-    fn id(&self) -> Uuid;
+    fn id(&self) -> String;
     fn alias(&self) -> Option<String>;
     fn extension(&self) -> String;
     async fn load(&self) -> XResult<Box<dyn DedutyFileReader>>;
@@ -24,6 +23,6 @@ pub trait DedutyFile: Sync + Send {
 #[async_trait]
 pub trait DedutyFileCollection: Sync + Send {
     async fn alias(&self, alias: &String) -> XResult<Option<&dyn DedutyFile>>;
-    async fn file(&self, uuid: &Uuid) -> XResult<Option<&dyn DedutyFile>>;
+    async fn file(&self, id: &String) -> XResult<Option<&dyn DedutyFile>>;
     async fn files(&self) -> XResult<Vec<&dyn DedutyFile>>;
 }
