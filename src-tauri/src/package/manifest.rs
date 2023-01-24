@@ -20,7 +20,7 @@ impl PackageManifest {
     }
 
     pub fn to_enum(&self) -> Option<PackageManifestVariants> {
-        match self.manifest.name.as_str() {
+        match self.manifest.name.to_lowercase().as_str() {
             "premier" => Some(PackageManifestVariants::Premier),
             _ => None
         }
