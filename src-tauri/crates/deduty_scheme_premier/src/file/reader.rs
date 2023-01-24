@@ -2,7 +2,7 @@ use async_std::io::{ BufReader, ReadExt };
 use async_std::fs::File;
 use async_trait::async_trait;
 
-use deduty_package::file::traits::DedutyFileReader;
+use deduty_package_traits::DedutyFileReader;
 use xresult::{ XError, XReason, XResult };
 
 

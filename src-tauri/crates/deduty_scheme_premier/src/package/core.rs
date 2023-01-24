@@ -7,15 +7,12 @@ use async_std::stream::StreamExt;
 use regex::Regex;
 use uuid::Uuid;
 
-use deduty_package::file::traits::{
+use deduty_package_traits::{
     DedutyFileCollection,
-    DedutyFile
-};
-use deduty_package::package::traits::{
+    DedutyLection,
     DedutyPackageMeta,
     DedutyPackage,
 };
-use deduty_package::lection::traits::DedutyLection;
 use xresult::{ XError, XResult };
 
 use crate::schemes;
@@ -162,8 +159,8 @@ impl PremierPackage {
 }
 
 impl DedutyPackage for PremierPackage {
-    fn id(&self) -> &Uuid {
-        &self.id
+    fn id(&self) -> String {
+        self.id.to_string()
     }
 
     fn files(&self) -> &dyn DedutyFileCollection {
@@ -174,8 +171,11 @@ impl DedutyPackage for PremierPackage {
         &self.meta
     }
 
-    fn lections(&self) -> &[Box<dyn DedutyLection>] {
-        self.lections.as_slice()
+    fn lections(&self) -> Vec<&dyn DedutyLection> {
+        self.lections
+            .iter()
+            .map(|lection| lection.as_ref())
+            .collect()
     }
 }
 

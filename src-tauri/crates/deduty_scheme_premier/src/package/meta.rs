@@ -1,4 +1,4 @@
-use deduty_package::package::traits::DedutyPackageMeta;
+use deduty_package_traits::DedutyPackageMeta;
 
 pub struct PremierPackageMeta {
     name: String,
@@ -8,20 +8,20 @@ pub struct PremierPackageMeta {
 }
 
 impl DedutyPackageMeta for PremierPackageMeta {
-    fn name(&self) -> &String {
-        &self.name
+    fn name(&self) -> String {
+        self.name.clone()
     }
 
-    fn version(&self) -> &String {
-        &self.version
+    fn version(&self) -> String {
+        self.version.clone()
     }
 
-    fn language(&self) -> &String {
-        &self.language
+    fn language(&self) -> String {
+        self.language.clone()
     }
 
-    fn tags(&self) -> &Vec<String> {
-        &self.tags
+    fn tags(&self) -> Vec<String> {
+        self.tags.clone()
     }
 }
 

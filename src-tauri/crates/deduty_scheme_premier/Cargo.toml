@@ -1,11 +1,11 @@
 [package]
-name = "premier"
+name = "deduty_scheme_premier"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-deduty_package = { path = "../../deduty_package" }
-xresult = { path = "../../xresult" }
+deduty_package_traits = { path = "../deduty_package_traits" }
+xresult = { path = "../xresult" }
 
 async-std = "1.12.0"
 async-trait = "0.1.58"

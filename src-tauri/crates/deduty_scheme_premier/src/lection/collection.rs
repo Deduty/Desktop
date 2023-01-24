@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 use uuid::Uuid;
 
-use deduty_package::file::traits::{
+use deduty_package_traits::{
     DedutyFile,
     DedutyFileCollection
 };
-use xresult::XResult;
+use xresult::{ XError, XResult };
 
 use crate::file::PremierFile;
 
@@ -33,11 +33,15 @@ impl DedutyFileCollection for PremierLectionFileCollection {
         )
     }
 
-    async fn file(&self, uuid: &Uuid) -> XResult<Option<&dyn DedutyFile>> {
+    async fn file(&self, id: &String) -> XResult<Option<&dyn DedutyFile>> {
+        /* Premier scheme use uuid, so we can perform validation check */
+        Uuid::parse_str(id.as_str())
+            .map_err(|error| XError::from(("Premier scheme error", error.to_string())))?;
+
         Ok(
             self.collection
                 .iter()
-                .find(|file| file.id() == *uuid)
+                .find(|file| file.id() == *id)
                 .map(|object| object as &dyn DedutyFile)
         )
     }

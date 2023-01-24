@@ -1,8 +1,8 @@
 use async_std::path::{Path, PathBuf};
 use uuid::Uuid;
 
-use deduty_package::file::traits::DedutyFileCollection;
-use deduty_package::lection::traits::{
+use deduty_package_traits::{
+    DedutyFileCollection,
     DedutyLection,
     DedutyLectionMeta
 };
@@ -52,8 +52,8 @@ impl PremierLection {
 }
 
 impl DedutyLection for PremierLection {
-    fn id(&self) -> &Uuid {
-        &self.id
+    fn id(&self) -> String {
+        self.id.to_string()
     }
 
     fn meta(&self) -> &dyn DedutyLectionMeta {

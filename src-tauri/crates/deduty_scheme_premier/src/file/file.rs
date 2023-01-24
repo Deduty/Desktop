@@ -3,7 +3,7 @@ use async_std::path::PathBuf;
 use async_trait::async_trait;
 use uuid::Uuid;
 
-use deduty_package::file::traits::{ DedutyFile, DedutyFileReader };
+use deduty_package_traits::{ DedutyFile, DedutyFileReader };
 use xresult::{ XError, XResult };
 
 use super::reader::PremierFileReader;
@@ -77,8 +77,8 @@ impl DedutyFile for PremierFile {
             .unwrap_or("".into())
     }
 
-    fn id(&self) -> Uuid {
-        self.uuid.clone()
+    fn id(&self) -> String {
+        self.uuid.to_string()
     }
 
     async fn load(&self) -> XResult<Box<dyn DedutyFileReader>> {

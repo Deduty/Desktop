@@ -1,7 +1,7 @@
 use async_std::io::ReadExt;
 use async_std::fs::File;
 
-use deduty_package::package::traits::DedutyPackage;
+use deduty_package_traits::DedutyPackage;
 use xresult::{ XError, XResult };
 
 use crate::schemes::package::PremierPackage as PremierPackageScheme;

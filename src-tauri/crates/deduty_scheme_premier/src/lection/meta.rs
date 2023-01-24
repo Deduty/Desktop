@@ -1,4 +1,4 @@
-use deduty_package::lection::traits::DedutyLectionMeta;
+use deduty_package_traits::DedutyLectionMeta;
 
 
 pub struct PremierLectionMeta {
@@ -7,8 +7,8 @@ pub struct PremierLectionMeta {
 }
 
 impl DedutyLectionMeta for PremierLectionMeta {
-    fn name(&self) -> &String {
-        &self.name
+    fn name(&self) -> String {
+        self.name.clone()
     }
 
     fn order(&self) -> u64 {
