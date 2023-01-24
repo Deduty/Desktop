@@ -8,14 +8,19 @@ use async_std::sync::RwLock;
 use async_std::path::Path;
 use uuid::Uuid;
 
-use deduty_package::package::traits::DedutyPackage;
-use deduty_package::package::serde::DedutyPackage as SerDedutyPackage;
-use deduty_package::lection::serde::DedutyLection as SerDedutyLection;
+use deduty_package_traits::DedutyPackage;
+use deduty_package_serde::{
+    SerdeDedutyPackage,
+    SerdeDedutyLection
+};
 
-use deduty_storage::active::{ ActivePackage, ActiveStorage };
+use deduty_package_index::active::{ ActivePackage, ActiveStorage };
 
-use crate::index::package::{ FileAffinity, FilePackageIndex };
-use crate::index::reader::FileReaderIndex;
+use deduty_application_resources::package::{
+    FileAffinity,
+    FilePackageIndex
+};
+use deduty_application_resources::reader::FileReaderIndex;
 
 type StateActiveStorage<'l> = tauri::State<'l, Arc<ActiveStorage>>;
 type StateFilePackageIndex<'l> = tauri::State<'l, Arc<RwLock<FilePackageIndex>>>;
@@ -61,7 +66,7 @@ pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, index: StateFi
     match manifest.to_enum() {
         // PREMIER PACKAGE
         Some(super::manifest::PackageManifestVariants::Premier) => {
-            let package = premier::actions::load(path.into())
+            let package = deduty_scheme_premier::actions::load(path.into())
                 .await
                 .map_err(|error| format!("Internal error: {}", error.to_string()))?;
             let uuid = package.id().clone();
@@ -83,7 +88,7 @@ pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, index: StateFi
                     Err(error) => return Err(format!("Unable to update program index for `{:?}`: {}", path, error.to_string())),
                     Ok(files) => {
                         for file in files {
-                            virtual_index.insert(file.id(), FileAffinity::Lection { package: uuid, lection: lection.id().clone() });
+                            virtual_index.insert(file.id(), FileAffinity::Lection { package: uuid.clone(), lection: lection.id().clone() });
                         }
                     }
                 }
@@ -111,16 +116,13 @@ pub async fn addLocalPackage<'s>(storage: StateActiveStorage<'s>, index: StateFi
 }
 
 #[tauri::command]
-pub async fn getLocalPackage<'s>(storage: StateActiveStorage<'s>, id: &str) -> Result<Option<SerDedutyPackage>, String> {
-    let uuid = uuid::Uuid::parse_str(id)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-    match storage.get(&uuid).await {
+pub async fn getLocalPackage<'s>(storage: StateActiveStorage<'s>, id: &str) -> Result<Option<SerdeDedutyPackage>, String> {
+    match storage.get(&id.to_string()).await {
         Some(package) => {
             match *package.read().await {
                 ActivePackage::Online(ref real) => Ok(
                     Some(
-                        SerDedutyPackage::try_from(real.as_ref())
+                        SerdeDedutyPackage::try_from(real.as_ref())
                             .await
                             .map_err(|error| format!("Internal error: {}", error.to_string()))?
                     )
@@ -146,10 +148,7 @@ pub async fn listLocalPackage<'s>(storage: StateActiveStorage<'s>) -> Result<Vec
 
 #[tauri::command]
 pub async fn listPackageLections<'s>(storage: StateActiveStorage<'s>, package: &str) -> Result<Vec<String>, String> {
-    let package_uuid = uuid::Uuid::from_str(package)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-    match storage.get(&package_uuid).await {
+    match storage.get(&package.to_string()).await {
         Some(active) => {
             match *active.read().await {
                 ActivePackage::Online(ref real) => Ok(
@@ -165,24 +164,17 @@ pub async fn listPackageLections<'s>(storage: StateActiveStorage<'s>, package: &
 }
 
 #[tauri::command]
-pub async fn getPackageLection<'s>(storage: StateActiveStorage<'s>, package: &str, lection: &str) -> Result<SerDedutyLection, String> {
-    let package_uuid = uuid::Uuid::from_str(package)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-    let lection_uuid = uuid::Uuid::from_str(lection)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-        match storage.get(&package_uuid).await {
+pub async fn getPackageLection<'s>(storage: StateActiveStorage<'s>, package: &str, lection: &str) -> Result<SerdeDedutyLection, String> {
+        match storage.get(&package.to_string()).await {
             Some(active) => {
                 match *active.read().await {
-                    ActivePackage::Online(ref real) => {
-                        let lection = real
-                            .lections()
-                            .iter()
-                            .find(|lection| lection.id() == &lection_uuid)
-                            .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection_uuid))?;
+                    ActivePackage::Online(ref real_package) => {
+                        let real_lections = real_package.lections();
+                        let real_lection = real_lections.iter()
+                            .find(|real_lection| real_lection.id().as_str() == lection)
+                            .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection))?;
 
-                        SerDedutyLection::try_from(lection.as_ref())
+                        SerdeDedutyLection::try_from(*real_lection)
                             .await
                             .map_err(|error| format!("Internal error: While serialize lection object: {}", error.to_string()))
                     }
@@ -195,11 +187,9 @@ pub async fn getPackageLection<'s>(storage: StateActiveStorage<'s>, package: &st
 
 #[tauri::command]
 pub async fn openFileChunked<'s>(storage: StateActiveStorage<'s>, package: StateFilePackageIndex<'s>, index: StateFileReaderIndex<'s>, id: &str) -> Result<String, String> {
-    let file_uuid = uuid::Uuid::from_str(id)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-    // Find out which package and / or lection
-    match package.write().await.index().get(&file_uuid) {
+    // Find out which package and / or lection\
+    let file_id = id.to_string();
+    match package.write().await.index().get(&file_id) {
 
         // CREATE TOKEN ON PACKAGE FILE
         Some(FileAffinity::Package { package: package_uuid}) => {
@@ -209,20 +199,20 @@ pub async fn openFileChunked<'s>(storage: StateActiveStorage<'s>, package: State
 
                         // GETTING PACKAGE
                         ActivePackage::Online(ref real) => {
-                            match real.files().file(&file_uuid).await {
+                            match real.files().file(&file_id).await {
                                 Ok(Some(file)) => {
 
                                     // GETTING READER
                                     match file.load().await {
                                         Ok(reader) => {
                                             let token = Uuid::new_v4();
-                                            index.write().await.index().insert(token.clone(), reader);
+                                            index.write().await.index().insert(token.to_string(), reader);
                                             Ok(token.to_string())
                                         }
                                         Err(error) => Err(format!("Internal error: {}", error.to_string()))
                                     }
                                 },
-                                Ok(None) => Err(format!("Internal error: Unable to find file with id `{}`", file_uuid)),
+                                Ok(None) => Err(format!("Internal error: Unable to find file with id `{}`", file_id)),
                                 Err(error) => Err(format!("Internal error: {}", error.to_string()))
                             }
                         }
@@ -241,27 +231,27 @@ pub async fn openFileChunked<'s>(storage: StateActiveStorage<'s>, package: State
 
                         // GETTING PACKAGE
                         ActivePackage::Online(ref real) => {
-                            let lection = real
-                                .lections()
+                            let lections = real.lections();
+                            let lection = lections
                                 .iter()
-                                .find(|lection| lection.id() == lection_uuid)
+                                .find(|lection| lection.id() == *lection_uuid)
                                 .ok_or_else(|| format!("Internal error: Lection with id `{}` is not exist", lection_uuid))?;
 
                             // GETTING READER
-                            match lection.files().file(&file_uuid).await {
+                            match lection.files().file(&file_id).await {
                                 Ok(Some(file)) => {
 
                                     // GETTING READER
                                     match file.load().await {
                                         Ok(reader) => {
                                             let token = Uuid::new_v4();
-                                            index.write().await.index().insert(token.clone(), reader);
+                                            index.write().await.index().insert(token.to_string(), reader);
                                             Ok(token.to_string())
                                         }
                                         Err(error) => Err(format!("Internal error: {}", error.to_string()))
                                     }
                                 },
-                                Ok(None) => Err(format!("Internal error: Unable to find file with id `{}`", file_uuid)),
+                                Ok(None) => Err(format!("Internal error: Unable to find file with id `{}`", file_id)),
                                 Err(error) => Err(format!("Internal error: {}", error.to_string()))
                             }
                         }
@@ -271,31 +261,25 @@ pub async fn openFileChunked<'s>(storage: StateActiveStorage<'s>, package: State
                 None => Err(format!("Internal error: Package with ID `{}` is not exist", package_uuid))
             }
         },
-        None => Err(format!("File with id `{}` is not in program index", file_uuid))
+        None => Err(format!("File with id `{}` is not in program index", file_id))
     }
 }
 
 #[tauri::command]
 pub async fn closeFileChunked<'s>(index: StateFileReaderIndex<'s>, id: &str) -> Result<bool, String> {
-    let file_uuid = uuid::Uuid::from_str(id)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
     Ok(
         index
             .write()
             .await
             .index()
-            .remove(&file_uuid)
+            .remove(&id.to_string())
             .is_some()
     )
 }
 
 #[tauri::command]
 pub async fn getFileChunked<'s>(index: StateFileReaderIndex<'s>, id: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
-    let file_uuid = uuid::Uuid::from_str(id)
-        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
-
-    match index.write().await.index().get_mut(&file_uuid) {
+    match index.write().await.index().get_mut(&id.to_string()) {
         Some(buffer) => {
             match buffer.closed() {
                 true => Err(format!("File `{}` have been closed", id)),
