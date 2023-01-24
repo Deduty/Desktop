@@ -7,16 +7,16 @@ use std::sync::Arc;
 
 use async_std::sync::RwLock;
 
-use deduty_storage::active::ActiveStorage;
+use deduty_package_index::active::ActiveStorage;
+use deduty_application_resources::package::FilePackageIndex;
+use deduty_application_resources::reader::FileReaderIndex;
 
 mod package;
-mod index;
-
 
 fn main() {
     let active_storage = Arc::new(ActiveStorage::new());
-    let package_index = Arc::new(RwLock::new(index::package::FilePackageIndex::new()));
-    let reader_index = Arc::new(RwLock::new(index::reader::FileReaderIndex::new()));
+    let package_index = Arc::new(RwLock::new(FilePackageIndex::new()));
+    let reader_index = Arc::new(RwLock::new(FileReaderIndex::new()));
 
     // TODO: Async load (storage, then package index)
 
