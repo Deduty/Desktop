@@ -1,15 +1,13 @@
 use std::collections::HashMap;
 
-use uuid::Uuid;
-
 pub enum FileAffinity {
-    Package { package: Uuid},
-    Lection { package: Uuid, lection: Uuid }
+    Package { package: String },
+    Lection { package: String, lection: String }
 }
 
 
 pub struct FilePackageIndex {
-    index: HashMap<Uuid, FileAffinity>
+    index: HashMap<String, FileAffinity>
 }
 
 impl FilePackageIndex {
@@ -17,7 +15,7 @@ impl FilePackageIndex {
         Self { index: HashMap::new() }
     }
 
-    pub fn index(&mut self) -> &mut HashMap<Uuid, FileAffinity> {
+    pub fn index(&mut self) -> &mut HashMap<String, FileAffinity> {
         &mut self.index
     }
 }
