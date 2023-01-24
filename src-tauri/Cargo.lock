@@ -613,23 +613,50 @@ dependencies = [
 ]
 
 [[package]]
-name = "deduty_package"
-version = "0.2.0"
+name = "deduty_application_resources"
+version = "0.1.0"
+dependencies = [
+ "deduty_package_traits",
+]
+
+[[package]]
+name = "deduty_package_index"
+version = "0.1.0"
 dependencies = [
  "async-std",
- "async-trait",
+ "deduty_package_traits",
+]
+
+[[package]]
+name = "deduty_package_serde"
+version = "0.1.0"
+dependencies = [
+ "deduty_package_traits",
  "serde",
- "uuid 1.2.2",
  "xresult",
 ]
 
 [[package]]
-name = "deduty_storage"
+name = "deduty_package_traits"
 version = "0.1.0"
 dependencies = [
  "async-std",
- "deduty_package",
+ "async-trait",
+ "xresult",
+]
+
+[[package]]
+name = "deduty_scheme_premier"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "deduty_package_traits",
+ "regex",
+ "serde",
+ "toml",
  "uuid 1.2.2",
+ "xresult",
 ]
 
 [[package]]
@@ -661,9 +688,11 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
- "deduty_package",
- "deduty_storage",
- "premier",
+ "deduty_application_resources",
+ "deduty_package_index",
+ "deduty_package_serde",
+ "deduty_package_traits",
+ "deduty_scheme_premier",
  "serde",
  "serde_json",
  "tauri",
@@ -2015,20 +2044,6 @@ name = "precomputed-hash"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
-
-[[package]]
-name = "premier"
-version = "0.1.0"
-dependencies = [
- "async-std",
- "async-trait",
- "deduty_package",
- "regex",
- "serde",
- "toml",
- "uuid 1.2.2",
- "xresult",
-]
 
 [[package]]
 name = "proc-macro-crate"

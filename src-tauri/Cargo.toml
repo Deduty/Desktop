@@ -16,12 +16,18 @@ tauri-build = { version = "1.1", features = [] }
 
 [dependencies]
 # Main
-deduty_package = { path = "./crates/deduty_package" }
-deduty_storage = { path = "./crates/deduty_storage" }
-# Support
+deduty_application_resources = { path = "./crates/deduty_application_resources" }
+
+## Package traits and other package crates
+deduty_package_traits = { path = "./crates/deduty_package_traits" }
+deduty_package_serde = { path = "./crates/deduty_package_serde" }
+deduty_package_index = { path = "./crates/deduty_package_index" }
+
+## Schemes
+deduty_scheme_premier = { path = "./crates/deduty_scheme_premier" }
+
+## Support
 xresult = { path = "./crates/xresult" }
-# Schemes
-premier = { path = "./crates/schemes/premier" }
 
 # Foreign
 async-std = "1.12.0"
