@@ -6,7 +6,7 @@ export class DedutyPackageStorageApi extends DedutyStorageApi {
   constructor(private pkg: string) {
     super(
       (key: string) =>
-        invoke('lectionStorageDelete', { package: this.pkg, key })
+        invoke('packageStorageDelete', { package: this.pkg, key })
           .then(ValueAsBoolean),
       (key: string) =>
         invoke('packageStorageGet', { package: this.pkg, key })
