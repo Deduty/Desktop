@@ -3,17 +3,21 @@ import { DedutyStorageApi } from './abstract'
 import { ValueAsBoolean, ValueAsStringOrNull } from './utils'
 
 export class DedutyPackageStorageApi extends DedutyStorageApi {
-  constructor(private pkg: string) {
+  #package: string
+
+  constructor(pkg: string) {
     super(
       (key: string) =>
-        invoke('packageStorageDelete', { package: this.pkg, key })
+        invoke('packageStorageDelete', { package: this.#package, key })
           .then(ValueAsBoolean),
       (key: string) =>
-        invoke('packageStorageGet', { package: this.pkg, key })
+        invoke('packageStorageGet', { package: this.#package, key })
           .then(ValueAsStringOrNull),
       (key: string, value: string, replace: boolean) =>
-        invoke('packageStorageSet', { package: this.pkg, key, value, replace })
+        invoke('packageStorageSet', { package: this.#package, key, value, replace })
           .then(ValueAsBoolean),
     )
+
+    this.#package = pkg
   }
 }
