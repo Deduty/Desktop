@@ -34,7 +34,7 @@ invoke('getPackageLection', properties)
 const Deduty: IDedutyApi = {
   storage: {
     lection: new DedutyLectionStorageApi(properties.package, properties.lection),
-    package: new DedutyPackageStorageApi(properties.lection),
+    package: new DedutyPackageStorageApi(properties.package),
   },
 }
 
