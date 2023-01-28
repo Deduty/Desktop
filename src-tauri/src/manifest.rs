@@ -4,6 +4,15 @@ pub enum PackageManifestVariants {
     Premier
 }
 
+impl PackageManifestVariants {
+    pub fn to_string(&self) -> String {
+        match &self {
+            PackageManifestVariants::Premier => "Premier".to_string()
+        }
+    }
+}
+
+
 #[derive(Deserialize)]
 struct Manifest {
     name: String
