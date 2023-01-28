@@ -9,7 +9,7 @@ license = "EULA"
 
 repository = "https://github.com/Deduty/Desktop"
 edition = "2021"
-rust-version = "1.65"
+rust-version = "1.67"
 
 [build-dependencies]
 tauri-build = { version = "1.1", features = [] }
@@ -22,6 +22,7 @@ deduty_application_resources = { path = "./crates/deduty_application_resources" 
 deduty_package_traits = { path = "./crates/deduty_package_traits" }
 deduty_package_serde = { path = "./crates/deduty_package_serde" }
 deduty_package_index = { path = "./crates/deduty_package_index" }
+deduty_package_storage = { path = "./crates/deduty_package_storage" }
 
 ## Schemes
 deduty_scheme_premier = { path = "./crates/deduty_scheme_premier" }

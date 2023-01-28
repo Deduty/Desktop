@@ -624,7 +624,9 @@ name = "deduty_package_index"
 version = "0.1.0"
 dependencies = [
  "async-std",
+ "async-trait",
  "deduty_package_traits",
+ "xresult",
 ]
 
 [[package]]
@@ -633,6 +635,17 @@ version = "0.1.0"
 dependencies = [
  "deduty_package_traits",
  "serde",
+ "xresult",
+]
+
+[[package]]
+name = "deduty_package_storage"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "deduty_package_traits",
+ "serde",
+ "serde_json",
  "xresult",
 ]
 
@@ -691,6 +704,7 @@ dependencies = [
  "deduty_application_resources",
  "deduty_package_index",
  "deduty_package_serde",
+ "deduty_package_storage",
  "deduty_package_traits",
  "deduty_scheme_premier",
  "serde",
@@ -2399,9 +2413,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.87"
+version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6ce777b7b150d76b9cf60d28b55f5847135a003f7d7350c6be7a773508ce7d45"
+checksum = "877c235533714907a8c2464236f5c4b2a17262ef1bd71f38f35ea592c8da6883"
 dependencies = [
  "itoa 1.0.4",
  "ryu",
