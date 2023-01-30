@@ -664,6 +664,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
+ "deduty_package_index",
  "deduty_package_traits",
  "regex",
  "serde",
