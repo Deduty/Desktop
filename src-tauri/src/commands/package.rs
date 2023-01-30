@@ -70,7 +70,7 @@ pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) ->
                     .services_mut()
                     .get_mut(&PackageManifestVariants::Premier.to_string())
                     .ok_or("Internal error: Premier package service is offline".to_string())?
-                    .add(path.to_string(), None)
+                    .add(path.to_string())
                     .await
                     .map_err(|error| format!("Internal error: {}", error.to_string()))?
                     .read()
