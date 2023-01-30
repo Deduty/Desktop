@@ -52,3 +52,9 @@ impl From<(&str, &str)> for XError {
         (name.clone(), message.clone()).into()
     }
 }
+
+impl<T> Into<crate::XResult<T>> for XError {
+    fn into(self) -> crate::XResult<T> {
+        Err(Box::new(self))
+    }
+}
