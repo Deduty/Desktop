@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+deduty_package_index = { path = "../deduty_package_index" }
 deduty_package_traits = { path = "../deduty_package_traits" }
 xresult = { path = "../xresult" }
 
