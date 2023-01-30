@@ -24,11 +24,12 @@ impl Into<Option<String>> for PremierFileAlias {
 }
 
 
+#[derive(Debug, Clone)]
 pub struct PremierFile {
-    alias: Option<String>,
-    root: PathBuf,
-    path: PathBuf,
-    uuid: Uuid
+    pub(crate) alias: Option<String>,
+    pub(crate) root: PathBuf,
+    pub(crate) path: PathBuf,
+    pub(crate) uuid: Uuid
 }
 
 impl PremierFile {

@@ -1,21 +1,22 @@
-use serde::Deserialize;
+use serde::{ Deserialize, Serialize };
 
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct LectionsExactItem {
     pub relative: String
 }
 
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct LectionsMeta {
     pub regex: Option<String>,
     pub exact: Option<Vec<LectionsExactItem>>
 }
 
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PackageMeta {
+    pub id: Option<String>,
     pub name: String,
     pub version: String,
     pub language: String,
@@ -24,7 +25,7 @@ pub struct PackageMeta {
 }
 
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PremierPackage {
     pub package: PackageMeta,
     pub lections: LectionsMeta

@@ -1,10 +1,11 @@
 use deduty_package_traits::DedutyPackageMeta;
 
+#[derive(Debug, Clone)]
 pub struct PremierPackageMeta {
-    name: String,
-    version: String,
-    language: String,
-    tags: Vec<String>
+    pub(crate) name: String,
+    pub(crate) version: String,
+    pub(crate) language: String,
+    pub(crate) tags: Vec<String>
 }
 
 impl DedutyPackageMeta for PremierPackageMeta {

@@ -17,9 +17,9 @@ use super::meta::PremierLectionMeta;
 
 
 pub struct PremierLection {
-    id: Uuid,
-    meta: PremierLectionMeta,
-    files: PremierLectionFileCollection
+    pub(crate) id: Uuid,
+    pub(crate) meta: PremierLectionMeta,
+    pub(crate) files: PremierLectionFileCollection
 }
 
 impl PremierLection {
@@ -43,7 +43,11 @@ impl PremierLection {
 
         Ok(
             Self {
-                id: uuid::Uuid::new_v4(),
+                id: schema.lection.id
+                    .clone()
+                    .unwrap_or_else(|| Uuid::new_v4().to_string())
+                    .parse::<Uuid>()
+                    .map_err(|error| Box::new(XError::from(("PremierPackageError", error.to_string()))))?,
                 meta: schema.lection.into(),
                 files: PremierLectionFileCollection::from(files)
             }
@@ -52,6 +56,14 @@ impl PremierLection {
 }
 
 impl DedutyLection for PremierLection {
+    fn as_any_ref(&self) -> &(dyn std::any::Any + Send + Sync) {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync) {
+        self
+    }
+
     fn id(&self) -> String {
         self.id.to_string()
     }

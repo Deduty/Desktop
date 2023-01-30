@@ -9,8 +9,9 @@ use xresult::{ XError, XResult };
 
 use crate::file::PremierFile;
 
+#[derive(Debug, Clone)]
 pub struct PremierLectionFileCollection {
-    collection: Vec<PremierFile>
+    pub(crate) collection: Vec<PremierFile>
 }
 
 impl PremierLectionFileCollection {

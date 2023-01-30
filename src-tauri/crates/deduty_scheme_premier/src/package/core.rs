@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use async_std::io::ReadExt;
+use async_std::io::{ReadExt, WriteExt};
 use async_std::fs::File;
-use async_std::path::{ Path, PathBuf };
+use async_std::path::PathBuf;
 use async_std::stream::StreamExt;
 use regex::Regex;
 use uuid::Uuid;
@@ -13,34 +13,64 @@ use deduty_package_traits::{
     DedutyPackageMeta,
     DedutyPackage,
 };
-use xresult::{ XError, XResult };
+use xresult::{ XError, XResult, XReason };
 
-use crate::schemes;
 use crate::file::{
     PremierFile,
     PremierFileAlias
 };
-use crate::lection::PremierLection;
 
 use super::collection::PremierPackageFileCollection;
 use super::meta::PremierPackageMeta;
 
+use crate::lection::PremierLection;
+use crate::schemes::package::LectionsExactItem;
+
+
 pub struct PremierPackage {
-    id: Uuid,
-    meta: PremierPackageMeta,
-    files: PremierPackageFileCollection,
-    lections: Vec<Box<dyn DedutyLection>>
+    pub(crate) root: PathBuf,
+    pub(crate) id: Uuid,
+    pub(crate) meta: PremierPackageMeta,
+    pub(crate) files: PremierPackageFileCollection,
+    pub(crate) lections: Vec<Box<dyn DedutyLection>>
 }
 
 impl PremierPackage {
-    pub async fn from(schema: schemes::package::PremierPackage, root: &Path) -> XResult<Self> {
+    pub async fn load(path: PathBuf) -> XResult<Self> {
+        if !path.exists().await {
+            return XError::from(("Premier index service error", format!("Path '{:#?}' is not exist", path))).into();
+        }
+        if !path.is_dir().await {
+            return XError::from(("Premier index service error", format!("Path '{:#?}' is not a directory", path))).into();
+        }
+    
+        let schema = {
+            let package_toml = path.join("package.toml");
+            if !package_toml.exists().await {
+                return Err("'package.toml' is not exist".into());
+            }
+            if !package_toml.is_file().await {
+                return Err("'package.toml' is not a file".into());
+            }
+    
+            let mut buffer = Vec::new();
+            File::open(package_toml.as_path())
+                .await
+                .map_err(|error| error.to_string())?
+                .read_to_end(&mut buffer)
+                .await
+                .map_err(|error| error.to_string())?;
+    
+            toml::from_slice::<crate::schemes::package::PremierPackage>(&buffer)?
+        };
+
         let mut files = HashMap::new();
 
         // About file: test, include
         {
             let about = PremierFile::new(
                 PremierFileAlias::Alias("about".into()),
-                root.to_path_buf(),
+                path.to_path_buf(),
                 PathBuf::from(&schema.package.about.clone().unwrap_or("ABOUT.md".into())),
                 Uuid::new_v4()
             );
@@ -58,10 +88,10 @@ impl PremierPackage {
         // Lection candidates collection
         let mut candidates: Vec<PathBuf> = vec![];
 
-        // EXACT
+        // EXACT - Collect lections
         if let Some(lections) = schema.lections.exact {
             for lection in lections {
-                let mut lection_root = root.join(lection.relative);
+                let mut lection_root = path.join(lection.relative);
                 if !lection_root.exists().await {
                     let location = lection_root.as_os_str().to_string_lossy();
                     return Err(Box::new(XError::from(("PremierPackageError", format!("Lection doesn't exist at {}", location)))));
@@ -93,12 +123,12 @@ impl PremierPackage {
             }
         }
 
-        // REGEX
+        // REGEX - Collect lections
         if let Some(expression) = schema.lections.regex {
             let regex = Regex::new(&expression)
                 .map_err(|error| Box::new(XError::from(("PremierPackageError", error.to_string()))))?;
 
-            let mut folders = vec![root.to_path_buf()];
+            let mut folders = vec![path.to_path_buf()];
             while !folders.is_empty() {
                 // UNWRAP: Directory already non empty
                 let folder = folders.pop().unwrap();
@@ -149,16 +179,167 @@ impl PremierPackage {
 
         Ok(
             PremierPackage {
-                id: Uuid::new_v4(),
+                root: path,
+                id: schema.package.id
+                    .clone()
+                    .unwrap_or_else(|| Uuid::new_v4().to_string())
+                    .parse::<Uuid>()
+                    .map_err(|error| Box::new(XError::from(("PremierPackageError", error.to_string()))))?,
                 meta: schema.package.into(),
                 files: PremierPackageFileCollection::from(files),
                 lections
             }
         )
     }
+
+    pub async fn save(&mut self, path: &PathBuf) -> XReason {
+        // Ensure root folder existence
+        async_std::fs::create_dir_all(path.clone())
+            .await
+            .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
+
+        // Copy all files if save path is different then current
+        if &self.root != path {
+            {
+                // Copy package files
+                // For current implementation, only one file allowed - about
+                let mut about = None;
+
+                if let Some(about_path) =
+                    self.files
+                        .collection
+                        .get(&"about".to_string())
+                        .map(|file| file.path.clone())
+                {
+                    let expected_path = path.join(about_path.file_name().expect("Unable to get file name from file"));
+                    async_std::fs::copy(about_path, expected_path.clone())
+                        .await
+                        .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
+                    about = Some(expected_path.to_string_lossy().to_string());
+                }
+                
+                // Preparing schema
+                let lections: Vec<_> =
+                    self.lections
+                        .iter()
+                        .map(|lection|
+                            LectionsExactItem {
+                                relative: path.join(PathBuf::from(lection.id())).to_string_lossy().to_string()
+                            }
+                        )
+                        .collect();
+
+                let package_schema = crate::schemes::package::PremierPackage {
+                    lections: crate::schemes::package::LectionsMeta {
+                        regex: None,
+                        exact: Some(lections)
+                    },
+                    package: crate::schemes::package::PackageMeta {
+                        id: Some(self.id.to_string()),
+                        name: self.meta.name(),
+                        version: self.meta.version(),
+                        language: self.meta.language(),
+                        tags: Some(self.meta.tags()),
+                        about
+                    }
+                };
+
+                let content = toml::ser::to_vec(&package_schema)
+                    .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
+
+                // Save new package.toml
+                File::create(path.join("package.toml"))
+                    .await
+                    .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?
+                    .write(&content);
+            }
+
+            // Copy lections files
+            for lection in self.lections.iter() {
+                match lection.as_any_ref().downcast_ref::<PremierLection>() {
+                    Some(lection) => {
+                        let lection_path = path.join(PathBuf::from(lection.id()));
+                        async_std::fs::create_dir(lection_path.clone())
+                            .await
+                            .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
+
+                        let mut lection_files = Vec::with_capacity(lection.files.collection.len());
+                        for lection_file in lection.files.collection.iter() {
+                            let expected_path = lection_path.join(lection_file.path.file_name().expect("Unable to get file name from file"));
+                            async_std::fs::copy(lection_file.path.clone(), expected_path.clone())
+                                .await
+                                .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
+
+                            lection_files.push(crate::schemes::lection::PremierLectionPage {
+                                relative: expected_path.to_string_lossy().to_string()
+                            });
+                        }
+
+                        let lection_schema = crate::schemes::lection::PremierLection {
+                            lection: crate::schemes::lection::PremierLectionMeta {
+                                id: Some(lection.id()),
+                                name: lection.meta().name(),
+                                order: lection.meta().order(),
+                                pages: Some(lection_files)
+                            }
+                        };
+
+                        let content = toml::ser::to_vec(&lection_schema)
+                            .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
+
+                        // Save new lection.toml
+                        File::create(lection_path.join("lection.toml"))
+                            .await
+                            .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?
+                            .write(&content);
+                    }
+                    None => return XError::from(("Premier package error", "Lection type is not PremierLection. This never suppose to happen")).into()
+                }
+            }
+        }
+
+        // Test saved package
+        let package = PremierPackage::load(path.clone())
+            .await?;
+
+        // Update paths
+        match (self.files.collection.get_mut(&"about".to_string()), package.files.collection.get(&"about".to_string())) {
+            (Some(lhs), Some(rhs)) => {
+                lhs.path = rhs.path.clone();
+                lhs.root = rhs.root.clone();
+
+                // TODO: Possible dangerous assignment
+                lhs.uuid = rhs.uuid.clone();
+            },
+            (None, None) => { /* Fine - no about file */ },
+            _ => return XError::from(("PremierPackageError", "Failure on file copy")).into()
+        }
+
+        for (lhs, rhs) in self.lections.iter_mut().zip(package.lections.iter()) {
+            match (lhs.as_any_mut().downcast_mut::<PremierLection>(), rhs.as_any_ref().downcast_ref::<PremierLection>()) {
+                (Some(lhs), Some(rhs)) => {
+                    if lhs.files.collection.len() != rhs.files.collection.len() {
+                        return XError::from(("PremierPackageError", "Failure on lection copy. Lections have different file set")).into();
+                    }
+                    lhs.files = rhs.files.clone();
+                },
+                _ => return XError::from(("PremierPackageError", "Failure on lection copy. Lections have different types")).into()
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl DedutyPackage for PremierPackage {
+    fn as_any_ref(&self) -> &(dyn std::any::Any + Send + Sync) {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync) {
+        self
+    }
+
     fn id(&self) -> String {
         self.id.to_string()
     }

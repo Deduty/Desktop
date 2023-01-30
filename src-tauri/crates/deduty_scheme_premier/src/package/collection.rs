@@ -12,7 +12,7 @@ use xresult::{ XError, XResult };
 use crate::file::PremierFile;
 
 pub struct PremierPackageFileCollection {
-    collection: HashMap<String, PremierFile>
+    pub(crate) collection: HashMap<String, PremierFile>
 }
 
 impl PremierPackageFileCollection {
