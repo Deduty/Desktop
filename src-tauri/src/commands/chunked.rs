@@ -24,7 +24,7 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             // SEARCH IN PACKAGE
@@ -36,11 +36,11 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
                         .read()
                         .await
                         .package_ref())
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                        .map_err(|error| format!("Internal error: {error}"))?
                     .files()
                     .file(&file_id)
                     .await
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
             {
                 match file.load().await {
                     Ok(reader) => {
@@ -54,7 +54,7 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
 
                         return Ok(token.to_string())
                     }
-                    Err(error) => return Err(format!("Internal error: {}", error.to_string()))
+                    Err(error) => return Err(format!("Internal error: {error}"))
                 }
             }
 
@@ -67,7 +67,7 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
                         .read()
                         .await
                         .package_ref())
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .lections()
             {
                 let optional_file =
@@ -75,7 +75,7 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
                         .files()
                         .file(&file_id)
                         .await
-                        .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                        .map_err(|error| format!("Internal error: {error}"))?;
 
                 if let Some(file) = optional_file {
                     match file.load().await {
@@ -90,14 +90,14 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
     
                             return Ok(token.to_string())
                         }
-                        Err(error) => return Err(format!("Internal error: {}", error.to_string()))
+                        Err(error) => return Err(format!("Internal error: {error}"))
                     }
                 }
             }
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", id))
+    Err(format!("Internal error: Package with uuid '{id}' not found"))
 }
 
 #[tauri::command]
@@ -119,13 +119,13 @@ pub async fn getFileChunked<'s>(readers: StateReaderIndex<'s>, id: &str, chunk: 
     match readers.write().await.index().get_mut(&id.to_string()) {
         Some(buffer) => {
             match buffer.closed() {
-                true => Err(format!("File `{}` have been closed", id)),
+                true => Err(format!("File `{id}` have been closed")),
                 false => buffer
                     .next(chunk)
                     .await
-                    .map_err(|err| format!("Error while reading file `{}`: {}", id, err.to_string()))
+                    .map_err(|error| format!("Error while reading file `{id}`: {error}"))
             }
         }
-        None => Err(format!("File `{}` is not opened (or have been read)", id))
+        None => Err(format!("File `{id}` is not opened (or have been read)"))
     }
 }
