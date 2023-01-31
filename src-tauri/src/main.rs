@@ -90,7 +90,7 @@ fn main() {
             self::commands::storage::lectionStorageSet,
         ])
         .manage(packages.clone())
-        .manage(readers.clone())
+        .manage(readers)
         .manage(storages.clone())
         .build(tauri::generate_context!())
         .expect("Error while running tauri application")
@@ -99,37 +99,34 @@ fn main() {
             let packages = packages.clone();
             let settings = settings.clone();
 
-            match event {
-                tauri::RunEvent::Exit => {
-                    let storages_save_thread = std::thread::spawn(move || {
-                        async_std::task::block_on(async move {
-                            let results = storages
-                                .read()
-                                .await
-                                .save()
-                                .await;
-    
-                            for error in results.iter().filter_map(|reason| reason.as_ref().err().map(|error| error.to_string())) {
-                                println!("While save error occurred {error}")
-                            }
-                        })
-                    });
+            if let tauri::RunEvent::Exit = event {
+                let storages_save_thread = std::thread::spawn(move || {
+                    async_std::task::block_on(async move {
+                        let results = storages
+                            .read()
+                            .await
+                            .save()
+                            .await;
 
-                    let packages_save_thread = std::thread::spawn(move || {
-                        async_std::task::block_on(async move {
-                            for (key, service) in packages.write().await.services_mut().iter_mut() {
-                                let expected_path = settings.resources().join("services").join(key);
-                                // TODO: Log errors
-                                let _ = service.save_all(&expected_path).await;
-                            }
-                        })
-                    });
-    
-                    // Ignore errors
-                    let _ = storages_save_thread.join();
-                    let _ = packages_save_thread.join();
-                },
-                _ => {}
+                        for error in results.iter().filter_map(|reason| reason.as_ref().err().map(|error| error.to_string())) {
+                            println!("While save error occurred {error}")
+                        }
+                    })
+                });
+
+                let packages_save_thread = std::thread::spawn(move || {
+                    async_std::task::block_on(async move {
+                        for (key, service) in packages.write().await.services_mut().iter_mut() {
+                            let expected_path = settings.resources().join("services").join(key);
+                            // TODO: Log errors
+                            let _ = service.save_all(&expected_path).await;
+                        }
+                    })
+                });
+
+                // Ignore errors
+                let _ = storages_save_thread.join();
+                let _ = packages_save_thread.join();
             }
         });
 
