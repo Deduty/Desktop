@@ -11,10 +11,16 @@ pub struct Settings {
 
 impl Settings {
     pub fn new() -> XResult<Self> {
-        Ok(Self {
-            project: ProjectDirs::from("edu", "Deduty", "Deduty Desktop")
-                .ok_or(XError::from(("Deduty settings error", "Unable to get project directories")))?
-        })
+        let project = ProjectDirs::from("edu", "Deduty", "Deduty Desktop")
+            .ok_or(XError::from(("Deduty settings error", "Unable to get project directories")))?;
+
+        std::fs::create_dir_all(project.data_dir())
+            .map_err(|error| XError::from(("Deduty settings error", error.to_string())))?;
+
+        std::fs::create_dir_all(project.preference_dir())
+            .map_err(|error| XError::from(("Deduty settings error", error.to_string())))?;
+
+        Ok(Self { project })
     }
 
     pub fn resources(&self) -> PathBuf {
