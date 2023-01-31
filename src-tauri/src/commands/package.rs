@@ -29,10 +29,10 @@ pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) ->
     // PATH
 	let target = Path::new(path);
     if !target.exists().await {
-        return Err(format!("Path '{:#?}' is not exist", path));
+        return Err(format!("Path '{path:#?}' is not exist"));
     }
   	if !target.is_dir().await {
-    	return Err(format!("Path '{:#?}' is not a directory", path));
+    	return Err(format!("Path '{path:#?}' is not a directory"));
   	}
 
     // PACKAGE
@@ -58,7 +58,7 @@ pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) ->
     // PACKAGE MANIFEST
     let manifest: PackageManifest = 
         toml::from_slice(&package_toml_content)
-            .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+            .map_err(|error| format!("Internal error: {error}"))?;
 
     match manifest.to_enum() {
         // PREMIER PACKAGE
@@ -73,13 +73,13 @@ pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) ->
                     .ok_or("Internal error: Premier package service is offline".to_string())?
                     .add(path.to_string())
                     .await
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .read()
                     .await
                     .package_ref())
 
                 // XResult for &dyn DedutyPackage
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                .map_err(|error| format!("Internal error: {error}"))?
                 .id()
         ),
         // UNKNOWN PACKAGE
@@ -93,27 +93,26 @@ pub async fn getPackage<'s>(packages: StatePackageIndex<'s>, id: &str) -> Result
     let package_id = id.to_string();
 
     for service in packages.read().await.services_ref().values() {
-        match service.get(&package_id).await.map_err(|error| format!("Internal error: {}", error.to_string()))? {
-            Some(agent) =>
+        if let Some(agent) =
+            service.get(&package_id).await.map_err(|error| format!("Internal error: {error}"))? {
                 return SerdeDedutyPackage::try_from(
                     Into::<XResult<&dyn DedutyPackage>>::into(
                         agent
                             .read()
                             .await
                             .package_ref())
-                        .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                        .map_err(|error| format!("Internal error: {error}"))?)
                     .await
-                    .map_err(|error| format!("Internal error: While serialize package object: {}", error.to_string())),
-            None => {}
+                    .map_err(|error| format!("Internal error: While serialize package object: {error}"));
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", id))
+    Err(format!("Internal error: Package with uuid '{id}' not found"))
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub async fn listPackages<'s>(packages: StatePackageIndex<'s>) -> Result<Vec<String>, String> {
+pub async fn listPackages(packages: StatePackageIndex<'_>) -> Result<Vec<String>, String> {
     let mut hierarchy = vec![];
 
     for service in packages.read().await.services_ref().values() {
@@ -121,7 +120,7 @@ pub async fn listPackages<'s>(packages: StatePackageIndex<'s>) -> Result<Vec<Str
             service
                 .list()
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                .map_err(|error| format!("Internal error: {error}"))?)
     }
 
     Ok(hierarchy.into_iter().flatten().collect())
@@ -133,24 +132,24 @@ pub async fn listPackageLections<'s>(packages: StatePackageIndex<'s>, id: &str) 
     let package_id = id.to_string();
 
     for service in packages.read().await.services_ref().values() {
-        match service.get(&package_id).await.map_err(|error| format!("Internal error: {}", error.to_string()))? {
-            Some(agent) => return Ok(
-                Into::<XResult<&dyn DedutyPackage>>::into(
-                    agent
-                        .read()
-                        .await
-                        .package_ref())
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?
-                .lections()
-                .into_iter()
-                .map(|lection| lection.id())
-                .collect()
-            ),
-            None => {}
+        if let Some(agent) =
+            service.get(&package_id).await.map_err(|error| format!("Internal error: {error}"))? {
+                return Ok(
+                    Into::<XResult<&dyn DedutyPackage>>::into(
+                        agent
+                            .read()
+                            .await
+                            .package_ref())
+                    .map_err(|error| format!("Internal error: {error}"))?
+                    .lections()
+                    .into_iter()
+                    .map(|lection| lection.id())
+                    .collect()
+                );
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", id))
+    Err(format!("Internal error: Package with uuid '{id}' not found"))
 }
 
 #[tauri::command]
@@ -160,24 +159,23 @@ pub async fn getPackageLection<'s>(packages: StatePackageIndex<'s>, package: &st
     let lection_id = lection.to_string();
 
     for service in packages.read().await.services_ref().values() {
-        match service.get(&package_id).await.map_err(|error| format!("Internal error: {}", error.to_string()))? {
-            Some(agent) =>
+        if let Some(agent) =
+            service.get(&package_id).await.map_err(|error| format!("Internal error: {error}"))? {
                 return SerdeDedutyLection::try_from(
                     Into::<XResult<&dyn DedutyPackage>>::into(
                         agent
                             .read()
                             .await
                             .package_ref())
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .lections()
                     .into_iter()
                     .find(|lection| lection.id() == lection_id)
-                    .ok_or_else(|| format!("Internal error: Package with ID `{}` is not found", package))?)
+                    .ok_or_else(|| format!("Internal error: Package with ID `{package}` is not found"))?)
                 .await
-                .map_err(|error| format!("Internal error: While serialize package object: {}", error.to_string())),
-            None => {}
+                .map_err(|error| format!("Internal error: While serialize package object: {error}"));
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
