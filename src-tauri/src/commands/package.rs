@@ -24,6 +24,7 @@ type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
 
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) -> Result<String, String> {
     // PATH
 	let target = Path::new(path);
@@ -87,6 +88,7 @@ pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) ->
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn getPackage<'s>(packages: StatePackageIndex<'s>, id: &str) -> Result<SerdeDedutyPackage, String> {
     let package_id = id.to_string();
 
@@ -110,6 +112,7 @@ pub async fn getPackage<'s>(packages: StatePackageIndex<'s>, id: &str) -> Result
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn listPackages<'s>(packages: StatePackageIndex<'s>) -> Result<Vec<String>, String> {
     let mut hierarchy = vec![];
 
@@ -125,6 +128,7 @@ pub async fn listPackages<'s>(packages: StatePackageIndex<'s>) -> Result<Vec<Str
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn listPackageLections<'s>(packages: StatePackageIndex<'s>, id: &str) -> Result<Vec<String>, String> {
     let package_id = id.to_string();
 
@@ -150,6 +154,7 @@ pub async fn listPackageLections<'s>(packages: StatePackageIndex<'s>, id: &str) 
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn getPackageLection<'s>(packages: StatePackageIndex<'s>, package: &str, lection: &str) -> Result<SerdeDedutyLection, String> {
     let package_id = package.to_string();
     let lection_id = lection.to_string();

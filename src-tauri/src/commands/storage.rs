@@ -13,6 +13,7 @@ type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageI
 
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn packageStorageDelete<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, package: &str, key: &str) -> Result<bool, String> {   
     let package_id = package.to_string();
 
@@ -49,6 +50,7 @@ pub async fn packageStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn packageStorageGet<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, package: &str, key: &str) -> Result<Option<String>, String> {   
     let package_id = package.to_string();
 
@@ -85,6 +87,7 @@ pub async fn packageStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn packageStorageSet<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, package: &str, key: &str, value: &str, replace: bool) -> Result<bool, String> {   
     let package_id = package.to_string();
 
@@ -128,6 +131,7 @@ pub async fn packageStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn lectionStorageDelete<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, package: &str, lection: &str, key: &str) -> Result<bool, String> {   
     let package_id = package.to_string();
     let lection_id = lection.to_string();
@@ -176,6 +180,7 @@ pub async fn lectionStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn lectionStorageGet<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, package: &str, lection: &str, key: &str) -> Result<Option<String>, String> {   
     let package_id = package.to_string();
     let lection_id = lection.to_string();
@@ -224,6 +229,7 @@ pub async fn lectionStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn lectionStorageSet<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, package: &str, lection: &str, key: &str, value: &str, replace: bool) -> Result<bool, String> {   
     let package_id = package.to_string();
     let lection_id = lection.to_string();

@@ -14,6 +14,7 @@ type StateReaderIndex<'l> = tauri::State<'l, Arc<RwLock<FileReaderIndex>>>;
 
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: StateReaderIndex<'s>, package: &str, id: &str) -> Result<String, String> {
     let package_id = package.to_string();
     let file_id = id.to_string();
@@ -100,6 +101,7 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn closeFileChunked<'s>(readers: StateReaderIndex<'s>, id: &str) -> Result<bool, String> {
     Ok(
         readers
@@ -112,6 +114,7 @@ pub async fn closeFileChunked<'s>(readers: StateReaderIndex<'s>, id: &str) -> Re
 }
 
 #[tauri::command]
+#[allow(non_snake_case)]
 pub async fn getFileChunked<'s>(readers: StateReaderIndex<'s>, id: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
     match readers.write().await.index().get_mut(&id.to_string()) {
         Some(buffer) => {
