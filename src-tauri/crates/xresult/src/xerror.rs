@@ -53,8 +53,8 @@ impl From<(&str, &str)> for XError {
     }
 }
 
-impl<T> Into<crate::XResult<T>> for XError {
-    fn into(self) -> crate::XResult<T> {
-        Err(Box::new(self))
+impl<T> From<XError> for crate::XResult<T> {
+    fn from(value: XError) -> Self {
+        Err(Box::new(value))
     }
 }
