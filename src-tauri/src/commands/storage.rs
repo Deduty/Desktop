@@ -22,7 +22,7 @@ pub async fn packageStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             return Ok(
@@ -35,9 +35,9 @@ pub async fn packageStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
                             .read()
                             .await
                             .package_ref())
-                        .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                        .map_err(|error| format!("Internal error: {error}"))?)
                     .await
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .write()
                     .await
                     .package_mut()
@@ -46,7 +46,7 @@ pub async fn packageStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
 
 #[tauri::command]
@@ -59,7 +59,7 @@ pub async fn packageStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             return Ok(
@@ -72,9 +72,9 @@ pub async fn packageStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
                             .read()
                             .await
                             .package_ref())
-                        .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                        .map_err(|error| format!("Internal error: {error}"))?)
                     .await
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .write()
                     .await
                     .package_mut()
@@ -83,7 +83,7 @@ pub async fn packageStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
 
 #[tauri::command]
@@ -96,7 +96,7 @@ pub async fn packageStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             let mut insertion = true;
@@ -110,9 +110,9 @@ pub async fn packageStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
                         .read()
                         .await
                         .package_ref())
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                    .map_err(|error| format!("Internal error: {error}"))?)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                .map_err(|error| format!("Internal error: {error}"))?
                 .write()
                 .await
                 .package_mut()
@@ -127,7 +127,7 @@ pub async fn packageStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
 
 #[tauri::command]
@@ -141,16 +141,16 @@ pub async fn lectionStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             // LECTION EXISTENCE CHECK
             match agent.read().await.package_ref() {
                 PackageStatus::Online(package) =>
-                    if package.lections().iter().find(|lection| lection.id() == lection_id).is_none() {
-                        return Err(format!("Internal error: Lection with uuid '{}' not found", lection))
+                    if !package.lections().iter().any(|lection| lection.id() == lection_id) {
+                        return Err(format!("Internal error: Lection with uuid `{lection}` not found"))
                     },
-                PackageStatus::Offline => return Err(format!("Internal error: Lection with uuid '{}' not available", lection)),
+                PackageStatus::Offline => return Err(format!("Internal error: Lection with uuid `{lection}` not available")),
             }
 
             return Ok(
@@ -163,9 +163,9 @@ pub async fn lectionStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
                             .read()
                             .await
                             .package_ref())
-                        .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                        .map_err(|error| format!("Internal error: {error}"))?)
                     .await
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .write()
                     .await
                     .lections_mut()
@@ -176,7 +176,7 @@ pub async fn lectionStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
 
 #[tauri::command]
@@ -190,16 +190,16 @@ pub async fn lectionStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             // LECTION EXISTENCE CHECK
             match agent.read().await.package_ref() {
                 PackageStatus::Online(package) =>
-                    if package.lections().iter().find(|lection| lection.id() == lection_id).is_none() {
-                        return Err(format!("Internal error: Lection with uuid '{}' not found", lection))
+                    if !package.lections().iter().any(|lection| lection.id() == lection_id) {
+                        return Err(format!("Internal error: Lection with uuid `{lection}` not found"))
                     },
-                PackageStatus::Offline => return Err(format!("Internal error: Lection with uuid '{}' not available", lection)),
+                PackageStatus::Offline => return Err(format!("Internal error: Lection with uuid `{lection}` not available")),
             }
 
             return Ok(
@@ -212,9 +212,9 @@ pub async fn lectionStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
                             .read()
                             .await
                             .package_ref())
-                        .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                        .map_err(|error| format!("Internal error: {error}"))?)
                     .await
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .write()
                     .await
                     .lections_mut()
@@ -225,7 +225,7 @@ pub async fn lectionStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
 
 #[tauri::command]
@@ -239,16 +239,16 @@ pub async fn lectionStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
             service
                 .get(&package_id)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?;
+                .map_err(|error| format!("Internal error: {error}"))?;
 
         if let Some(agent) = optional_agent {
             // LECTION EXISTENCE CHECK
             match agent.read().await.package_ref() {
                 PackageStatus::Online(package) =>
-                    if package.lections().iter().find(|lection| lection.id() == lection_id).is_none() {
-                        return Err(format!("Internal error: Lection with uuid '{}' not found", lection))
+                    if !package.lections().iter().any(|lection| lection.id() == lection_id) {
+                        return Err(format!("Internal error: Lection with uuid `{lection}` not found"))
                     },
-                PackageStatus::Offline => return Err(format!("Internal error: Lection with uuid '{}' not available", lection)),
+                PackageStatus::Offline => return Err(format!("Internal error: Lection with uuid '{lection}' not available")),
             }
 
             let mut insertion = true;
@@ -262,9 +262,9 @@ pub async fn lectionStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
                         .read()
                         .await
                         .package_ref())
-                    .map_err(|error| format!("Internal error: {}", error.to_string()))?)
+                    .map_err(|error| format!("Internal error: {error}"))?)
                 .await
-                .map_err(|error| format!("Internal error: {}", error.to_string()))?
+                .map_err(|error| format!("Internal error: {error}"))?
                 .write()
                 .await
                 .lections_mut()
@@ -281,5 +281,5 @@ pub async fn lectionStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
         }
     }
 
-    Err(format!("Internal error: Package with uuid '{}' not found", package))
+    Err(format!("Internal error: Package with uuid `{package}` not found"))
 }
