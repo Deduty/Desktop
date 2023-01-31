@@ -7,7 +7,7 @@ pub enum PackageManifestVariants {
 impl PackageManifestVariants {
     pub fn to_string(&self) -> String {
         match &self {
-            PackageManifestVariants::Premier => "Premier".to_string()
+            PackageManifestVariants::Premier => "premier".to_string()
         }
     }
 }
