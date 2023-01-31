@@ -140,7 +140,7 @@ impl IndexService for PremierIndexService {
         }
     }
 
-    async fn update(&mut self, serialized: String, id: &String) -> XReason {
+    async fn update(&mut self, _serialized: String, _id: &String) -> XReason {
         // TODO: Implement it later
         XError::from(("Premier index service error", "Update function is not implemented")).into()
     }
