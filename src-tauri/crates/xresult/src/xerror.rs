@@ -49,7 +49,7 @@ impl From<(&str, &String)> for XError {
 
 impl From<(&str, &str)> for XError {
     fn from((name, message): (&str, &str)) -> Self {
-        (name.clone(), message.clone()).into()
+        (name.to_string(), message.to_string()).into()
     }
 }
 
