@@ -26,7 +26,20 @@ pub struct PackageMeta {
 
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct Manifest {
+    name: String
+}
+
+impl Default for Manifest {
+    fn default() -> Self {
+        Self { name: "premier".to_string() }
+    }
+}
+
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PremierPackage {
+    pub manifest: Manifest,
     pub package: PackageMeta,
     pub lections: LectionsMeta
 }
