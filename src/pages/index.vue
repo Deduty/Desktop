@@ -7,7 +7,7 @@
     <div
       flex flex-col
       p-2
-      style="width: 40%"
+      style="width: min(65ch, 100%)"
     >
       <PackageBar />
     </div>
