@@ -31,16 +31,6 @@ onMounted(() => hookRouterPath({ path: window.location.pathname }))
     >
       <button
         class="button"
-      >
-        <div i-carbon-account />
-      </button>
-      <button
-        class="button"
-      >
-        <div i-carbon-settings />
-      </button>
-      <button
-        class="button"
         mt-a
         :disabled="!haveHistory"
         @click="Router.back()"
