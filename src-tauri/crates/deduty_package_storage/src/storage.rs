@@ -52,7 +52,10 @@ impl DedutyPackageStorage {
                     .map_err(|error| XError::from(("Deduty package storage error", error.to_string())))?;
 
                 let mut buffer = vec![];
-                file.read_to_end(&mut buffer);
+                file
+                    .read_to_end(&mut buffer)
+                    .await
+                    .map_err(|error| XError::from(("Deduty package storage error", error.to_string())))?;
 
                 let schema: SerdeDedutyPackageStorage = serde_json::from_slice(&buffer)
                     .map_err(|error| XError::from(("Deduty package storage error", error.to_string())))?;
