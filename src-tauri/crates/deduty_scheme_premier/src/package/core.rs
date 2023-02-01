@@ -205,31 +205,32 @@ impl PremierPackage {
                 // For current implementation, only one file allowed - about
                 let mut about = None;
 
-                if let Some(about_path) =
+                if let Some(about_file) =
                     self.files
                         .collection
                         .get(&"about".to_string())
-                        .map(|file| file.path.clone())
                 {
-                    let expected_path = path.join(about_path.file_name().expect("Unable to get file name from file"));
-                    async_std::fs::copy(about_path, expected_path.clone())
+                    let about_filename = about_file.path.file_name().expect("Unable to get file name from file");
+                    let expected_path = path.join(about_file.path.clone());
+                    async_std::fs::copy(about_file.location().await?, expected_path.clone())
                         .await
                         .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
-                    about = Some(expected_path.to_string_lossy().to_string());
+                    about = Some(about_filename.to_string_lossy().to_string());
                 }
-                
+
                 // Preparing schema
                 let lections: Vec<_> =
                     self.lections
                         .iter()
                         .map(|lection|
                             LectionsExactItem {
-                                relative: path.join(PathBuf::from(lection.id())).to_string_lossy().to_string()
+                                relative: lection.id()
                             }
                         )
                         .collect();
 
                 let package_schema = crate::schemes::package::PremierPackage {
+                    manifest: crate::schemes::package::Manifest::default(),
                     lections: crate::schemes::package::LectionsMeta {
                         regex: None,
                         exact: Some(lections)
@@ -251,7 +252,9 @@ impl PremierPackage {
                 File::create(path.join("package.toml"))
                     .await
                     .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?
-                    .write(&content);
+                    .write(&content)
+                    .await
+                    .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
             }
 
             // Copy lections files
@@ -265,13 +268,14 @@ impl PremierPackage {
 
                         let mut lection_files = Vec::with_capacity(lection.files.collection.len());
                         for lection_file in lection.files.collection.iter() {
-                            let expected_path = lection_path.join(lection_file.path.file_name().expect("Unable to get file name from file"));
-                            async_std::fs::copy(lection_file.path.clone(), expected_path.clone())
+                            let lection_filename = lection_file.path.file_name().expect("Unable to get file name from file");
+                            let expected_path = lection_path.join(lection_filename);
+                            async_std::fs::copy(lection_file.location().await?, expected_path.clone())
                                 .await
                                 .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
 
                             lection_files.push(crate::schemes::lection::PremierLectionPage {
-                                relative: expected_path.to_string_lossy().to_string()
+                                relative: lection_filename.to_string_lossy().to_string()
                             });
                         }
 
@@ -291,7 +295,9 @@ impl PremierPackage {
                         File::create(lection_path.join("lection.toml"))
                             .await
                             .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?
-                            .write(&content);
+                            .write(&content)
+                            .await
+                            .map_err(|error| XError::from(("PremierPackageError", error.to_string())))?;
                     }
                     None => return XError::from(("Premier package error", "Lection type is not PremierLection. This never suppose to happen")).into()
                 }
