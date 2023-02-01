@@ -8,7 +8,6 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
 
   async function include(pkg: DedutyPackage): Promise<void> {
     packages.push(pkg)
-    // TODO: INCLUDE IN TAURI DATABASE
   }
 
   async function exclude(pkg: DedutyPackage): Promise<void> {
@@ -16,14 +15,13 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
 
     packages.length = 0
     packages.push(...previousPackages.filter(storedPackage => storedPackage.id !== pkg.id))
-    // TODO: EXCLUDE IN TAURI DATABASE
   }
 
   async function refresh(totally = false) {
     if (totally)
       packages.length = 0
 
-    const updated: Set<string> = new Set(await invoke('listLocalPackage'))
+    const updated: Set<string> = new Set(await invoke('listPackages'))
     const stored: Set<string> = new Set(packages.map(pkg => pkg.id))
 
     for (const uuid of stored)
@@ -31,7 +29,7 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
 
     for (const uuid of updated) {
       try {
-        const serialized: IDedutyPackage = await invoke('getLocalPackage', { id: uuid })
+        const serialized: IDedutyPackage = await invoke('getPackage', { id: uuid })
         if (!serialized)
           continue
 

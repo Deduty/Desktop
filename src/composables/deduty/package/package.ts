@@ -22,7 +22,7 @@ export class DedutyPackage implements IDedutyPackage {
   ) {}
 
   static fromOptions({ id, meta, files }: IDedutyPackage): DedutyPackage {
-    return new DedutyPackage(id, DedutyPackageMeta.fromOptions(meta), DedutyFileCollection.fromOptions(files))
+    return new DedutyPackage(id, DedutyPackageMeta.fromOptions(meta), DedutyFileCollection.fromOptions(id, files))
   }
 }
 

@@ -7,16 +7,17 @@ export class DedutyFile implements IDedutyFile {
   constructor(
     public alias: string | undefined,
     public extension: string,
+    public pkg: string,
     public id: string,
   ) {}
 
   async createReader(): Promise<DedutyFileReader> {
-    const token: string = await invoke('openFileChunked', { id: this.id })
+    const token: string = await invoke('openFileChunked', { package: this.pkg, id: this.id })
     return new DedutyFileReader(token)
   }
 
-  static fromOptions({ alias, extension, id }: IDedutyFile): DedutyFile {
-    return new DedutyFile(alias, extension, id)
+  static fromOptions(pkg: string, { alias, extension, id }: IDedutyFile): DedutyFile {
+    return new DedutyFile(alias, extension, pkg, id)
   }
 }
 
@@ -25,7 +26,7 @@ export class DedutyFileCollection implements IDedutyFileCollection {
     public files: DedutyFile[],
   ) {}
 
-  static fromOptions({ files }: IDedutyFileCollection): DedutyFileCollection {
-    return new DedutyFileCollection(files.map(DedutyFile.fromOptions))
+  static fromOptions(pkg: string, { files }: IDedutyFileCollection): DedutyFileCollection {
+    return new DedutyFileCollection(files.map(file => DedutyFile.fromOptions(pkg, file)))
   }
 }

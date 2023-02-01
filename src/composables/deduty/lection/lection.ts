@@ -19,7 +19,7 @@ export class DedutyLection implements IDedutyLection {
     public files: DedutyFileCollection,
   ) {}
 
-  static fromOptions({ id, meta, files }: IDedutyLection): DedutyLection {
-    return new DedutyLection(id, DedutyLectionMeta.fromOptions(meta), DedutyFileCollection.fromOptions(files))
+  static fromOptions(pkg: string, { id, meta, files }: IDedutyLection): DedutyLection {
+    return new DedutyLection(id, DedutyLectionMeta.fromOptions(meta), DedutyFileCollection.fromOptions(pkg, files))
   }
 }

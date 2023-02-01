@@ -32,7 +32,7 @@ const selectPath = () => {
         throw new Error(`Internal error: Invalid package id '${id}'`)
       return id as string
     })
-    .then((id: string) => invoke('getLocalPackage', { id }))
+    .then((id: string) => invoke('getPackage', { id }))
     .then((pkg: unknown) => {
       if (typeof pkg !== 'object' || !pkg)
         throw new Error('Internal error: Serialized package must be an object')

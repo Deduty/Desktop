@@ -20,7 +20,7 @@ const readerArray: Ref<ReaderFile[]> = ref([])
 invoke('getPackageLection', properties)
   .then((serialized: unknown) => {
     // TODO: UNSAFE CAST
-    return DedutyLection.fromOptions(serialized as IDedutyLection)
+    return DedutyLection.fromOptions(properties.package, serialized as IDedutyLection)
   })
   .then(async (lection: DedutyLection) => {
     for (const file of lection.files.files) {

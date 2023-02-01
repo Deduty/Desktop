@@ -31,7 +31,7 @@ const filterShowedLections = (searchString: string) => {
   })
 }
 
-invoke('listPackageLections', { package: pkg })
+invoke('listPackageLections', { id: pkg })
   .then((lections: unknown) => {
     if (!Array.isArray(lections))
       throw new Error(`Internal error: \`listPackageLections\` returns non string array but \`${lections}\``)
@@ -41,7 +41,7 @@ invoke('listPackageLections', { package: pkg })
   .then(async (ids: string[]) => {
     for (const id of ids) {
       const lection: IDedutyLection = await invoke('getPackageLection', { package: pkg, lection: id })
-      lections.value.push({ lection: DedutyLection.fromOptions(lection), showed: searchString === '' })
+      lections.value.push({ lection: DedutyLection.fromOptions(pkg, lection), showed: searchString === '' })
     }
   })
 
