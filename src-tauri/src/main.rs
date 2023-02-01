@@ -41,12 +41,18 @@ fn main() {
                 let mut failures = Vec::new();
                 for (key, service) in packages.write().await.services_mut().iter_mut() {
                     let expected_path = settings.resources().join("services").join(key);
+                    if let Err(error) = async_std::fs::create_dir_all(expected_path.clone()).await {
+                        println!("{error}");
+                        panic!("{error}");
+                    }
+
                     match service.load_all(&expected_path).await {
                         Ok(_) => { /* TODO: Log all wrong entries */ },
-                        Err(_) => {
+                        Err(error) => {
                             // TODO: Log error
                             // Note: This service must be unplugged since this thread is not main
                             //       so we can't interrupt initialization without join this thread
+                            println!("{error}");
                             failures.push(key.clone());
                         }
                     }
@@ -106,7 +112,8 @@ fn main() {
                             .read()
                             .await
                             .save()
-                            .await;
+                            .await
+                            .unwrap();
 
                         for error in results.iter().filter_map(|reason| reason.as_ref().err().map(|error| error.to_string())) {
                             println!("While save error occurred {error}")
@@ -119,17 +126,21 @@ fn main() {
                         for (key, service) in packages.write().await.services_mut().iter_mut() {
                             let expected_path = settings.resources().join("services").join(key);
                             // TODO: Log errors
-                            let _ = service.save_all(&expected_path).await;
+                            let result0 = service.save_all(&expected_path).await;
+                            println!("{result0:#?}");
                         }
                     })
                 });
 
                 // Ignore errors
-                let _ = storages_save_thread.join();
-                let _ = packages_save_thread.join();
+                let result1 = storages_save_thread.join();
+                let result2 = packages_save_thread.join();
+                println!("{result1:#?}");
+                println!("{result2:#?}");
             }
         });
 
     // TODO: This thread never join
-    let _ = service_tear_up.join();
+    let result3 = service_tear_up.join();
+    println!("{result3:#?}");
 }
