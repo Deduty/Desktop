@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DedutyPackage } from '~/composables/deduty'
 
-const { pkg } = defineProps<{ pkg: DedutyPackage }>()
+const { pack } = defineProps<{ pack: DedutyPackage }>()
 </script>
 
 <template>
@@ -20,7 +20,7 @@ const { pkg } = defineProps<{ pkg: DedutyPackage }>()
         class="black-text"
         text-lg
       >
-        {{ pkg.meta.name }}
+        {{ pack.meta.name }}
       </div>
       <div
         m-a
@@ -42,7 +42,7 @@ const { pkg } = defineProps<{ pkg: DedutyPackage }>()
         class="gray-text"
         text="sm gray-400 dark:gray-500"
       >
-        Version: {{ pkg.meta.version }}
+        Version: {{ pack.meta.version }}
       </div>
       <div m-a />
       <div
