@@ -21,6 +21,10 @@ impl DedutyPackageStorageIndex {
     }
 
     pub async fn storage(&mut self, package: &dyn DedutyPackage) -> XResult<Arc<RwLock<DedutyPackageStorage>>> {
+        async_std::fs::create_dir_all(self.root.clone())
+            .await
+            .map_err(|error| XError::from(("Deduty package storage error", error.to_string())))?;
+
         match self.storages.get(&package.id()) {
             Some(storage) => Ok(storage.clone()),
             None => {
@@ -32,7 +36,11 @@ impl DedutyPackageStorageIndex {
         }
     }
 
-    pub async fn save(&self) -> Vec<XReason> {
+    pub async fn save(&self) -> XResult<Vec<XReason>> {
+        async_std::fs::create_dir_all(self.root.clone())
+            .await
+            .map_err(|error| XError::from(("Deduty package storage error", error.to_string())))?;
+
         let mut reasons = vec![];
         for storage in self.storages.values() {
             reasons.push(
@@ -43,6 +51,6 @@ impl DedutyPackageStorageIndex {
                     .await
             );
         }
-        reasons
+        Ok(reasons)
     }
 }
