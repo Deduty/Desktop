@@ -1,31 +1,26 @@
-import { acceptHMRUpdate, defineStore } from 'pinia'
 import { invoke } from '@tauri-apps/api'
+import { acceptHMRUpdate, defineStore } from 'pinia'
+import type { Ref } from 'vue'
+
 import type { IDedutyPackage } from '~/composables/deduty'
 import { DedutyPackage } from '~/composables/deduty'
 
 export const usePackageStore = defineStore('DedutyPackage', () => {
-  const packages = reactive<DedutyPackage[]>([])
+  const packages: Ref<DedutyPackage[]> = ref([])
 
   async function include(pkg: DedutyPackage): Promise<void> {
-    packages.push(pkg)
+    packages.value.push(pkg)
   }
 
   async function exclude(pkg: DedutyPackage): Promise<void> {
-    const previousPackages = [...packages]
-
-    packages.length = 0
-    packages.push(...previousPackages.filter(storedPackage => storedPackage.id !== pkg.id))
+    packages.value = [...packages.value.filter(storedPackage => storedPackage.id !== pkg.id)]
   }
 
   async function refresh(totally = false) {
     if (totally)
-      packages.length = 0
+      packages.value = []
 
     const updated: Set<string> = new Set(await invoke('listPackages'))
-    const stored: Set<string> = new Set(packages.map(pkg => pkg.id))
-
-    for (const uuid of stored)
-      updated.delete(uuid)
 
     for (const uuid of updated) {
       try {
@@ -33,7 +28,7 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
         if (!serialized)
           continue
 
-        packages.push(DedutyPackage.fromOptions(serialized))
+        packages.value.push(DedutyPackage.fromOptions(serialized))
       }
       catch (error) {
         console.error(`Internal error: Unable to fetch Package '${uuid}' due to: ${error}`)
