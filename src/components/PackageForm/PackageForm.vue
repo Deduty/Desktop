@@ -27,6 +27,10 @@ const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
 </template>
 
 <style scoped lang="sass">
+div.box
+  width: 65ch
+  height: 90%
+
 html div.box
   background-color: white
 

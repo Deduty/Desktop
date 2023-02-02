@@ -2,11 +2,13 @@
   <div
     h-full w-full
     border="~ rounded gray-200 dark:gray-700"
-    bg-op-0
     m-0 p-4
+    flex flex-col
     class="box"
+    gap-4
+    w-prose h-min
   >
-    FILL ME (CREATE)
+    <LocalPackageAdd />
   </div>
 </template>
 

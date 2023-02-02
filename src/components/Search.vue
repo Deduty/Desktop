@@ -47,7 +47,7 @@ onMounted(() => {
 
 <template>
   <div
-    flex flex-row
+    flex flex-row flex-grow
     border="~ rounded gray-200 dark:gray-700"
     class="box"
   >

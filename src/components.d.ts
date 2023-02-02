@@ -18,6 +18,8 @@ declare module '@vue/runtime-core' {
     LectionSearch: typeof import('./components/LectionBar/LectionSearch.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']
     LocalPackage: typeof import('./components/AddPackage/LocalPackage.vue')['default']
+    LocalPackageAdd: typeof import('./components/PackageAdd/LocalPackageAdd.vue')['default']
+    PackageAdd: typeof import('./components/PackageAdd/PackageAdd.vue')['default']
     PackageForm: typeof import('./components/PackageForm/PackageForm.vue')['default']
     PackageFormAbout: typeof import('./components/PackageForm/PackageFormAbout.vue')['default']
     PackageFormMenu: typeof import('./components/PackageForm/PackageFormMenu.vue')['default']

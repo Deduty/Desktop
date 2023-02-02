@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { dialog, invoke } from '@tauri-apps/api'
+
 import type { IDedutyPackage } from '~/composables/deduty'
 import { DedutyPackage } from '~/composables/deduty'
 
@@ -53,20 +54,20 @@ const selectPath = () => {
 <template>
   <div
     class="box"
-    w-prose
+    flex flex-grow
     m-0 p-4
     border="~ rounded gray-200 dark:gray-700"
     bg-op-0
   >
     <div
-      flex flex-col
+      flex flex-col flex-grow
       gap-2
     >
       <div text-xl mb-2>
         Add local package
       </div>
       <div
-        flex flex-col
+        flex flex-col flex-grow
         border="~ rounded gray-200 dark:gray-700"
         gap-1
         p-2
@@ -77,7 +78,7 @@ const selectPath = () => {
           Select folder
         </span>
         <div
-          flex flex-row
+          flex flex-row flex-grow
           class="box select"
           border="~ rounded gray-200 dark:gray-700"
         >

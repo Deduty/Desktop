@@ -5,6 +5,7 @@ import type { DedutyPackage } from '~/composables/deduty'
 import { PackageSearchCriteria } from '~/composables/search'
 
 import PackageForm from '~/components/PackageForm/PackageForm.vue'
+import PackageAdd from '~/components/PackageAdd/PackageAdd.vue'
 
 /* ================ SEARCH TO LIST ================ */
 
@@ -31,7 +32,7 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
   <!-- OVERLAY COMPONENT -->
   <div
     v-show="componentInstance"
-    flex flex-row
+    flex flex-row flex-grow
     h-full w-full
     left-0 right-0 top-0 bottom-0
     fixed
@@ -42,15 +43,11 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
       justify-center items-center
       @click.self="componentInstance = null"
     >
-      <div
-        class="overlay box"
-      >
-        <component
-          :is="componentInstance.comp"
-          v-bind="componentInstance.prop"
-          v-if="componentInstance"
-        />
-      </div>
+      <component
+        :is="componentInstance.comp"
+        v-if="componentInstance"
+        v-bind="componentInstance.prop"
+      />
     </div>
   </div>
   <!-- ------- --------- -->
@@ -72,8 +69,23 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
         p-4
         gap-4
       >
-        <div m-0>
+        <div
+          flex flex-row
+          m-0
+          gap-2
+        >
           <Search @search-string-updated="searchStringUpdated" />
+          <button
+            icon-btn
+            border="~ rounded gray-200 dark:gray-700"
+            @click="componentInstance = new ComponentInstance(PackageAdd, {})"
+          >
+            <div
+              m-2
+              p-4
+              i-carbon-add
+            />
+          </button>
         </div>
         <div
           flex-grow
@@ -94,8 +106,4 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
 div.overlay
   backdrop-filter: blur(5px)
   z-index: 100
-
-div.overlay.box
-  width: 55rem
-  height: 90%
 </style>
