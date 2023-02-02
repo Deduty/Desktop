@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import type { DedutyPackage } from '~/composables/deduty'
 
-const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
+const { pack } = defineProps<{ pack: DedutyPackage }>()
+const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
+
+const isSettingsToggled = ref(false)
+const toggleSettingsClicked = () => {
+  isSettingsToggled.value = !isSettingsToggled.value
+}
+
+const packageFormClosed = () => {
+  emit('packageFormClosed')
+}
 </script>
 
 <template>
@@ -15,13 +25,24 @@ const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
     gap-4
   >
     <div>
-      <PackageFormMenu :pkg="pkg" />
+      <PackageFormMenu
+        :pack="pack"
+        @toggle-settings-clicked="toggleSettingsClicked"
+      />
     </div>
     <div
       flex-grow
       overflow-auto
     >
-      <PackageFormAbout :pkg="pkg" />
+      <PackageFormAbout
+        v-show="!isSettingsToggled"
+        :pack="pack"
+      />
+      <PackageFormSettings
+        v-show="isSettingsToggled"
+        :pack="pack"
+        @package-form-closed="packageFormClosed"
+      />
     </div>
   </div>
 </template>

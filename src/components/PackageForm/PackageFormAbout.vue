@@ -4,7 +4,7 @@ import type { DedutyPackage } from '~/composables/deduty'
 import Loading from '~/components/Loading.vue'
 import Reader from '~/components/Reader/Reader.vue'
 
-const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
+const { pack } = defineProps<{ pack: DedutyPackage | null }>()
 
 const ComponentInstance = shallowRef(Loading)
 const ComponentProperties = ref({})
@@ -20,12 +20,12 @@ watchEffect(async () => {
   ComponentProperties.value = {}
   ComponentInstance.value = Loading
 
-  if (pkg === null) {
+  if (pack === null) {
     errorMessage.value = 'All values (include error message) are just flushed. If you see this text - frontend is little bit broken'
     return
   }
 
-  const candidates = pkg.files.files.filter(file => file.alias === 'about')
+  const candidates = pack.files.files.filter(file => file.alias === 'about')
   if (candidates.length === 0) {
     errorMessage.value = 'NO ABOUT FILE'
     return

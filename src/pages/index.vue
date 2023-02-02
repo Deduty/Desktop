@@ -8,7 +8,6 @@ import PackageForm from '~/components/PackageForm/PackageForm.vue'
 import PackageAdd from '~/components/PackageAdd/PackageAdd.vue'
 
 /* ================ SEARCH TO LIST ================ */
-
 const searchCriteria = ref(new PackageSearchCriteria(''))
 
 const searchStringUpdated = (newSearchString: string) => {
@@ -16,15 +15,22 @@ const searchStringUpdated = (newSearchString: string) => {
 }
 
 /* ============= LIST TO PACKAGE FORM ============= */
-
 class ComponentInstance {
-  constructor(public comp: any, public prop: object) {}
+  constructor(
+    public comp: any,
+    public prop: object = {},
+    public even: object = {},
+  ) {}
 }
 
 const componentInstance: Ref<ComponentInstance | null> = shallowRef(null)
 
+const packageFormClosed = () => {
+  componentInstance.value = null
+}
+
 const dedutyDisplayChosen = (pack: DedutyPackage) => {
-  componentInstance.value = new ComponentInstance(PackageForm, { pkg: pack })
+  componentInstance.value = new ComponentInstance(PackageForm, { pack }, { packageFormClosed })
 }
 </script>
 
@@ -47,6 +53,7 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
         :is="componentInstance.comp"
         v-if="componentInstance"
         v-bind="componentInstance.prop"
+        v-on="componentInstance?.even"
       />
     </div>
   </div>
@@ -78,7 +85,7 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
           <button
             icon-btn
             border="~ rounded gray-200 dark:gray-700"
-            @click="componentInstance = new ComponentInstance(PackageAdd, {})"
+            @click="componentInstance = new ComponentInstance(PackageAdd)"
           >
             <div
               m-2

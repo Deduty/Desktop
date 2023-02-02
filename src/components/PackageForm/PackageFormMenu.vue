@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import type { DedutyPackage } from '~/composables/deduty'
 
-const { pkg } = defineProps<{ pkg: DedutyPackage | null }>()
+const { pack } = defineProps<{ pack: DedutyPackage | null }>()
+const emit = defineEmits<{ (event: 'toggleSettingsClicked'): void }>()
+
+const isSettingsToggled = ref(false)
+
 const router = useRouter()
 </script>
 
@@ -20,7 +24,7 @@ const router = useRouter()
 
         text-2xl
       >
-        {{ pkg?.meta.name }}
+        {{ pack?.meta.name }}
       </div>
       <!-- VERSION \ SOURCE -->
       <div
@@ -31,7 +35,7 @@ const router = useRouter()
         text="gray-400 dark:gray-500"
       >
         <div mr-a>
-          Version: {{ pkg?.meta.version }}
+          Version: {{ pack?.meta.version }}
         </div>
         <div>Local</div>
       </div>
@@ -52,17 +56,28 @@ const router = useRouter()
         text-3xl
         border-rounded
         class="package form button"
-        @click="router.push(`/package/${pkg?.id}`)"
+        @click="router.push(`/package/${pack?.id}`)"
       >
         <div i-carbon-book />
       </div>
       <div m-a />
       <div
+        v-show="!isSettingsToggled"
         text-3xl
         border-rounded
         class="package form button"
+        @click="emit('toggleSettingsClicked'); isSettingsToggled = true"
       >
         <div i-carbon-settings />
+      </div>
+      <div
+        v-show="isSettingsToggled"
+        text-3xl
+        border-rounded
+        class="package form button"
+        @click="emit('toggleSettingsClicked'); isSettingsToggled = false"
+      >
+        <div i-carbon-account />
       </div>
     </div>
     <!-- MINI SIDE MENU END -->
