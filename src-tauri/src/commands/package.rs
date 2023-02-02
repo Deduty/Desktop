@@ -12,6 +12,7 @@ use deduty_package_serde::{
 };
 
 use deduty_package_index::DedutyPackageIndex;
+use deduty_package_storage::DedutyPackageStorageIndex;
 
 use xresult::XResult;
 
@@ -21,6 +22,7 @@ use crate::manifest::{
 };
 
 type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
+type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageIndex>>>;
 
 
 #[tauri::command]
@@ -104,6 +106,37 @@ pub async fn getPackage<'s>(packages: StatePackageIndex<'s>, id: &str) -> Result
                         .map_err(|error| format!("Internal error: {error}"))?)
                     .await
                     .map_err(|error| format!("Internal error: While serialize package object: {error}"));
+        }
+    }
+
+    Err(format!("Internal error: Package with uuid '{id}' not found"))
+}
+
+#[tauri::command]
+#[allow(non_snake_case)]
+pub async fn subPackage<'s>(packages: StatePackageIndex<'s>, storages: StatePackageStorage<'s>, id: &str) -> Result<(), String> {
+    let package_id = id.to_string();
+
+    for service in packages.write().await.services_mut().values_mut() {
+        if service
+            .get(&package_id)
+            .await
+            .map_err(|error| format!("Internal error: {error}"))?
+            .is_some()
+        {
+            storages
+                .write()
+                .await
+                .remove(&package_id)
+                .await
+                .map_err(|error| format!("Internal error: {error}"))?;
+
+            service
+                .sub(&package_id)
+                .await
+                .map_err(|error| format!("Internal error: {error}"))?;
+
+            return Ok(());
         }
     }
 

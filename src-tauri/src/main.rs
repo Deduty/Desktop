@@ -84,6 +84,7 @@ fn main() {
             self::commands::package::getPackageLection,
             self::commands::package::listPackages,
             self::commands::package::listPackageLections,
+            self::commands::package::subPackage,
 
             // STORAGE - PACKAGE
             self::commands::storage::packageStorageDelete,

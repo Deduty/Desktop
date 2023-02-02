@@ -134,6 +134,17 @@ impl IndexService for PremierIndexService {
                     self.packages.insert(id.clone(), package);
                     return XError::from(("Premier index service error", format!("Unable offline package with id {}. Abort", id))).into();
                 }
+                
+                // Remove package if it's path under application control
+                let package_root = XResult::from(package.read().await.package_ref())?
+                    .as_any_ref()
+                    .downcast_ref::<PremierPackage>()
+                    .ok_or_else(|| Box::new(XError::from(("Premier index service error", format!("Deduty package {id} has wrong type. Unable to clean directory")))))?
+                    .root
+                    .clone();
+
+                println!("ROOT IS {:#?}", package_root);
+
                 Ok(())
             }
             None => XError::from(("Premier index service error", format!("Package with id {} not found", id))).into()
