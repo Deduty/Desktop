@@ -23,6 +23,7 @@ declare module '@vue/runtime-core' {
     PackageForm: typeof import('./components/PackageForm/PackageForm.vue')['default']
     PackageFormAbout: typeof import('./components/PackageForm/PackageFormAbout.vue')['default']
     PackageFormMenu: typeof import('./components/PackageForm/PackageFormMenu.vue')['default']
+    PackageFormSettings: typeof import('./components/PackageForm/PackageFormSettings.vue')['default']
     PackageItem: typeof import('./components/PackageList/PackageItem.vue')['default']
     PackageList: typeof import('./components/PackageList/PackageList.vue')['default']
     Reader: typeof import('./components/Reader/Reader.vue')['default']
