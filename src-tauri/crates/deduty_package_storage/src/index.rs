@@ -20,6 +20,23 @@ impl DedutyPackageStorageIndex {
         Self { root, storages: HashMap::new() }
     }
 
+    pub async fn remove(&mut self, id: &String) -> XReason {
+        async_std::fs::create_dir_all(self.root.clone())
+            .await
+            .map_err(|error| XError::from(("Deduty package storage error", error.to_string())))?;
+        
+        self.storages.remove(id);
+
+        let expected_filepath = self.root.join(format!("{id}.json"));
+        if expected_filepath.exists().await {
+            return async_std::fs::remove_file(expected_filepath)
+                .await
+                .map_err(|error| XError::from(("Deduty package storage error", error.to_string())).into());
+        }
+
+        Ok(())
+    }
+
     pub async fn storage(&mut self, package: &dyn DedutyPackage) -> XResult<Arc<RwLock<DedutyPackageStorage>>> {
         async_std::fs::create_dir_all(self.root.clone())
             .await
