@@ -29,30 +29,30 @@ fn main() {
     let service_tear_up = {
         /* Services parallel setup */
         let packages = packages.clone();
-        let settings = settings.clone();
 
         std::thread::spawn(move || {
             async_std::task::block_on(async move {
+                let packages_root = settings.resources().join("services");
+
                 // Premier service
-                let premier = Box::new(deduty_scheme_premier::service::PremierIndexService::new()) as Box<dyn IndexService>;
+                let premier = Box::new(deduty_scheme_premier::service::PremierIndexService::new(packages_root.join("premier"))) as Box<dyn IndexService>;
                 packages.write().await.services_mut().insert("premier".to_string(), premier);
     
                 // Load all
                 let mut failures = Vec::new();
                 for (key, service) in packages.write().await.services_mut().iter_mut() {
-                    let expected_path = settings.resources().join("services").join(key);
-                    if let Err(error) = async_std::fs::create_dir_all(expected_path.clone()).await {
-                        println!("{error}");
-                        panic!("{error}");
+                    if let Err(error) = async_std::fs::create_dir_all(packages_root.join(key)).await {
+                        println!("While initial folder creating, next error occurred: {error}");
+                        panic!("Unable to continue on initial folder creating due to next error: {error}");
                     }
 
-                    match service.load_all(&expected_path).await {
+                    match service.load_all().await {
                         Ok(_) => { /* TODO: Log all wrong entries */ },
                         Err(error) => {
                             // TODO: Log error
                             // Note: This service must be unplugged since this thread is not main
                             //       so we can't interrupt initialization without join this thread
-                            println!("{error}");
+                            println!("While load all packages of service `{key}`, next error occurred: {error}");
                             failures.push(key.clone());
                         }
                     }
@@ -104,7 +104,6 @@ fn main() {
         .run(move |_handle, event| {
             let storages = storages.clone();
             let packages = packages.clone();
-            let settings = settings.clone();
 
             if let tauri::RunEvent::Exit = event {
                 let storages_save_thread = std::thread::spawn(move || {
@@ -125,23 +124,27 @@ fn main() {
                 let packages_save_thread = std::thread::spawn(move || {
                     async_std::task::block_on(async move {
                         for (key, service) in packages.write().await.services_mut().iter_mut() {
-                            let expected_path = settings.resources().join("services").join(key);
                             // TODO: Log errors
-                            let result0 = service.save_all(&expected_path).await;
-                            println!("{result0:#?}");
+                            if let Err(error) = service.save_all().await {
+                                println!("While service `{key}` saving, next error occurred: {error}");
+                            }
                         }
                     })
                 });
 
-                // Ignore errors
-                let result1 = storages_save_thread.join();
-                let result2 = packages_save_thread.join();
-                println!("{result1:#?}");
-                println!("{result2:#?}");
+                // TODO: Log errors
+                if let Err(error) = storages_save_thread.join() {
+                    println!("While joining `storages save` thread, next error occurred: {error:#?}");
+                }
+
+                if let Err(error) = packages_save_thread.join() {
+                    println!("While joining `packages save` thread, next error occurred: {error:#?}");
+                }
             }
         });
 
     // TODO: This thread never join
-    let result3 = service_tear_up.join();
-    println!("{result3:#?}");
+    if let Err(error) = service_tear_up.join() {
+        println!("While joining `services tear up` thread, next error occurred: {error:#?}");
+    }
 }
