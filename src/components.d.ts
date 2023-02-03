@@ -7,17 +7,10 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    AddPackage: typeof import('./components/AddPackage/AddPackage.vue')['default']
-    CreatePackage: typeof import('./components/AddPackage/CreatePackage.vue')['default']
     Error: typeof import('./components/Error.vue')['default']
-    GitPackage: typeof import('./components/AddPackage/GitPackage.vue')['default']
-    LectionBar: typeof import('./components/LectionBar/LectionBar.vue')['default']
-    LectionItem: typeof import('./components/LectionBar/LectionList/LectionItem.vue')['default']
-    LectionList: typeof import('./components/LectionBar/LectionList/LectionList.vue')['default']
-    LectionMenu: typeof import('./components/LectionBar/LectionMenu.vue')['default']
-    LectionSearch: typeof import('./components/LectionBar/LectionSearch.vue')['default']
+    LectionItem: typeof import('./components/LectionList/LectionItem.vue')['default']
+    LectionList: typeof import('./components/LectionList/LectionList.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']
-    LocalPackage: typeof import('./components/AddPackage/LocalPackage.vue')['default']
     LocalPackageAdd: typeof import('./components/PackageAdd/LocalPackageAdd.vue')['default']
     PackageAdd: typeof import('./components/PackageAdd/PackageAdd.vue')['default']
     PackageForm: typeof import('./components/PackageForm/PackageForm.vue')['default']

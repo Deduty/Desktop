@@ -10,7 +10,7 @@ const { lection } = defineProps<{ lection: DedutyLection }>()
     border="~ rounded gray-200 dark:gray-700"
     class="package item"
     gap-2
-    m-0 p-2
+    m-2 p-2
   >
     <div
       flex flex-row
