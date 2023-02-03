@@ -119,10 +119,9 @@ pub async fn subPackage<'s>(packages: StatePackageIndex<'s>, storages: StatePack
 
     for service in packages.write().await.services_mut().values_mut() {
         if service
-            .get(&package_id)
+            .has(&package_id)
             .await
             .map_err(|error| format!("Internal error: {error}"))?
-            .is_some()
         {
             storages
                 .write()
