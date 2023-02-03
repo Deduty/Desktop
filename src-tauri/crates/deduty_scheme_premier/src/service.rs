@@ -22,21 +22,22 @@ type SafePackageAgent = Arc<RwLock<Box<dyn PackageAgent>>>;
 
 
 pub struct PremierIndexService {
-    packages: HashMap<String, SafePackageAgent>
+    packages: HashMap<String, SafePackageAgent>,
+    root: PathBuf
 }
 
 impl PremierIndexService {
-    pub fn new() -> Self {
-        Self { packages: HashMap::new() }
+    pub fn new(root: PathBuf) -> Self {
+        Self { packages: HashMap::new(), root }
     }
 }
 
 #[async_trait]
 impl IndexService for PremierIndexService {
-    async fn load_all(&mut self, root: &PathBuf) -> XResult<Vec<XReason>> {
+    async fn load_all(&mut self) -> XResult<Vec<XReason>> {
         let mut reasons = Vec::new();
 
-        let mut targets = root
+        let mut targets = self.root
             .read_dir()
             .await
             .map_err(|error| Box::new(XError::from(("Premier index service error", error.to_string()))))?
@@ -62,7 +63,7 @@ impl IndexService for PremierIndexService {
         Ok(reasons)
     }
 
-    async fn save_all(&mut self, root: &PathBuf) -> XResult<Vec<XReason>> {
+    async fn save_all(&mut self) -> XResult<Vec<XReason>> {
         let mut reasons = Vec::with_capacity(self.packages.len());
         let mut failures = Vec::with_capacity(self.packages.len());
 
@@ -71,7 +72,7 @@ impl IndexService for PremierIndexService {
                 PackageStatus::Online(package) => {
                     match package.as_any_mut().downcast_mut::<PremierPackage>() {
                         Some(premier) => {
-                            let expected_root = root.join(Path::new(premier.id().as_str()));
+                            let expected_root = self.root.join(Path::new(premier.id().as_str()));
 
                             match premier.root == expected_root {
                                 true => reasons.push(Ok(())),
@@ -123,6 +124,10 @@ impl IndexService for PremierIndexService {
         Ok(self.packages.get(id).cloned())
     }
 
+    async fn has(&self, id: &String) -> XResult<bool> {
+        Ok(self.packages.contains_key(id))
+    }
+
     async fn list(&self) -> XResult<Vec<String>> {
         Ok(self.packages.keys().cloned().collect())
     }
@@ -130,11 +135,6 @@ impl IndexService for PremierIndexService {
     async fn sub(&mut self, id: &String) -> XReason {
         match self.packages.remove(id) {
             Some(package) => {
-                if package.write().await.offline().is_err() {
-                    self.packages.insert(id.clone(), package);
-                    return XError::from(("Premier index service error", format!("Unable offline package with id {}. Abort", id))).into();
-                }
-                
                 // Remove package if it's path under application control
                 let package_root = XResult::from(package.read().await.package_ref())?
                     .as_any_ref()
@@ -143,9 +143,18 @@ impl IndexService for PremierIndexService {
                     .root
                     .clone();
 
-                println!("ROOT IS {:#?}", package_root);
+                if package_root.starts_with(&self.root) {
+                    return async_std::fs::remove_dir_all(package_root)
+                        .await
+                        .map_err(|error| XError::from(("Premier index service error", format!("Unable to remove package {id} due to unexpected error: {error}"))).into());
+                }
 
-                Ok(())
+                // TODO: What to do if this error occurs?
+                package
+                    .write()
+                    .await
+                    .offline()
+                    .map_err(|error| XError::from(("Premier index service error", format!("Unable offline package with id {id}. Unexpected error: {error}"))).into())
             }
             None => XError::from(("Premier index service error", format!("Package with id {} not found", id))).into()
         }
