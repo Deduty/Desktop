@@ -23,14 +23,6 @@ impl<T> PackageStatus<T> {
         }
     }
 }
-impl<T> From<PackageStatus<T>> for XResult<T> {
-    fn from(value: PackageStatus<T>) -> Self {
-        match value {
-            PackageStatus::Online(package) => Ok(package),
-            PackageStatus::Offline => Err(Box::new(XError::from(("Deduty package index error", "Package is not available")))),
-        }
-    }
-}
 
 
 pub trait PackageAgent: Send + Sync {

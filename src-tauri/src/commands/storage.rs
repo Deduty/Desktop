@@ -4,9 +4,6 @@ use async_std::sync::RwLock;
 
 use deduty_package_index::{DedutyPackageIndex, PackageStatus};
 use deduty_package_storage::DedutyPackageStorageIndex;
-use deduty_package_traits::DedutyPackage;
-
-use xresult::XResult;
 
 type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
 type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageIndex>>>;
@@ -30,12 +27,12 @@ pub async fn packageStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
                     .write()
                     .await
                     .storage(
-                        Into::<XResult<&dyn DedutyPackage>>::into(
-                            agent
+                        agent
                             .read()
                             .await
-                            .package_ref())
-                        .map_err(|error| format!("Internal error: {error}"))?)
+                            .package_ref()
+                            .to_result()
+                            .map_err(|error| format!("Internal error: {error}"))?)
                     .await
                     .map_err(|error| format!("Internal error: {error}"))?
                     .write()
@@ -67,12 +64,12 @@ pub async fn packageStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
                     .write()
                     .await
                     .storage(
-                        Into::<XResult<&dyn DedutyPackage>>::into(
-                            agent
+                        agent
                             .read()
                             .await
-                            .package_ref())
-                        .map_err(|error| format!("Internal error: {error}"))?)
+                            .package_ref()
+                            .to_result()
+                            .map_err(|error| format!("Internal error: {error}"))?)
                     .await
                     .map_err(|error| format!("Internal error: {error}"))?
                     .write()
@@ -105,12 +102,12 @@ pub async fn packageStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
                 .write()
                 .await
                 .storage(
-                    Into::<XResult<&dyn DedutyPackage>>::into(
-                        agent
+                    agent
                         .read()
                         .await
-                        .package_ref())
-                    .map_err(|error| format!("Internal error: {error}"))?)
+                        .package_ref()
+                        .to_result()
+                        .map_err(|error| format!("Internal error: {error}"))?)
                 .await
                 .map_err(|error| format!("Internal error: {error}"))?
                 .write()
@@ -158,12 +155,12 @@ pub async fn lectionStorageDelete<'s>(packages: StatePackageIndex<'s>, storages:
                     .write()
                     .await
                     .storage(
-                        Into::<XResult<&dyn DedutyPackage>>::into(
-                            agent
+                        agent
                             .read()
                             .await
-                            .package_ref())
-                        .map_err(|error| format!("Internal error: {error}"))?)
+                            .package_ref()
+                            .to_result()
+                            .map_err(|error| format!("Internal error: {error}"))?)
                     .await
                     .map_err(|error| format!("Internal error: {error}"))?
                     .write()
@@ -207,12 +204,12 @@ pub async fn lectionStorageGet<'s>(packages: StatePackageIndex<'s>, storages: St
                     .write()
                     .await
                     .storage(
-                        Into::<XResult<&dyn DedutyPackage>>::into(
-                            agent
+                        agent
                             .read()
                             .await
-                            .package_ref())
-                        .map_err(|error| format!("Internal error: {error}"))?)
+                            .package_ref()
+                            .to_result()
+                            .map_err(|error| format!("Internal error: {error}"))?)
                     .await
                     .map_err(|error| format!("Internal error: {error}"))?
                     .write()
@@ -257,11 +254,11 @@ pub async fn lectionStorageSet<'s>(packages: StatePackageIndex<'s>, storages: St
                 .write()
                 .await
                 .storage(
-                    Into::<XResult<&dyn DedutyPackage>>::into(
-                        agent
+                    agent
                         .read()
                         .await
-                        .package_ref())
+                        .package_ref()
+                        .to_result()
                     .map_err(|error| format!("Internal error: {error}"))?)
                 .await
                 .map_err(|error| format!("Internal error: {error}"))?

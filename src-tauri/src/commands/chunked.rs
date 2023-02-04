@@ -5,8 +5,6 @@ use uuid::Uuid;
 
 use deduty_application_resources::reader::FileReaderIndex;
 use deduty_package_index::DedutyPackageIndex;
-use deduty_package_traits::DedutyPackage;
-use xresult::XResult;
 
 
 type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
@@ -31,12 +29,12 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
             // Note: Such long `if let` expression required for RwLockReadGuard of agent
             //
             if let Some(file) = 
-                Into::<XResult<&dyn DedutyPackage>>::into(
-                    agent
-                        .read()
-                        .await
-                        .package_ref())
-                        .map_err(|error| format!("Internal error: {error}"))?
+                agent
+                    .read()
+                    .await
+                    .package_ref()
+                    .to_result()
+                    .map_err(|error| format!("Internal error: {error}"))?
                     .files()
                     .file(&file_id)
                     .await
@@ -62,11 +60,11 @@ pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: State
             // Note: Such long `for in` expression required for RwLockReadGuard of agent
             //
             for lection in
-                Into::<XResult<&dyn DedutyPackage>>::into(
-                    agent
-                        .read()
-                        .await
-                        .package_ref())
+                agent
+                    .read()
+                    .await
+                    .package_ref()
+                    .to_result()
                     .map_err(|error| format!("Internal error: {error}"))?
                     .lections()
             {

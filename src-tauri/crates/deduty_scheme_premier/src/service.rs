@@ -137,12 +137,17 @@ impl IndexService for PremierIndexService {
         match self.packages.remove(id) {
             Some(package) => {
                 // Remove package if it's path under application control
-                let package_root = XResult::from(package.read().await.package_ref())?
-                    .as_any_ref()
-                    .downcast_ref::<PremierPackage>()
-                    .ok_or_else(|| Box::new(XError::from(("Premier index service error", format!("Deduty package {id} has wrong type. Unable to clean directory")))))?
-                    .root
-                    .clone();
+                let package_root =
+                    package
+                        .read()
+                        .await
+                        .package_ref()
+                        .to_result()?
+                        .as_any_ref()
+                        .downcast_ref::<PremierPackage>()
+                        .ok_or_else(|| Box::new(XError::from(("Premier index service error", format!("Deduty package {id} has wrong type. Unable to clean directory")))))?
+                        .root
+                        .clone();
 
                 if package_root.starts_with(&self.root) {
                     return async_std::fs::remove_dir_all(package_root)

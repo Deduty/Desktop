@@ -3,7 +3,6 @@ use std::collections::HashMap;
 
 use async_std::sync::RwLock;
 
-use deduty_package_traits::DedutyPackage;
 use deduty_package_serde::{
     SerdeDedutyPackage,
     SerdeDedutyLection
@@ -14,8 +13,6 @@ use deduty_package_index::{
     FrontEndSerialization
 };
 use deduty_package_storage::DedutyPackageStorageIndex;
-
-use xresult::XResult;
 
 type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
 type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageIndex>>>;
@@ -151,12 +148,12 @@ pub async fn getPackage<'s>(packages: StatePackageIndex<'s>, id: &str) -> Result
         if let Some(agent) =
             service.get(&package_id).await.map_err(|error| format!("Internal error: {error}"))? {
                 return SerdeDedutyPackage::try_from(
-                    Into::<XResult<&dyn DedutyPackage>>::into(
                         agent
                             .read()
                             .await
-                            .package_ref())
-                        .map_err(|error| format!("Internal error: {error}"))?)
+                            .package_ref()
+                            .to_result()
+                            .map_err(|error| format!("Internal error: {error}"))?)
                     .await
                     .map_err(|error| format!("Internal error: While serialize package object: {error}"));
         }
@@ -220,16 +217,16 @@ pub async fn listPackageLections<'s>(packages: StatePackageIndex<'s>, id: &str) 
         if let Some(agent) =
             service.get(&package_id).await.map_err(|error| format!("Internal error: {error}"))? {
                 return Ok(
-                    Into::<XResult<&dyn DedutyPackage>>::into(
-                        agent
-                            .read()
-                            .await
-                            .package_ref())
-                    .map_err(|error| format!("Internal error: {error}"))?
-                    .lections()
-                    .into_iter()
-                    .map(|lection| lection.id())
-                    .collect()
+                    agent
+                        .read()
+                        .await
+                        .package_ref()
+                        .to_result()
+                        .map_err(|error| format!("Internal error: {error}"))?
+                        .lections()
+                        .into_iter()
+                        .map(|lection| lection.id())
+                        .collect()
                 );
         }
     }
@@ -247,16 +244,16 @@ pub async fn getPackageLection<'s>(packages: StatePackageIndex<'s>, package: &st
         if let Some(agent) =
             service.get(&package_id).await.map_err(|error| format!("Internal error: {error}"))? {
                 return SerdeDedutyLection::try_from(
-                    Into::<XResult<&dyn DedutyPackage>>::into(
-                        agent
-                            .read()
-                            .await
-                            .package_ref())
-                    .map_err(|error| format!("Internal error: {error}"))?
-                    .lections()
-                    .into_iter()
-                    .find(|lection| lection.id() == lection_id)
-                    .ok_or_else(|| format!("Internal error: Package with ID `{package}` is not found"))?)
+                    agent
+                        .read()
+                        .await
+                        .package_ref()
+                        .to_result()
+                        .map_err(|error| format!("Internal error: {error}"))?
+                        .lections()
+                        .into_iter()
+                        .find(|lection| lection.id() == lection_id)
+                        .ok_or_else(|| format!("Internal error: Package with ID `{package}` is not found"))?)
                 .await
                 .map_err(|error| format!("Internal error: While serialize package object: {error}"));
         }
