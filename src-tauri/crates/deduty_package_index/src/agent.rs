@@ -15,6 +15,13 @@ impl<T> PackageStatus<T> {
             PackageStatus::Offline => None,
         }
     }
+
+    pub fn to_result(self) -> XResult<T> {
+        match self {
+            PackageStatus::Online(package) => Ok(package),
+            PackageStatus::Offline => Err(Box::new(XError::from(("Deduty package index error", "Package is not available"))))
+        }
+    }
 }
 impl<T> From<PackageStatus<T>> for XResult<T> {
     fn from(value: PackageStatus<T>) -> Self {
