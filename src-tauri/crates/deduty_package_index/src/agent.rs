@@ -8,6 +8,14 @@ pub enum PackageStatus<T> {
     Offline
 }
 
+impl<T> PackageStatus<T> {
+    pub fn to_option(self) -> Option<T> {
+        match self {
+            PackageStatus::Online(package) => Some(package),
+            PackageStatus::Offline => None,
+        }
+    }
+}
 impl<T> From<PackageStatus<T>> for XResult<T> {
     fn from(value: PackageStatus<T>) -> Self {
         match value {
