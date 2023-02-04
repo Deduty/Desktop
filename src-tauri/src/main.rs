@@ -15,7 +15,6 @@ use deduty_package_storage::DedutyPackageStorageIndex;
 
 
 mod commands;
-mod manifest;
 
 
 fn main() {
@@ -79,12 +78,15 @@ fn main() {
             self::commands::chunked::openFileChunked,
 
             // PACKAGE
-            self::commands::package::addLocalPackage,
+            self::commands::package::addPackage,
             self::commands::package::getPackage,
             self::commands::package::getPackageLection,
             self::commands::package::listPackages,
             self::commands::package::listPackageLections,
+            self::commands::package::listServiceAddRequirements,
+            self::commands::package::listServiceUpdateRequirements,
             self::commands::package::subPackage,
+            self::commands::package::updatePackage,
 
             // STORAGE - PACKAGE
             self::commands::storage::packageStorageDelete,

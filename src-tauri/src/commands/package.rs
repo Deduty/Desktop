@@ -1,9 +1,7 @@
 use std::sync::Arc;
+use std::collections::HashMap;
 
-use async_std::io::ReadExt;
-use async_std::fs::File;
 use async_std::sync::RwLock;
-use async_std::path::Path;
 
 use deduty_package_traits::DedutyPackage;
 use deduty_package_serde::{
@@ -11,15 +9,13 @@ use deduty_package_serde::{
     SerdeDedutyLection
 };
 
-use deduty_package_index::DedutyPackageIndex;
+use deduty_package_index::{
+    DedutyPackageIndex,
+    FrontEndSerialization
+};
 use deduty_package_storage::DedutyPackageStorageIndex;
 
 use xresult::XResult;
-
-use crate::manifest::{
-    PackageManifest,
-    PackageManifestVariants
-};
 
 type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
 type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageIndex>>>;
@@ -27,65 +23,122 @@ type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageI
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub async fn addLocalPackage<'s>(packages: StatePackageIndex<'s>, path: &str) -> Result<String, String> {
-    // PATH
-	let target = Path::new(path);
-    if !target.exists().await {
-        return Err(format!("Path '{path:#?}' is not exist"));
+pub async fn listServiceAddRequirements(packages: StatePackageIndex<'_>) -> Result<HashMap<String, HashMap<String, String>>, String> {
+    let mut reqs = HashMap::with_capacity(packages.read().await.services_ref().len());
+    for (name, service) in packages.read().await.services_ref() {
+        reqs.insert(
+            name.clone(),
+            service
+                .add_reqs()
+                .iter()
+                .map(|(key, req)| (key.clone(), req.to_string()))
+                .collect()
+        );
     }
-  	if !target.is_dir().await {
-    	return Err(format!("Path '{path:#?}' is not a directory"));
-  	}
+    Ok(reqs)
+}
 
-    // PACKAGE
-    let package_toml = target.join("package.toml");
-	if !package_toml.exists().await {
-    	return Err("'package.toml' is not exist".into());
-  	}
-	if !package_toml.is_file().await {
-		return Err("'package.toml' is not a file".into());
-	}
+#[tauri::command]
+#[allow(non_snake_case)]
+pub async fn listServiceUpdateRequirements(packages: StatePackageIndex<'_>) -> Result<HashMap<String, HashMap<String, String>>, String> {
+    let mut reqs = HashMap::with_capacity(packages.read().await.services_ref().len());
+    for (name, service) in packages.read().await.services_ref() {
+        reqs.insert(
+            name.clone(),
+            service
+                .update_reqs()
+                .iter()
+                .map(|(key, req)| (key.clone(), req.to_string()))
+                .collect()
+        );
+    }
+    Ok(reqs)
+}
 
-    let package_toml_content = {
-        let mut buffer = Vec::new();
-        File::open(package_toml.as_path())
-            .await
-            .map_err(|error| error.to_string())?
-            .read_to_end(&mut buffer)
-            .await
-            .map_err(|error| error.to_string())?;
-        buffer
-    };
+#[tauri::command]
+#[allow(non_snake_case)]
+pub async fn addPackage<'s>(packages: StatePackageIndex<'s>, service: &str, mut serialized: HashMap<String, String>) -> Result<String, String> {
+    let service_name = service.to_string();
 
-    // PACKAGE MANIFEST
-    let manifest: PackageManifest = 
-        toml::from_slice(&package_toml_content)
-            .map_err(|error| format!("Internal error: {error}"))?;
+    match packages
+        .write()
+        .await
+        .services_mut()
+        .get_mut(&service_name)
+    {
+        Some(service) => {
+            let mut reserialized: HashMap<String, FrontEndSerialization> = HashMap::with_capacity(service.add_reqs().len());
 
-    match manifest.to_enum() {
-        // PREMIER PACKAGE
-        Some(PackageManifestVariants::Premier) => Ok(
-            Into::<XResult<&dyn DedutyPackage>>::into(
-                // Creating a new package
-                packages
-                    .write()
+            for (key, req) in service.add_reqs() {
+                // Note: When serialized is large then it needs no error occurs
+                match serialized.remove(key) {
+                    Some(value) => {
+                        reserialized.insert(key.clone(), FrontEndSerialization::new(*req, value));
+                    },
+                    None => return Err(format!("Internal error: Incomplete serialization for service `{service_name}`: Key `{key}` is missed"))
+                }
+            }
+
+            Ok(
+                service
+                    .add(reserialized)
                     .await
-                    .services_mut()
-                    .get_mut(&PackageManifestVariants::Premier.to_string())
-                    .ok_or("Internal error: Premier package service is offline".to_string())?
-                    .add(path.to_string())
-                    .await
-                    .map_err(|error| format!("Internal error: {error}"))?
+                    .map_err(|error| format!("Internal error: Unable to add package due to unexpected error: {error}"))?
                     .read()
                     .await
-                    .package_ref())
+                    .package_ref()
+                    .to_result()
+                    .map_err(|error| format!("Internal error: Unable to add package due to unexpected error: {error}"))?
+                    .id()
+            )
+        },
+        None => Err(format!("Internal error: Service with name {service} not found"))
+    }
+}
 
-                // XResult for &dyn DedutyPackage
-                .map_err(|error| format!("Internal error: {error}"))?
-                .id()
-        ),
-        // UNKNOWN PACKAGE
-        None => Err(format!("Manifest '{}' version is not supported", manifest.as_string()))
+#[tauri::command]
+#[allow(non_snake_case)]
+pub async fn updatePackage<'s>(packages: StatePackageIndex<'s>, service: &str, id: &str, mut serialized: HashMap<String, String>) -> Result<(), String> {
+    let service_name = service.to_string();
+    let package_id = id.to_string();
+
+    match packages
+        .write()
+        .await
+        .services_mut()
+        .get_mut(&service_name)
+    {
+        Some(service) => {
+            // Note: Without this precheck all preparing process may going for nothing
+            if !service
+                    .has(&package_id)
+                    .await
+                    .map_err(|error|
+                        format!("Internal error: Unable to check package existence for id `{package_id}` at service `{service_name}` due to unexpected error: {error}"))?
+            {
+                return Err(format!("Internal error: No package with id `{package_id}` found at service `{service_name}`"));
+            }
+
+            let mut reserialized: HashMap<String, FrontEndSerialization> = HashMap::with_capacity(service.add_reqs().len());
+
+            for (key, req) in service.update_reqs() {
+                // Note: When serialized is large then it needs no error occurs
+                match serialized.remove(key) {
+                    Some(value) => {
+                        reserialized.insert(key.clone(), FrontEndSerialization::new(*req, value));
+                    },
+                    None => return Err(format!("Internal error: Incomplete serialization for service `{service_name}`: Key `{key}` is missed"))
+                }
+            }
+
+            Ok(
+                service
+                    .update(reserialized, &package_id)
+                    .await
+                    .map_err(|error| format!("Internal error: Unable to add package due to unexpected error: {error}"))?
+            )
+        },
+        None => Err(format!("Internal error: Service with name {service} not found"))
     }
 }
 
