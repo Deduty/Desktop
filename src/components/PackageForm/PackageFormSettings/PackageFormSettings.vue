@@ -23,7 +23,7 @@ watch(deleteButtonHolden, (isHolden) => {
         packageStore.exclude(pack)
         invoke('subPackage', { id: pack.id })
       },
-      3000,
+      2500,
     )
   }
   else {

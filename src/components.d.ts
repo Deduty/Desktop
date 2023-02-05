@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     LectionItem: typeof import('./components/LectionList/LectionItem.vue')['default']
     LectionList: typeof import('./components/LectionList/LectionList.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']
+    Message: typeof import('./components/Message.vue')['default']
     PackageAdd: typeof import('./components/PackageAdd/PackageAdd.vue')['default']
     PackageAddSuspense: typeof import('./components/PackageAdd/PackageAddSuspense.vue')['default']
     PackageForm: typeof import('./components/PackageForm/PackageForm.vue')['default']
