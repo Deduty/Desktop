@@ -83,13 +83,6 @@ const selectPath = () => {
 </template>
 
 <style scoped lang="sass">
-// ============================== BOX BACKGROUND ==============================
-// html div.box
-//   background-color: white
-
-// html.dark div.box
-//   background-color: #121212
-
 // ================================ INPUT BAR =================================
 html input
   background-color: white
