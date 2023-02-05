@@ -81,7 +81,17 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
           m-0
           gap-2
         >
-          <Search @search-string-updated="searchStringUpdated" />
+          <Search
+            :place-holder-variants="[
+              'Tutorial',
+              'Mathematics',
+              'Physics',
+              'Geometry',
+              'English',
+              'Easter egg',
+            ]"
+            @search-string-updated="searchStringUpdated"
+          />
           <button
             icon-btn
             border="~ rounded gray-200 dark:gray-700"

@@ -31,7 +31,15 @@ const searchStringUpdated = (newSearchString: string) => {
         gap-4
       >
         <div>
-          <Search @search-string-updated="searchStringUpdated" />
+          <Search
+            :place-holder-variants="[
+              'Introduction',
+              'Diffusion',
+              'Group theory',
+              'Ring theory',
+              'Easter egg',
+            ]" @search-string-updated="searchStringUpdated"
+          />
         </div>
         <div
           flex-grow

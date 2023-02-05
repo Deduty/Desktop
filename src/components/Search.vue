@@ -1,17 +1,9 @@
 <script setup lang="ts">
+const { placeHolderVariants } = defineProps<{ placeHolderVariants: string[] }>()
 const emit = defineEmits<{ (event: 'searchStringUpdated', newSearchString: string): void }>()
 
 const searchString = ref('')
-
 const placeHolderString = ref('')
-const placeHolderVariants = [
-  'Tutorial',
-  'Mathematics',
-  'Physics',
-  'Geometry',
-  'English',
-  'Easter egg',
-]
 
 watchThrottled(
   searchString,
