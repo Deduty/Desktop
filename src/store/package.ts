@@ -21,6 +21,9 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
       packages.value = []
 
     const updated: Set<string> = new Set(await invoke('listPackages'))
+    packages.value
+      .map(pack => pack.id)
+      .forEach(updated.delete)
 
     for (const uuid of updated) {
       try {
