@@ -20,6 +20,25 @@ type StatePackageStorage<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageStorageI
 
 #[tauri::command]
 #[allow(non_snake_case)]
+pub async fn getService(packages: StatePackageIndex<'_>, package: &str) -> Result<String, String> {
+    let package_id = package.to_string();
+
+    for (key, service) in packages.read().await.services_ref() {
+        if
+            service
+                .has(&package_id)
+                .await
+                .map_err(|error| format!("Internal error: Unable to update package due to unexpected error: {error}"))?
+        {
+            return Ok(key.clone());
+        }
+    }
+
+    Err(format!("Internal error: Service not found for package with id `{package_id}`"))
+}
+
+#[tauri::command]
+#[allow(non_snake_case)]
 pub async fn listServiceAddRequirements(packages: StatePackageIndex<'_>) -> Result<HashMap<String, HashMap<String, String>>, String> {
     let mut reqs = HashMap::with_capacity(packages.read().await.services_ref().len());
     for (name, service) in packages.read().await.services_ref() {

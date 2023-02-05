@@ -44,7 +44,6 @@ const router = useRouter()
     <div
       ml-2 mr-2
       border="~ rounded gray-200 dark:gray-700"
-      class="vertical-line"
     />
     <!-- MINI SIDE MENU -->
     <div

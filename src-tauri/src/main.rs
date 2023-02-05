@@ -80,6 +80,7 @@ fn main() {
             // PACKAGE
             self::commands::package::addPackage,
             self::commands::package::getPackage,
+            self::commands::package::getService,
             self::commands::package::getPackageLection,
             self::commands::package::listPackages,
             self::commands::package::listPackageLections,
