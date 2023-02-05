@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const Router = useRouter()
+const router = useRouter()
 
 const haveHistory = ref(false)
 const isHomePage = ref(true)
@@ -9,7 +9,7 @@ const hookRouterPath = (to: { path: String }) => {
   isHomePage.value = to.path === '/'
 }
 
-Router.afterEach(hookRouterPath)
+router.afterEach(hookRouterPath)
 
 onMounted(() => hookRouterPath({ path: window.location.pathname }))
 </script>
@@ -33,7 +33,7 @@ onMounted(() => hookRouterPath({ path: window.location.pathname }))
         class="button"
         mt-a
         :disabled="!haveHistory"
-        @click="Router.back()"
+        @click="router.back()"
       >
         <div
           i-carbon-arrow-left
@@ -42,7 +42,7 @@ onMounted(() => hookRouterPath({ path: window.location.pathname }))
       <button
         class="button"
         :disabled="isHomePage"
-        @click="Router.push('/')"
+        @click="router.push('/')"
       >
         <div
           i-carbon-home
