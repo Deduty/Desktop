@@ -38,14 +38,21 @@ const Deduty: IDedutyApi = {
   },
 }
 
+// @ts-expect-error: The `document` object is being used for passing DedutyApi into lection
 document.Deduty = Deduty
 </script>
 
 <template>
+  <!--
+    Note: This hack is required for setting a global DedutyApi object for lection interaction
+          Also note that next line removed link to the object in document that was set before
+  -->
+  <!-- eslint-disable -->
   <component is="script">
     const Deduty = document.Deduty;
     delete document.Deduty;
   </component>
+  <!-- eslint-enable -->
   <div
     h-full w-full
     p-2
