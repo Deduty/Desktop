@@ -31,7 +31,7 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
         class="black-text"
         text="sm right"
       >
-        Unknown size
+        {{ pack.packageSize() }}
       </div>
     </div>
     <div
@@ -49,7 +49,7 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
         class="gray-text"
         text="sm right gray-400 dark:gray-500"
       >
-        Local
+        {{ pack.service }}
       </div>
     </div>
   </div>
