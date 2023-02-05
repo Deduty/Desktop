@@ -46,6 +46,7 @@ watchEffect(async () => {
   <div
     h-full w-full
     m-0
+    p-2
   >
     <div v-if="errorMessage">
       <Error :message="errorMessage" />
