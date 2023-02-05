@@ -5,6 +5,7 @@ import type { Ref } from 'vue'
 import PackageRequirements from '~/components/PackageRequirements/PackageRequirements.vue'
 import type { IDedutyPackage } from '~/composables/deduty'
 import { DedutyPackage } from '~/composables/deduty'
+import { DynamicComponent } from '~/composables/dynamic'
 
 const emit = defineEmits<{ (event: 'packageAddSuspenseClosed'): void }>()
 
@@ -16,14 +17,16 @@ const serviceRequirements: Map<string, Map<string, string>> = new Map(
 
 const packageStore = usePackageStore()
 
-class ServiceComponent {
+class ServiceComponent extends DynamicComponent {
   constructor(
     public name: string,
-    public comp: any,
-    public prop: object = {},
-    public even: object = {},
+    comp: any,
+    prop: object = {},
+    even: object = {},
     public addPackageDynamicSignal: Ref<(() => Promise<void>) | null> = ref(null),
-  ) {}
+  ) {
+    super(comp, prop, even)
+  }
 }
 
 const requirementSatisfied = (service: ServiceComponent, serialized: Map<string, string>) => {

@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 
 import type { DedutyPackage } from '~/composables/deduty'
 import { PackageSearchCriteria } from '~/composables/search'
+import { DynamicComponent } from '~/composables/dynamic'
 
 import PackageForm from '~/components/PackageForm/PackageForm.vue'
 import PackageAdd from '~/components/PackageAdd/PackageAdd.vue'
@@ -15,22 +16,14 @@ const searchStringUpdated = (newSearchString: string) => {
 }
 
 /* ============= LIST TO PACKAGE FORM ============= */
-class ComponentInstance {
-  constructor(
-    public comp: any,
-    public prop: object = {},
-    public even: object = {},
-  ) {}
-}
-
-const componentInstance: Ref<ComponentInstance | null> = shallowRef(null)
+const componentInstance: Ref<DynamicComponent | null> = shallowRef(null)
 
 const componentInstanceClosed = () => {
   componentInstance.value = null
 }
 
 const dedutyDisplayChosen = (pack: DedutyPackage) => {
-  componentInstance.value = new ComponentInstance(PackageForm, { pack }, { packageFormClosed: componentInstanceClosed })
+  componentInstance.value = new DynamicComponent(PackageForm, { pack }, { packageFormClosed: componentInstanceClosed })
 }
 </script>
 
@@ -95,7 +88,7 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
           <button
             icon-btn
             border="~ rounded gray-200 dark:gray-700"
-            @click="componentInstance = new ComponentInstance(PackageAdd, {}, { packageAddClosed: componentInstanceClosed })"
+            @click="componentInstance = new DynamicComponent(PackageAdd, {}, { packageAddClosed: componentInstanceClosed })"
           >
             <div
               m-2

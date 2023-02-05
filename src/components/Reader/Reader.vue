@@ -5,6 +5,7 @@ import ReaderImageComponent from './ReaderImageComponent.vue'
 import ReaderMarkdownComponent from './ReaderMarkdownComponent.vue'
 
 import type { DedutyFileReader } from '~/composables/deduty/file/reader'
+import { DynamicComponent } from '~/composables/dynamic'
 
 const { reader, extension } = defineProps<{ reader: DedutyFileReader; extension: string }>()
 
@@ -22,41 +23,22 @@ class Extension {
   isMarkdown(): boolean {
     return this.origin === 'md'
   }
-}
 
-class ReaderComponent {
-  private m_component
-  private m_properties: object
+  createComponent(): DynamicComponent {
+    if (this.isHtml())
+      return new DynamicComponent(ReaderHtmlComponent, { reader })
 
-  constructor(ext: Extension) {
-    if (ext.isHtml()) {
-      this.m_component = ReaderHtmlComponent
-      this.m_properties = { reader }
-    }
-    else if (ext.isImage()) {
-      this.m_component = ReaderImageComponent
-      this.m_properties = { reader, extension }
-    }
-    else if (ext.isMarkdown()) {
-      this.m_component = ReaderMarkdownComponent
-      this.m_properties = { reader }
-    }
-    else {
-      this.m_component = Error
-      this.m_properties = { message: `File extension \`${ext.origin}\` is not supported` }
-    }
-  }
+    if (this.isImage())
+      return new DynamicComponent(ReaderImageComponent, { reader, extension })
 
-  get component() {
-    return this.m_component
-  }
+    if (this.isMarkdown())
+      return new DynamicComponent(ReaderMarkdownComponent, { reader })
 
-  get properties() {
-    return this.m_properties
+    return new DynamicComponent(Error, { message: `File extension \`${this.origin}\` is not supported` })
   }
 }
 
-const ComponentInstance = new ReaderComponent(new Extension(extension))
+const componentInstance = (new Extension(extension)).createComponent()
 const ErrorMessage = ref('')
 
 onErrorCaptured((error) => {
@@ -81,7 +63,11 @@ onErrorCaptured((error) => {
       <Suspense v-else>
         <!-- DONE - SHOW DYNAMIC COMPONENT -->
         <template #default>
-          <component :is="ComponentInstance.component" v-bind="ComponentInstance.properties" />
+          <component
+            :is="componentInstance.comp"
+            v-bind="componentInstance.prop"
+            v-on="componentInstance.even"
+          />
         </template>
         <!-- LOADING - SHOW LOADING ANIMATION -->
         <template #fallback>

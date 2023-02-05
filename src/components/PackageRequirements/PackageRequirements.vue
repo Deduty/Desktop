@@ -2,6 +2,7 @@
 import type { Ref } from 'vue'
 
 import DirectoryPathRequirement from './DirectoryPathRequirement.vue'
+import { DynamicComponent } from '~/composables/dynamic'
 
 const { requirements } = defineProps<{ requirements: Map<string, string> }>()
 
@@ -13,14 +14,6 @@ const emit = defineEmits<{
 const satisfiedRequirements: Ref<Map<string, string | null>> = ref(new Map())
 
 /* ======================== COMPONENT SATISFACTION ========================= */
-class RequirementComponent {
-  constructor(
-    public comp: any,
-    public prop: object = {},
-    public even: object = {},
-  ) {}
-}
-
 const requirementSatisfied = (requirementKey: string, serialized: string) => {
   satisfiedRequirements.value.set(requirementKey, serialized)
 }
@@ -29,9 +22,9 @@ const requirementNotSatisfied = (requirementKey: string) => {
   satisfiedRequirements.value.set(requirementKey, null)
 }
 
-const componentFromString = (key: string, kind: string): RequirementComponent => {
+const componentFromString = (key: string, kind: string): DynamicComponent => {
   if (kind === 'DirectoryPath') {
-    return new RequirementComponent(DirectoryPathRequirement, {}, {
+    return new DynamicComponent(DirectoryPathRequirement, {}, {
       requirementSatisfied: (serialized: string) => requirementSatisfied(key, serialized),
       requirementNotSatisfied: () => requirementNotSatisfied(key),
     })
@@ -39,7 +32,7 @@ const componentFromString = (key: string, kind: string): RequirementComponent =>
   throw new Error(`Requirement of kind \`${kind}\` is not support`)
 }
 
-const requirementComponents: Ref<RequirementComponent[]> = shallowRef([])
+const requirementComponents: Ref<DynamicComponent[]> = shallowRef([])
 
 const checkSatisfiedRequirements = (requirements: Map<string, string | null>) => {
   const satisfied: Map<string, string> = new Map()
