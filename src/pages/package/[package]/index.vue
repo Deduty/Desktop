@@ -9,6 +9,11 @@ const searchCriteria = ref(new LectionSearchCriteria(''))
 const searchStringUpdated = (newSearchString: string) => {
   searchCriteria.value = new LectionSearchCriteria(newSearchString)
 }
+
+const errorMessage = ref('')
+onErrorCaptured((error) => {
+  errorMessage.value = error.message
+})
 </script>
 
 <template>
@@ -40,6 +45,9 @@ const searchStringUpdated = (newSearchString: string) => {
               'Easter egg',
             ]" @search-string-updated="searchStringUpdated"
           />
+        </div>
+        <div v-if="errorMessage">
+          <Error :message="errorMessage" />
         </div>
         <div
           flex-grow
