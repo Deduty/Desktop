@@ -9,6 +9,8 @@ export interface IDedutyPackageMeta {
 
 export interface IDedutyPackage {
   id: string
+  size?: number
+  service: string
   meta: IDedutyPackageMeta
   files: IDedutyFileCollection
 }
