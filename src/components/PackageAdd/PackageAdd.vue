@@ -1,3 +1,16 @@
+<script setup lang="ts">
+const emit = defineEmits<{ (event: 'packageAddClosed'): void }>()
+
+const packageAddClosed = () => {
+  emit('packageAddClosed')
+}
+
+const errorMessage = ref('')
+onErrorCaptured((error) => {
+  errorMessage.value = error.message
+})
+</script>
+
 <template>
   <div
     h-full w-full
@@ -8,7 +21,29 @@
     gap-4
     w-prose h-min
   >
-    <LocalPackageAdd />
+    <div text-2xl>
+      Add package
+    </div>
+    <div
+      h-full w-full
+      m-a
+      flex flex-grow
+    >
+      <!-- ERROR - SHOW ERROR WHEN CHILD COMPONENT ERROR MESSAGE CAUGHT -->
+      <div v-if="errorMessage" flex-grow>
+        <Error :message="errorMessage" />
+      </div>
+      <Suspense v-else>
+        <!-- DONE - SHOW DYNAMIC COMPONENT -->
+        <template #default>
+          <PackageAddSuspense @package-add-suspense-closed="packageAddClosed" />
+        </template>
+        <!-- LOADING - SHOW LOADING ANIMATION -->
+        <template #fallback>
+          <Loading />
+        </template>
+      </Suspense>
+    </div>
   </div>
 </template>
 
