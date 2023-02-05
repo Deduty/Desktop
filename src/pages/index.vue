@@ -25,12 +25,12 @@ class ComponentInstance {
 
 const componentInstance: Ref<ComponentInstance | null> = shallowRef(null)
 
-const packageFormClosed = () => {
+const componentInstanceClosed = () => {
   componentInstance.value = null
 }
 
 const dedutyDisplayChosen = (pack: DedutyPackage) => {
-  componentInstance.value = new ComponentInstance(PackageForm, { pack }, { packageFormClosed })
+  componentInstance.value = new ComponentInstance(PackageForm, { pack }, { packageFormClosed: componentInstanceClosed })
 }
 </script>
 
@@ -85,7 +85,7 @@ const dedutyDisplayChosen = (pack: DedutyPackage) => {
           <button
             icon-btn
             border="~ rounded gray-200 dark:gray-700"
-            @click="componentInstance = new ComponentInstance(PackageAdd)"
+            @click="componentInstance = new ComponentInstance(PackageAdd, {}, { packageAddClosed: componentInstanceClosed })"
           >
             <div
               m-2
