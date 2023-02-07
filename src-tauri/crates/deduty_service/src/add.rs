@@ -1,5 +1,8 @@
 use async_trait::async_trait;
-use xresult::XReason;
+use xresult::XResult;
+
+
+use deduty_package::DedutyPackage;
 
 
 /// ### Important
@@ -8,5 +11,5 @@ use xresult::XReason;
 #[async_trait]
 pub trait AddService: Send + Sync {
     fn requirements(&self) -> &String;
-    async fn add(&self, serialized: String) -> XReason;
+    async fn add(&self, serialized: String) -> XResult<&dyn DedutyPackage>;
 }
