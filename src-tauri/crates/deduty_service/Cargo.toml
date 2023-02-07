@@ -1,13 +1,15 @@
 [package]
-name = "deduty_package_index"
+name = "deduty_service"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-deduty_package_traits = { path = "../deduty_package_traits"}
-xresult = { path = "../xresult" }
+# Main dependency
+deduty_package = { path = "../deduty_package" }
 
+# Other dependencies
+async-trait = "0.1.64"
+xresult = { path = "../xresult" }
 async-std = "1.12.0"
-async-trait = "0.1.58"
