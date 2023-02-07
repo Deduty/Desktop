@@ -66,13 +66,14 @@ impl ServiceEntry {
 }
 
 
+#[derive(Default)]
 pub struct ServiceManager {
     services: RwLock<HashMap<String, Arc<dyn Service>>>
 }
 
 impl ServiceManager {
     pub fn new() -> Self {
-        Self { services: Default::default() }
+        Default::default()
     }
 
     pub async fn access(&self, service: &str) -> ServiceEntry {
