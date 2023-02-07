@@ -21,35 +21,13 @@ impl Display for XError {
     }
 }
 
-// AUTO FROM IMPLS
-
-impl From<(String, String)> for XError {
-    fn from((name, message): (String, String)) -> Self {
-        Self { name, message }
-    }
-}
-
-impl From<(&String, &String)> for XError {
-    fn from((name, message): (&String, &String)) -> Self {
-        (name.clone(), message.clone()).into()
-    }
-}
-
-impl From<(&str, String)> for XError {
-    fn from((name, message): (&str, String)) -> Self {
-        (name.to_string(), message).into()
-    }
-}
-
-impl From<(&str, &String)> for XError {
-    fn from((name, message): (&str, &String)) -> Self {
-        (name.to_string(), message.clone()).into()
-    }
-}
-
-impl From<(&str, &str)> for XError {
-    fn from((name, message): (&str, &str)) -> Self {
-        (name.to_string(), message.to_string()).into()
+impl<K: Display, M: Display> From<(K, M)> for XError
+{
+    fn from((name, message): (K, M)) -> Self {
+        Self {
+            name: name.to_string(),
+            message: message.to_string()
+        }
     }
 }
 
