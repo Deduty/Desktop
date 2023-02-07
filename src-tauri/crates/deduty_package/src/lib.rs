@@ -4,7 +4,6 @@ mod package;
 
 pub use file::{
     DedutyFile,
-    DedutyFileCollection,
     DedutyFileReader
 };
 
