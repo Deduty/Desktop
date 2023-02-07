@@ -15,18 +15,12 @@ rust-version = "1.67"
 tauri-build = { version = "1.1", features = [] }
 
 [dependencies]
-# Main
-deduty_application_resources = { path = "./crates/deduty_application_resources" }
-deduty_application_settings = { path = "./crates/deduty_application_settings" }
-
-## Package traits and other package crates
-deduty_package_traits = { path = "./crates/deduty_package_traits" }
-deduty_package_serde = { path = "./crates/deduty_package_serde" }
-deduty_package_index = { path = "./crates/deduty_package_index" }
-deduty_package_storage = { path = "./crates/deduty_package_storage" }
+# Application public crates
+deduty_package = { path = "./crates/deduty_package" }
+deduty_service = { path = "./crates/deduty_service" }
 
 ## Schemes
-deduty_scheme_premier = { path = "./crates/deduty_scheme_premier" }
+# deduty_scheme_premier = { path = "./crates/deduty_scheme_premier" }
 
 ## Support
 xresult = { path = "./crates/xresult" }
@@ -34,16 +28,18 @@ xresult = { path = "./crates/xresult" }
 # Foreign
 async-std = "1.12.0"
 async-trait = "0.1.58"
+directories = "4.0.1"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.1", features = ["dialog-open"] }
+tauri = { version = "1.2.4", features = ["dialog-open"] }
 toml = "0.5"
+tokio = { version = "1.25.0", features = ["full"] }
 uuid = "1.2.2"
 
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
-default = [ "custom-protocol" ]
+default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
-custom-protocol = [ "tauri/custom-protocol" ]
+custom-protocol = ["tauri/custom-protocol"]
