@@ -1,129 +1,57 @@
 use std::sync::Arc;
 
-use async_std::sync::RwLock;
-use uuid::Uuid;
+use xresult::XError;
 
-use deduty_application_resources::reader::FileReaderIndex;
-use deduty_package_index::DedutyPackageIndex;
+use crate::managers::{ ReaderManager, ServiceManager };
 
-
-type StatePackageIndex<'l> = tauri::State<'l, Arc<RwLock<DedutyPackageIndex>>>;
-type StateReaderIndex<'l> = tauri::State<'l, Arc<RwLock<FileReaderIndex>>>;
+type StateReaderManager<'l> = tauri::State<'l, Arc<ReaderManager>>;
+type StateServiceManager<'l> = tauri::State<'l, Arc<ServiceManager>>;
 
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub async fn openFileChunked<'s>(packages: StatePackageIndex<'s>, readers: StateReaderIndex<'s>, package: &str, id: &str) -> Result<String, String> {
-    let package_id = package.to_string();
-    let file_id = id.to_string();
-
-    for service in packages.read().await.services_ref().values() {
-        let optional_agent =
-            service
-                .get(&package_id)
-                .await
-                .map_err(|error| format!("Internal error: {error}"))?;
-
-        if let Some(agent) = optional_agent {
-            // SEARCH IN PACKAGE
-            // Note: Such long `if let` expression required for RwLockReadGuard of agent
-            //
-            if let Some(file) = 
-                agent
-                    .read()
-                    .await
-                    .package_ref()
-                    .to_result()
-                    .map_err(|error| format!("Internal error: {error}"))?
-                    .files()
-                    .file(&file_id)
-                    .await
-                    .map_err(|error| format!("Internal error: {error}"))?
-            {
-                match file.load().await {
-                    Ok(reader) => {
-                        let token = Uuid::new_v4();
-
-                        readers
-                            .write()
-                            .await
-                            .index()
-                            .insert(token.to_string(), reader);
-
-                        return Ok(token.to_string())
-                    }
-                    Err(error) => return Err(format!("Internal error: {error}"))
-                }
-            }
-
-            // SEARCH IN LECTIONS
-            // Note: Such long `for in` expression required for RwLockReadGuard of agent
-            //
-            for lection in
-                agent
-                    .read()
-                    .await
-                    .package_ref()
-                    .to_result()
-                    .map_err(|error| format!("Internal error: {error}"))?
-                    .lections()
-            {
-                let optional_file =
-                    lection
-                        .files()
-                        .file(&file_id)
-                        .await
-                        .map_err(|error| format!("Internal error: {error}"))?;
-
-                if let Some(file) = optional_file {
-                    match file.load().await {
-                        Ok(reader) => {
-                            let token = Uuid::new_v4();
-    
-                            readers
-                                .write()
-                                .await
-                                .index()
-                                .insert(token.to_string(), reader);
-    
-                            return Ok(token.to_string())
-                        }
-                        Err(error) => return Err(format!("Internal error: {error}"))
-                    }
-                }
-            }
-        }
+pub async fn closeFileChunked(readers: StateReaderManager<'_>, file: &str) -> Result<(), String> {
+    if let Some(reader) = readers.sub(file).await {
+        return reader.close().await.map_err(|error| error.to_string());
     }
 
-    Err(format!("Internal error: Package with uuid '{id}' not found"))
+    Err(XError::from(("Internal error", format!("Reader with id `{file}` not found"))).to_string())
 }
+
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub async fn closeFileChunked<'s>(readers: StateReaderIndex<'s>, id: &str) -> Result<bool, String> {
-    Ok(
-        readers
-            .write()
-            .await
-            .index()
-            .remove(&id.to_string())
-            .is_some()
-    )
+pub async fn openFileChunked(
+    services: StateServiceManager<'_>,
+    readers: StateReaderManager<'_>,
+    service: &str,
+    package: &str,
+    lection: &str,
+    file: &str
+) -> Result<String, String> {
+    let reader = services
+        .access(service)
+        .await
+        .with_file(package, lection, file)
+        .await
+        .map_err(|error| error.to_string())?
+        .ok_or_else(|| XError::from(("Internal error", format!("Reader with id `{file}` not found"))).to_string())?
+        .reader()
+        .await
+        .map_err(|error| error.to_string())?;
+
+    Ok(readers.add(reader).await)
 }
+
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub async fn getFileChunked<'s>(readers: StateReaderIndex<'s>, id: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
-    match readers.write().await.index().get_mut(&id.to_string()) {
-        Some(buffer) => {
-            match buffer.closed() {
-                true => Err(format!("File `{id}` have been closed")),
-                false => buffer
-                    .next(chunk)
-                    .await
-                    .map_err(|error| format!("Error while reading file `{id}`: {error}"))
-            }
-        }
-        None => Err(format!("File `{id}` is not opened (or have been read)"))
-    }
+pub async fn getFileChunked<'s>(readers: StateReaderManager<'s>, file: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
+    readers
+        .get(file)
+        .await
+        .ok_or_else(|| XError::from(("Internal error", format!("Reader with id `{file}` not found"))).to_string())?
+        .next(chunk)
+        .await
+        .map_err(|error| error.to_string())
 }
