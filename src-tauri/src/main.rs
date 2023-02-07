@@ -4,73 +4,73 @@
 )]
 
 use std::sync::Arc;
+use std::error::Error;
 
-use async_std::sync::RwLock;
+use xresult::XReason;
 
-use deduty_application_settings::Settings;
-use deduty_application_resources::reader::FileReaderIndex;
-
-use deduty_package_index::{ DedutyPackageIndex, IndexService };
-use deduty_package_storage::DedutyPackageStorageIndex;
-
+use deduty_service::Service;
 
 mod commands;
+mod managers;
 
 
-fn main() {
-    // TODO: Provide logs or something for user when settings are not available
-    let settings = Settings::new().unwrap();
-
-    let packages = Arc::new(RwLock::new(DedutyPackageIndex::new()));
-    let readers = Arc::new(RwLock::new(FileReaderIndex::new()));
-    let storages = Arc::new(RwLock::new(DedutyPackageStorageIndex::new(settings.resources().join("storages"))));
-
-    let service_tear_up = {
-        /* Services parallel setup */
-        let packages = packages.clone();
-
-        std::thread::spawn(move || {
-            async_std::task::block_on(async move {
-                let packages_root = settings.resources().join("services");
-
-                // Premier service
-                let premier = Box::new(deduty_scheme_premier::service::PremierIndexService::new(packages_root.join("premier"))) as Box<dyn IndexService>;
-                packages.write().await.services_mut().insert("premier".to_string(), premier);
-    
-                // Load all
-                let mut failures = Vec::new();
-                for (key, service) in packages.write().await.services_mut().iter_mut() {
-                    if let Err(error) = async_std::fs::create_dir_all(packages_root.join(key)).await {
-                        println!("While initial folder creating, next error occurred: {error}");
-                        panic!("Unable to continue on initial folder creating due to next error: {error}");
-                    }
-
-                    match service.load_all().await {
-                        Ok(_) => { /* TODO: Log all wrong entries */ },
-                        Err(error) => {
-                            // TODO: Log error
-                            // Note: This service must be unplugged since this thread is not main
-                            //       so we can't interrupt initialization without join this thread
-                            println!("While load all packages of service `{key}`, next error occurred: {error}");
-                            failures.push(key.clone());
-                        }
-                    }
-                }
-
-                // Remove all failure services
-                // Note: Irrefutable pattern required for keeping WriteRwLockGuard of packages
-                //
-                #[allow(irrefutable_let_patterns)]
-                if let services = packages.write().await.services_mut() {
-                    for failure in failures {
-                        services.remove(&failure);
-                    }
-                }
-            })
+fn left_errors(reasons: impl IntoIterator<IntoIter = impl Iterator<Item = XReason>, Item = XReason>) -> Vec<Box<dyn Error>> {
+    reasons
+        .into_iter()
+        .filter_map(|reason| match reason {
+            Ok(()) => None,
+            Err(error) => Some(error as Box<dyn Error>)
         })
-    };
+        .collect()
+}
 
-    tauri::Builder::default()
+
+async fn execute() -> tauri::App {
+    // TODO: Provide logs or something for user when settings are not available
+    let settings = Arc::new(managers::Settings::create().await.unwrap());
+
+    // Managers setup
+    let services = Arc::new(managers::ServiceManager::new());
+    let storages = Arc::new(managers::WebStorageManager::new(settings.resources().join("storages")));
+    let readers = Arc::new(managers::ReaderManager::new());
+
+    {
+        let manager = &services;
+        let services: Vec<Box<dyn Service>> = vec![];
+
+        // Premier service
+        // let premier = Box::new(deduty_scheme_premier::service::PremierIndexService::new(packages_root.join("premier"))) as Box<dyn IndexService>;
+        // packages.write().await.services_mut().insert("premier".to_string(), premier);
+
+        for service in services {
+            let service_root = settings.services().join(service.id());
+            let service_id = service.id().clone();
+
+            match service.load_all(&service_root).await {
+                Ok(_) => {
+                    // ^----------------------------\
+                    // TODO: Log all wrong entries -/
+
+                    if let Err(error) = manager.add(service).await {
+                        println!("Warning: Several packages have the same id `{service_id}`");
+                        println!("{error}");
+                        println!("Skipping service with id {service_id} (data will NOT be saved)...");
+                    }
+                },
+                Err(error) => {
+                    // TODO: Log error
+                    // Note: This service must be unplugged since this thread is not main
+                    //       so we can't interrupt initialization without join this thread
+                    println!("While load all packages of service `{service_id}`, next error occurred: {error}");
+                    println!("Skipping service with id {service_id} (data will NOT be saved)...");
+                }
+            }
+        }
+    }
+
+    tauri::async_runtime::set(tokio::runtime::Handle::current());
+
+    let mut application = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             // CHUNKED
             self::commands::chunked::closeFileChunked,
@@ -99,55 +99,92 @@ fn main() {
             self::commands::storage::lectionStorageGet,
             self::commands::storage::lectionStorageSet,
         ])
-        .manage(packages.clone())
-        .manage(readers)
+        .manage(settings.clone())
+        .manage(services.clone())
         .manage(storages.clone())
+        .manage(readers.clone())
         .build(tauri::generate_context!())
-        .expect("Error while running tauri application")
-        .run(move |_handle, event| {
-            let storages = storages.clone();
-            let packages = packages.clone();
+        .expect("Error while running tauri application");
 
-            if let tauri::RunEvent::Exit = event {
-                let storages_save_thread = std::thread::spawn(move || {
-                    async_std::task::block_on(async move {
-                        let results = storages
-                            .read()
-                            .await
-                            .save()
-                            .await
-                            .unwrap();
+    // Note: All magic goes here
+    //       There is no another way to check if we PROBABLY need to close window
+    while application.run_iteration().window_count != 0 {}
 
-                        for error in results.iter().filter_map(|reason| reason.as_ref().err().map(|error| error.to_string())) {
-                            println!("While save error occurred {error}")
-                        }
-                    })
-                });
+    {
+        // STORAGES SAVING
 
-                let packages_save_thread = std::thread::spawn(move || {
-                    async_std::task::block_on(async move {
-                        for (key, service) in packages.write().await.services_mut().iter_mut() {
-                            // TODO: Log errors
-                            if let Err(error) = service.save_all().await {
-                                println!("While service `{key}` saving, next error occurred: {error}");
-                            }
-                        }
-                    })
-                });
+        let storage_result: Result<Vec<_>, _> = storages
+            .save()
+            .await
+            .map(left_errors);
 
-                // TODO: Log errors
-                if let Err(error) = storages_save_thread.join() {
-                    println!("While joining `storages save` thread, next error occurred: {error:#?}");
+        match storage_result.as_deref() {
+            Ok([]) => {},
+            Ok(reasons) => {
+                println!("While saving web storage, unable to save several storages:");
+                for reason in reasons {
+                    println!("\t{reason}");
                 }
+            },
+            Err(error) => {
+                println!("While saving web storage an error occurred: {error}");
+            }
+        }
+    }
 
-                if let Err(error) = packages_save_thread.join() {
-                    println!("While joining `packages save` thread, next error occurred: {error:#?}");
+    {
+        // SERVICES SAVING
+
+        for service in services.list().await {
+            let service_root = settings.services().join(service.id());
+            let service_result = service
+                .save_all(&service_root)
+                .await
+                .map(left_errors);
+
+            match service_result.as_deref() {
+                Ok([]) => {},
+                Ok(reasons) => {
+                    println!("While saving service with id `{}`, unable to save several packages:", service.id());
+                    for reason in reasons {
+                        println!("\t{reason}");
+                    }
+                },
+                Err(error) => {
+                    println!("While saving service with id `{}` an error occurred: {error}", service.id());
                 }
             }
-        });
-
-    // TODO: This thread never join
-    if let Err(error) = service_tear_up.join() {
-        println!("While joining `services tear up` thread, next error occurred: {error:#?}");
+        }
     }
+
+    application
+}
+
+
+/// ### Important
+/// 
+/// [`main`] function creates entire async runtime for property state management:
+/// 1. Async resources \ state setup
+/// 2. **Run application by loop**
+/// 3. Async tear down
+/// 
+/// The second one, as you can see, allows to tear down without killing entire process
+/// but we anyway MUST DO this, because tauri do additional clean on an application
+/// 
+fn main() {
+    // Note: MUST HAVE
+    //       https://github.com/tauri-apps/tauri/blob/dev/examples
+
+    // Note: Allow use any libs (dlls)
+    //       https://github.com/tauri-apps/tauri/blob/dev/examples/tauri-dynamic-lib/src-app1/src/main.rs
+
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Unable to create Tokio Runtime")
+        .block_on(execute())
+        //
+        // Note: Exit through the tauri::process::exit with automatic cleanup
+        .handle()
+        .exit(0)
 }
