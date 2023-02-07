@@ -8,6 +8,7 @@ declare global {
   const $ref: typeof import('vue/macros')['$ref']
   const $shallowRef: typeof import('vue/macros')['$shallowRef']
   const $toRef: typeof import('vue/macros')['$toRef']
+  const DynamicComponent: typeof import('./composables/dynamic')['DynamicComponent']
   const EffectScope: typeof import('vue')['EffectScope']
   const LectionSearchCriteria: typeof import('./composables/search')['LectionSearchCriteria']
   const PackageSearchCriteria: typeof import('./composables/search')['PackageSearchCriteria']
@@ -290,6 +291,7 @@ declare module 'vue' {
     readonly $ref: UnwrapRef<typeof import('vue/macros')['$ref']>
     readonly $shallowRef: UnwrapRef<typeof import('vue/macros')['$shallowRef']>
     readonly $toRef: UnwrapRef<typeof import('vue/macros')['$toRef']>
+    readonly DynamicComponent: UnwrapRef<typeof import('./composables/dynamic')['DynamicComponent']>
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
     readonly LectionSearchCriteria: UnwrapRef<typeof import('./composables/search')['LectionSearchCriteria']>
     readonly PackageSearchCriteria: UnwrapRef<typeof import('./composables/search')['PackageSearchCriteria']>
