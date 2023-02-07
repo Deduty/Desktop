@@ -9,10 +9,10 @@ use deduty_package::{ DedutyPackage, DedutyLection, DedutyFile };
 use deduty_service::Service;
 
 
-type ServiceRef = Box<dyn Deref<Target = dyn Service>>;
+type ServiceRef = Box<dyn Deref<Target = dyn Service> + Send + Sync>;
 
-fn into_service_ref(service: Arc<dyn Service>) -> Box<dyn Deref<Target = dyn Service>> {
-    Box::new(service) as Box<dyn Deref<Target = dyn Service>>
+fn into_service_ref(service: Arc<dyn Service>) -> ServiceRef {
+    Box::new(service) as ServiceRef
 }
 
 
