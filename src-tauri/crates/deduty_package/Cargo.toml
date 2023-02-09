@@ -9,3 +9,8 @@ edition = "2021"
 xresult = { path = '../xresult' }
 
 async-trait = "0.1.64"
+serde = { version = "1.0.152", features = ["derive"], optional = true }
+
+[features]
+default = []
+serde = ["dep:serde"]
