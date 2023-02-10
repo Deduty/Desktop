@@ -5,9 +5,9 @@ import { escapeHtml } from 'markdown-it/lib/common/utils'
 import HightLightJS from 'highlight.js'
 
 import { getCurrentStyles } from '~/composables/highlight'
-import type { DedutyFileReader } from '~/composables/deduty/file/reader'
+import type { DedutyFile } from '~/composables/deduty'
 
-const { reader } = defineProps<{ reader: DedutyFileReader }>()
+const { file } = defineProps<{ file: DedutyFile }>()
 
 /* ========================= DARK DYNAMIC SUPPORT ========================== */
 const updateMarkdownHighlight = (isDark: boolean) => {
@@ -52,7 +52,7 @@ const ConfiguredMarkdownIt = MarkdownIt({
 /* ========================= ======== ============= ======================== */
 
 /* ====================== PREPARING DYNAMIC COMPONENT ====================== */
-const readerBlob = await reader.readAll()
+const readerBlob = await (await file.createReader()).readAll()
 if (!readerBlob)
   throw new Error('Reader return null value. Probably file empty or already was read. Try to reload page')
 

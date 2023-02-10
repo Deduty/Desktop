@@ -4,10 +4,10 @@ import ReaderHtmlComponent from './ReaderHtmlComponent.vue'
 import ReaderImageComponent from './ReaderImageComponent.vue'
 import ReaderMarkdownComponent from './ReaderMarkdownComponent.vue'
 
-import type { DedutyFileReader } from '~/composables/deduty/file/reader'
 import { DynamicComponent } from '~/composables/dynamic'
+import type { DedutyFile } from '~/composables/deduty'
 
-const { reader, extension } = defineProps<{ reader: DedutyFileReader; extension: string }>()
+const { file } = defineProps<{ file: DedutyFile }>()
 
 class Extension {
   constructor(public origin: string) {}
@@ -26,19 +26,19 @@ class Extension {
 
   createComponent(): DynamicComponent {
     if (this.isHtml())
-      return new DynamicComponent(ReaderHtmlComponent, { reader })
+      return new DynamicComponent(ReaderHtmlComponent, { file })
 
     if (this.isImage())
-      return new DynamicComponent(ReaderImageComponent, { reader, extension })
+      return new DynamicComponent(ReaderImageComponent, { file })
 
     if (this.isMarkdown())
-      return new DynamicComponent(ReaderMarkdownComponent, { reader })
+      return new DynamicComponent(ReaderMarkdownComponent, { file })
 
     return new DynamicComponent(Error, { message: `File extension \`${this.origin}\` is not supported` })
   }
 }
 
-const componentInstance = (new Extension(extension)).createComponent()
+const componentInstance = (new Extension(file.ext)).createComponent()
 const ErrorMessage = ref('')
 
 onErrorCaptured((error) => {
