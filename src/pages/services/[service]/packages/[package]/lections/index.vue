@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { LectionSearchCriteria } from '~/composables/search'
 
-const properties = defineProps<{ package: string }>()
+const properties = defineProps<{ service: string; package: string }>()
 
-/* ================ SEARCH TO LIST ================ */
 const searchCriteria = ref(new LectionSearchCriteria(''))
-
 const searchStringUpdated = (newSearchString: string) => {
   searchCriteria.value = new LectionSearchCriteria(newSearchString)
 }
 
-const errorMessage = ref('')
-onErrorCaptured((error) => {
-  errorMessage.value = error.message
-})
+const packageStore = usePackageStore()
+
+const packageObject = (
+  packageStore
+    .indexedPackages
+    .get(properties.service)
+    ?.get(properties.package))
+
+const errorMessage = `Package with id \`${properties.package}\` not found. Probably service or package is not exist.`
 </script>
 
 <template>
@@ -46,16 +49,17 @@ onErrorCaptured((error) => {
             ]" @search-string-updated="searchStringUpdated"
           />
         </div>
-        <div v-if="errorMessage">
+        <div v-if="!packageObject">
           <Error :message="errorMessage" />
         </div>
         <div
+          v-if="packageObject"
           flex-grow
           overflow-hidden
           m-0
         >
           <LectionList
-            :package-id="properties.package"
+            :pack="packageObject"
             :criteria="searchCriteria"
           />
         </div>
