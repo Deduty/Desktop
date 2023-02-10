@@ -35,7 +35,6 @@ pub async fn openFileChunked(
         .with_file(package, lection, file)
         .await
         .map_err(|error| error.to_string())?
-        .ok_or_else(|| XError::from(("Internal error", format!("Reader with id `{file}` not found"))).to_string())?
         .reader()
         .await
         .map_err(|error| error.to_string())?;
