@@ -1,36 +1,23 @@
-import { DedutyFileCollection } from '../file'
+import { DedutyLection } from '../lection'
 import type { IDedutyPackage, IDedutyPackageMeta } from './scheme'
+import { updateValues } from '~/composables/utils'
 
-export class DedutyPackageMeta implements IDedutyPackageMeta {
+export class DedutyPackage {
   constructor(
-    public name: string,
-    public version: string,
-    public language: string,
-    public tags: string[],
-  ) {}
-
-  static fromOptions({ name, version, language, tags }: IDedutyPackageMeta): DedutyPackageMeta {
-    return new DedutyPackageMeta(name, version, language, tags)
-  }
-}
-
-export class DedutyPackage implements IDedutyPackage {
-  constructor(
-    public id: string,
-    public size: number | undefined,
     public service: string,
-    public meta: DedutyPackageMeta,
-    public files: DedutyFileCollection,
+    public id: string,
+    public meta: IDedutyPackageMeta,
+    public lections: DedutyLection[],
+    public size?: number,
   ) {}
 
-  static fromOptions({ id, size, service, meta, files }: IDedutyPackage): DedutyPackage {
-    return new DedutyPackage(
-      id,
-      size,
-      service,
-      DedutyPackageMeta.fromOptions(meta),
-      DedutyFileCollection.fromOptions(id, files),
-    )
+  static fromOptions(service: string, { id, meta, lections, size }: IDedutyPackage): DedutyPackage {
+    const defaultOptionMeta: IDedutyPackageMeta = { name: id, version: 'Unknown', language: 'Unknown', tags: ['Deprecated'] }
+    const optionMeta: IDedutyPackageMeta = updateValues(defaultOptionMeta, JSON.parse(meta))
+
+    const objectLections = lections.map(lection => DedutyLection.fromOptions(service, id, lection))
+
+    return new DedutyPackage(service, id, optionMeta, objectLections, size)
   }
 
   packageSize(): string {

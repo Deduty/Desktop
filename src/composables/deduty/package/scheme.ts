@@ -1,4 +1,4 @@
-import type { IDedutyFileCollection } from '../file'
+import type { IDedutyLection } from '../lection'
 
 export interface IDedutyPackageMeta {
   name: string
@@ -9,8 +9,7 @@ export interface IDedutyPackageMeta {
 
 export interface IDedutyPackage {
   id: string
+  meta: string
+  lections: IDedutyLection[]
   size?: number
-  service: string
-  meta: IDedutyPackageMeta
-  files: IDedutyFileCollection
 }
