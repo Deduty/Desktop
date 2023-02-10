@@ -11,6 +11,7 @@ declare module '@vue/runtime-core' {
     Error: typeof import('./components/Error.vue')['default']
     LectionItem: typeof import('./components/LectionList/LectionItem.vue')['default']
     LectionList: typeof import('./components/LectionList/LectionList.vue')['default']
+    LectionReader: typeof import('./components/LectionReader.vue')['default']
     Loading: typeof import('./components/Loading.vue')['default']
     Message: typeof import('./components/Message.vue')['default']
     PackageAdd: typeof import('./components/PackageAdd/PackageAdd.vue')['default']
