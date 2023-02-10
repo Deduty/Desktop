@@ -1,5 +1,8 @@
-import type { IDedutyStorageApi } from './storage'
+import type { DedutyWebStorageApi } from './web-storage'
 
 export interface IDedutyApi {
-  storage: IDedutyStorageApi
+  webStorage: {
+    lection?: DedutyWebStorageApi
+    package: DedutyWebStorageApi
+  }
 }
