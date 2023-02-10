@@ -1,2 +1,2 @@
-export type { IDedutyFile, IDedutyFileCollection } from './scheme'
-export { DedutyFile, DedutyFileCollection } from './file'
+export type { IDedutyFile } from './scheme'
+export { DedutyFile } from './file'

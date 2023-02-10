@@ -1,32 +1,28 @@
-import { invoke } from '@tauri-apps/api'
-
 import { DedutyFileReader } from './reader'
-import type { IDedutyFile, IDedutyFileCollection } from './scheme'
+import type { IDedutyFile } from './scheme'
+import * as Commands from '~/composables/commands'
 
-export class DedutyFile implements IDedutyFile {
+export class DedutyFile {
   constructor(
-    public alias: string | undefined,
-    public extension: string,
-    public pkg: string,
+    public service: string,
+    public pack: string,
+    public lection: string,
     public id: string,
+    public ext: string,
+    public size?: number,
   ) {}
 
   async createReader(): Promise<DedutyFileReader> {
-    const token: string = await invoke('openFileChunked', { package: this.pkg, id: this.id })
+    const token = await Commands.openFileChunked(this.service, this.pack, this.lection, this.id)
     return new DedutyFileReader(token)
   }
 
-  static fromOptions(pkg: string, { alias, extension, id }: IDedutyFile): DedutyFile {
-    return new DedutyFile(alias, extension, pkg, id)
-  }
-}
-
-export class DedutyFileCollection implements IDedutyFileCollection {
-  constructor(
-    public files: DedutyFile[],
-  ) {}
-
-  static fromOptions(pkg: string, { files }: IDedutyFileCollection): DedutyFileCollection {
-    return new DedutyFileCollection(files.map(file => DedutyFile.fromOptions(pkg, file)))
+  static fromOptions(
+    service: string,
+    pack: string,
+    lection: string,
+    { id, ext, size }: IDedutyFile,
+  ): DedutyFile {
+    return new DedutyFile(service, pack, lection, id, ext, size)
   }
 }

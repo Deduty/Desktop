@@ -1,13 +1,13 @@
-import { invoke } from '@tauri-apps/api'
+import * as Commands from '~/composables/commands'
 
 export class DedutyFileReader {
-  private token: string
+  #token: string
 
   constructor(token: string) {
-    this.token = token
+    this.#token = token
   }
 
-  async readAll(): Promise<Blob | null> {
+  async readAll(): Promise<Blob | undefined> {
     const content: Uint8Array[] = []
     while (true) {
       const chunked = await this.readNext()
@@ -16,17 +16,10 @@ export class DedutyFileReader {
       else
         break
     }
-    return content.length > 0 ? new Blob(content) : null
+    return content.length > 0 ? new Blob(content) : undefined
   }
 
-  async readNext(): Promise<Uint8Array | null> {
-    // Invoke chunk of file id with size 8 bit * 1024 kb * 1024 mb == 1 mb
-    try {
-      const chunk = await invoke('getFileChunked', { id: this.token, chunk: 8 * 1024 * 1024 })
-      return Array.isArray(chunk) ? new Uint8Array(chunk) : null
-    }
-    catch (error) {
-      return null
-    }
+  async readNext(): Promise<Uint8Array | undefined> {
+    return Commands.getFileChunked(this.#token)
   }
 }
