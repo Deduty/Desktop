@@ -1,0 +1,1 @@
+export { updateValues } from './object'
