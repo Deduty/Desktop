@@ -1,3 +1,3 @@
 pub mod chunked;
 pub mod package;
-pub mod storage;
+pub mod web_storage;

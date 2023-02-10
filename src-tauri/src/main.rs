@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+#![feature(trait_upcasting)]
+
 use std::sync::Arc;
 use std::error::Error;
 
@@ -31,7 +33,6 @@ async fn execute() -> tauri::App {
 
     // Managers setup
     let services = Arc::new(managers::ServiceManager::new());
-    let storages = Arc::new(managers::WebStorageManager::new(settings.resources().join("storages")));
     let readers = Arc::new(managers::ReaderManager::new());
 
     {
@@ -77,31 +78,25 @@ async fn execute() -> tauri::App {
             self::commands::chunked::getFileChunked,
             self::commands::chunked::openFileChunked,
 
+            // WEB STORAGE
+            self::commands::web_storage::webStorageDelete,
+            self::commands::web_storage::webStorageGet,
+            self::commands::web_storage::webStorageSet,
+
+            // SERVICE
+            self::commands::service::getServiceAddRequirements,
+            self::commands::service::getServiceUpdateRequirements,
+            self::commands::service::listServices,
+
             // PACKAGE
             self::commands::package::addPackage,
             self::commands::package::getPackage,
-            self::commands::package::getService,
-            self::commands::package::getPackageLection,
             self::commands::package::listPackages,
-            self::commands::package::listPackageLections,
-            self::commands::package::listServiceAddRequirements,
-            self::commands::package::listServiceUpdateRequirements,
             self::commands::package::subPackage,
             self::commands::package::updatePackage,
-
-            // STORAGE - PACKAGE
-            self::commands::storage::packageStorageDelete,
-            self::commands::storage::packageStorageGet,
-            self::commands::storage::packageStorageSet,
-
-            // STORAGE - LECTION
-            self::commands::storage::lectionStorageDelete,
-            self::commands::storage::lectionStorageGet,
-            self::commands::storage::lectionStorageSet,
         ])
         .manage(settings.clone())
         .manage(services.clone())
-        .manage(storages.clone())
         .manage(readers.clone())
         .build(tauri::generate_context!())
         .expect("Error while running tauri application");
@@ -109,28 +104,6 @@ async fn execute() -> tauri::App {
     // Note: All magic goes here
     //       There is no another way to check if we PROBABLY need to close window
     while application.run_iteration().window_count != 0 {}
-
-    {
-        // STORAGES SAVING
-
-        let storage_result: Result<Vec<_>, _> = storages
-            .save()
-            .await
-            .map(left_errors);
-
-        match storage_result.as_deref() {
-            Ok([]) => {},
-            Ok(reasons) => {
-                println!("While saving web storage, unable to save several storages:");
-                for reason in reasons {
-                    println!("\t{reason}");
-                }
-            },
-            Err(error) => {
-                println!("While saving web storage an error occurred: {error}");
-            }
-        }
-    }
 
     {
         // SERVICES SAVING
