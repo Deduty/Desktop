@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api'
 import type { Ref } from 'vue'
 
 import PackageRequirements from '~/components/PackageRequirements/PackageRequirements.vue'
-import type { IDedutyPackage } from '~/composables/deduty'
-import { DedutyPackage } from '~/composables/deduty'
 import { DynamicComponent } from '~/composables/dynamic'
+import { DedutyPackage } from '~/composables/deduty'
+import * as Commands from '~/composables/commands'
 
 const emit = defineEmits<{ (event: 'packageAddSuspenseClosed'): void }>()
 
+interface IRequirements {
+  [key: string]: string
+}
+
 // { Service: { SerializationKey: SerializationType } }
-const serviceRequirements: Map<string, Map<string, string>> = new Map(
-  Object
-    .entries(await invoke('listServiceAddRequirements') as object)
-    .map(([key, value]) => [key, new Map(Object.entries(value))]))
+const serviceRequirements: Map<string, IRequirements> = new Map()
+for (const service of await Commands.listServices())
+  serviceRequirements.set(service, JSON.parse(await Commands.getServiceAddRequirements(service)) as IRequirements)
 
 const packageStore = usePackageStore()
 
@@ -31,9 +33,9 @@ class ServiceComponent extends DynamicComponent {
 
 const requirementSatisfied = (service: ServiceComponent, serialized: Map<string, string>) => {
   service.addPackageDynamicSignal.value = async () => {
-    const package_id: string = await invoke('addPackage', { service: service.name, serialized: Object.fromEntries(serialized) })
-    const options = (await invoke('getPackage', { id: package_id }) as IDedutyPackage)
-    await packageStore.include(DedutyPackage.fromOptions(options))
+    const pack = await Commands.addPackage(service.name, JSON.stringify(serialized))
+    const packageOptions = await Commands.getPackage(service.name, pack)
+    await packageStore.include(DedutyPackage.fromOptions(service.name, packageOptions))
     emit('packageAddSuspenseClosed')
   }
 }
@@ -53,7 +55,7 @@ const serviceComponents: ServiceComponent[]
       return component
     })
 
-const currentServiceComponent: Ref<ServiceComponent> = shallowRef(serviceComponents[0])
+const currentServiceComponent: Ref<ServiceComponent | undefined> = shallowRef(serviceComponents[0])
 
 const stringCapitalize = (value: string) => {
   return `${value[0].toUpperCase()}${value.slice(1)}`
@@ -73,6 +75,12 @@ onErrorCaptured((error) => {
     <!-- ERROR - SHOW ERROR WHEN CHILD COMPONENT ERROR MESSAGE CAUGHT -->
     <div v-if="errorMessage" flex-grow>
       <Error :message="errorMessage" />
+    </div>
+    <div
+      v-else-if="!currentServiceComponent"
+      flex flex-grow
+    >
+      <Message message="Services are not installed" />
     </div>
     <Suspense v-else>
       <!-- DONE - SHOW DYNAMIC COMPONENT -->
@@ -113,7 +121,7 @@ onErrorCaptured((error) => {
             <component
               :is="currentServiceComponent.comp"
               v-bind="currentServiceComponent.prop"
-              v-on="currentServiceComponent.even"
+              v-on="currentServiceComponent?.even"
             />
             <button
               class="confirm-button"
@@ -122,7 +130,7 @@ onErrorCaptured((error) => {
               ml-a m-4 mt-0
               p-2
               :disabled="currentServiceComponent.addPackageDynamicSignal.value === null"
-              @click="currentServiceComponent.addPackageDynamicSignal.value"
+              @click="currentServiceComponent?.addPackageDynamicSignal.value"
             >
               Add package
             </button>
