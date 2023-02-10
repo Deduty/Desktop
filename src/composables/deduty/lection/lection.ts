@@ -1,25 +1,19 @@
-import { DedutyFileCollection } from '../file'
+import { DedutyFile } from '../file'
 import type { IDedutyLection, IDedutyLectionMeta } from './scheme'
+import { updateValues } from '~/composables/utils'
 
-export class DedutyLectionMeta implements IDedutyLectionMeta {
-  constructor(
-    public name: string,
-    public order: number,
-  ) {}
-
-  static fromOptions({ name, order }: IDedutyLectionMeta): DedutyLectionMeta {
-    return new DedutyLectionMeta(name, order)
-  }
-}
-
-export class DedutyLection implements IDedutyLection {
+export class DedutyLection {
   constructor(
     public id: string,
-    public meta: DedutyLectionMeta,
-    public files: DedutyFileCollection,
+    public meta: IDedutyLectionMeta,
+    public files: DedutyFile[],
+    public size?: number,
   ) {}
 
-  static fromOptions(pkg: string, { id, meta, files }: IDedutyLection): DedutyLection {
-    return new DedutyLection(id, DedutyLectionMeta.fromOptions(meta), DedutyFileCollection.fromOptions(pkg, files))
+  static fromOptions(service: string, pack: string, { id, meta, files, size }: IDedutyLection): DedutyLection {
+    const optionMeta: IDedutyLectionMeta = updateValues({ name: id, hidden: false }, JSON.parse(meta))
+    const objectFiles = files.map(file => DedutyFile.fromOptions(service, pack, id, file))
+
+    return new DedutyLection(id, optionMeta, objectFiles, size)
   }
 }

@@ -1,2 +1,2 @@
 export type { IDedutyLection, IDedutyLectionMeta } from './scheme'
-export { DedutyLection, DedutyLectionMeta } from './lection'
+export { DedutyLection } from './lection'

@@ -1,12 +1,13 @@
-import type { IDedutyFileCollection } from '../file'
+import type { IDedutyFile } from '../file'
 
 export interface IDedutyLectionMeta {
   name: string
-  order: number
+  hidden: boolean
 }
 
 export interface IDedutyLection {
   id: string
-  meta: IDedutyLectionMeta
-  files: IDedutyFileCollection
+  meta: string
+  files: IDedutyFile[]
+  size?: number
 }
