@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api'
 import type { Ref } from 'vue'
 
 import PackageRequirements from '~/components/PackageRequirements/PackageRequirements.vue'
 import type { DedutyPackage } from '~/composables/deduty'
+import * as Commands from '~/composables/commands'
 
 const { pack } = defineProps<{ pack: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageUpdated'): void }>()
 
-// { Service: { SerializationKey: SerializationType } }
-const packageService = await invoke('getService', { package: pack.id }) as string
-const allRequirements = await invoke('listServiceUpdateRequirements') as any
-const serviceRequirements: Map<string, string> = new Map(Object.entries(allRequirements[packageService]))
+// { SerializationKey: SerializationType }
+const serviceRequirements: Map<string, string> = new Map(
+  Object.entries(JSON.parse(await Commands.getServiceUpdateRequirements(pack.service))))
 
 const packageStore = usePackageStore()
 
@@ -27,9 +26,9 @@ class ServiceComponent {
 
 const requirementSatisfied = (service: ServiceComponent, serialized: Map<string, string>) => {
   service.addPackageDynamicSignal.value = async () => {
-    await invoke('updatePackage', { service: service.name, id: pack.id, serialized: Object.fromEntries(serialized) })
+    await Commands.updatePackage(pack.service, pack.id, JSON.stringify(serialized))
     await packageStore.exclude(pack)
-    await packageStore.refresh()
+    await packageStore.refresh(false, [pack.service])
     emit('packageUpdated')
   }
 }
@@ -40,7 +39,7 @@ const requirementNotSatisfied = (service: ServiceComponent) => {
 
 const currentServiceComponent: Ref<ServiceComponent> = shallowRef(
   new ServiceComponent(
-    packageService,
+    pack.service,
     PackageRequirements,
     {
       requirements: serviceRequirements,

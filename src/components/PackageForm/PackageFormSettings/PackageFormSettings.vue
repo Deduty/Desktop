@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { invoke } from '@tauri-apps/api'
 import type { Ref } from 'vue'
 
 import type { DedutyPackage } from '~/composables/deduty'
+import * as Commands from '~/composables/commands'
 
 const { pack } = defineProps<{ pack: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
@@ -21,7 +21,7 @@ watch(deleteButtonHolden, (isHolden) => {
       () => {
         emit('packageFormClosed')
         packageStore.exclude(pack)
-        invoke('subPackage', { id: pack.id })
+        Commands.subPackage(pack.service, pack.id)
       },
       2400,
     )
