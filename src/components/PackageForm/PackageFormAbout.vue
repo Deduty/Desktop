@@ -6,32 +6,23 @@ import { DynamicComponent } from '~/composables/dynamic'
 
 import Loading from '~/components/Loading.vue'
 import Message from '~/components/Message.vue'
-import Reader from '~/components/Reader/Reader.vue'
+import LectionReader from '~/components/LectionReader.vue'
 
 const { pack } = defineProps<{ pack: DedutyPackage }>()
 
-const componentInstance: Ref<DynamicComponent> = ref(new DynamicComponent(Loading))
+const componentInstance: Ref<DynamicComponent> = shallowRef(
+  new DynamicComponent(Message, { message: 'About file not represented' }))
 
 const errorMessage = ref('')
 onErrorCaptured((error) => {
   errorMessage.value = error.message
 })
 
-onMounted(async () => {
-  const candidates = pack.files.files.filter(file => file.alias === 'about')
-  if (candidates.length === 0) {
-    componentInstance.value = new DynamicComponent(Message, { message: 'About file not represented' })
-    return
-  }
-
-  if (candidates.length !== 1) {
-    errorMessage.value = 'Package have several \'about\' alias. Expected only one for package representation'
-    return
-  }
-  const [about] = candidates
-
-  componentInstance.value = new DynamicComponent(Reader, { reader: await about.createReader(), extension: about.extension })
-})
+const aboutLection = pack.lections.find(lection => lection.id.toLowerCase() === 'about')
+if (aboutLection) {
+  componentInstance.value
+    = new DynamicComponent(LectionReader, { service: pack.service, pack: pack.id, lection: aboutLection, apiEnabled: true })
+}
 </script>
 
 <template>
