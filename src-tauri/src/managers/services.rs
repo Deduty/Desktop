@@ -24,9 +24,7 @@ pub struct ServiceEntry {
 impl ServiceEntry {
     pub fn as_service(&self) -> XResult<&dyn Service> {
         match &self.service {
-            Some(service) => {
-                Ok(service.as_ref())
-            },
+            Some(service) => Ok(service.as_ref()),
             None => XError::from(("Service error", format!("Service with id `{}` is not exist", self.service_id))).into()
         }
     }
