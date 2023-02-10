@@ -28,8 +28,8 @@ const filterSearchCriteria = (criteria: PackageSearchCriteria) => {
 }
 
 watch(() => criteria, filterSearchCriteria, { deep: true })
-watch(() => packageStore.packages, replaceDisplayItems, { deep: true })
-onMounted(() => replaceDisplayItems(packageStore.packages))
+watch(() => packageStore.storedPackages, replaceDisplayItems, { deep: true })
+onMounted(() => replaceDisplayItems(packageStore.storedPackages))
 </script>
 
 <template>
