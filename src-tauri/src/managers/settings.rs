@@ -37,7 +37,7 @@ impl Settings {
     }
 
     pub fn resources(&self) -> PathBuf {
-        PathBuf::from(self.project.data_dir())
+        PathBuf::from(self.project.data_dir()).join("resources")
     }
 
     pub fn settings(&self) -> PathBuf {
