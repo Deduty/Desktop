@@ -7,6 +7,6 @@ use xresult::{ XReason, XResult };
 ///
 #[async_trait]
 pub trait StateFullService: Send + Sync {
-    async fn load_all(&self, root: &PathBuf) -> XResult<Box<dyn Iterator<Item = XReason>>>;
-    async fn save_all(&self, root: &PathBuf) -> XResult<Box<dyn Iterator<Item = XReason>>>;
+    async fn load_all(&self, root: &PathBuf) -> XResult<Box<dyn Iterator<Item = XReason> + Send>>;
+    async fn save_all(&self, root: &PathBuf) -> XResult<Box<dyn Iterator<Item = XReason> + Send>>;
 }
