@@ -10,6 +10,6 @@ use deduty_package::DedutyPackage;
 ///
 #[async_trait]
 pub trait AddService: Send + Sync {
-    fn requirements(&self) -> &String;
+    fn requirements(&self) -> &str;
     async fn add(&self, serialized: &str) -> XResult<&dyn DedutyPackage>;
 }

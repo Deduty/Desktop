@@ -100,7 +100,7 @@ impl ServiceManager {
         self.services
             .write()
             .await
-            .insert(service.id().clone(), service.into());
+            .insert(service.id().to_string(), service.into());
         Ok(())
     }
 

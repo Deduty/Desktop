@@ -3,13 +3,13 @@ use xresult::XResult;
 
 
 pub trait UniqueLection: Sync + Send {
-    fn id(&self) -> &String;
+    fn id(&self) -> &str;
 }
 
 
 pub trait MetaLection: Sync + Send {
     /// Json acceptable string
-    fn meta(&self) -> Option<&String>;
+    fn meta(&self) -> Option<&str>;
 
     /// Indicates how much space the lection occupies on the machine:
     /// - Use [`None`] if lection size **can't be** known without it's loading.

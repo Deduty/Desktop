@@ -27,8 +27,8 @@ impl AsyncTrySerialize<DedutyPackageSerde> for &dyn SerdePackage {
 
         Ok(
             DedutyPackageSerde {
-                id: self.id().clone(),
-                meta: self.meta().cloned(),
+                id: self.id().to_string(),
+                meta: self.meta().map(str::to_string),
                 lections,
                 size: self.size()
             }

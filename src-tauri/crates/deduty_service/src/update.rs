@@ -7,6 +7,6 @@ use xresult::XReason;
 ///
 #[async_trait]
 pub trait UpdateService: Send + Sync {
-    fn requirements(&self) -> &String;
+    fn requirements(&self) -> &str;
     async fn update(&self, id: &str, serialized: &str) -> XReason;
 }

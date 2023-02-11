@@ -12,15 +12,15 @@ pub trait DedutyFileReader: Sync + Send {
 
 
 pub trait UniqueFile: Sync + Send {
-    fn id(&self) -> &String;
+    fn id(&self) -> &str;
 }
 
 
 pub trait MetaFile: Sync + Send {
-    fn ext(&self) -> &String;
+    fn ext(&self) -> &str;
 
     /// Json acceptable string
-    fn meta(&self) -> Option<&String>;
+    fn meta(&self) -> Option<&str>;
 
     /// Indicates how much space the file occupies on the machine:
     /// - Use [`None`] if file size **can't be** known without it's loading.

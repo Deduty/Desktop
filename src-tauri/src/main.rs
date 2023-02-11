@@ -45,7 +45,7 @@ async fn execute() -> tauri::App {
 
         for service in services {
             let service_root = settings.services().join(service.id());
-            let service_id = service.id().clone();
+            let service_id = service.id().to_string();
 
             match service.load_all(&service_root).await {
                 Ok(_) => {

@@ -20,7 +20,7 @@ pub async fn addPackage(services: StateServiceManager<'_>, service: &str, serial
         .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?
         .add(serialized)
         .await
-        .map(|package| package.id().clone())
+        .map(|package| package.id().to_string())
         .map_err(|error| error.to_string())
 }
 
@@ -49,7 +49,7 @@ pub async fn listPackages(services: StateServiceManager<'_>, service: &str) -> R
             .all()
             .await
             .map_err(|error| error.to_string())?
-            .cloned()
+            .map(|package| package.id().to_string())
             .collect()
     )
 }

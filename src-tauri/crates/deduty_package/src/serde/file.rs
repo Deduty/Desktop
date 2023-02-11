@@ -20,9 +20,9 @@ impl AsyncTrySerialize<DedutyFileSerde> for &dyn SerdeFile {
     async fn try_serde(&self) -> XResult<DedutyFileSerde> {
         Ok(
             DedutyFileSerde {
-                id: self.id().clone(),
-                ext: self.ext().clone(),
-                meta: self.meta().cloned(),
+                id: self.id().to_string(),
+                ext: self.ext().to_string(),
+                meta: self.meta().map(str::to_string),
                 size: self.size()
             }
         )

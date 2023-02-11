@@ -3,13 +3,13 @@ use xresult::XResult;
 
 
 pub trait UniquePackage: Sync + Send {
-    fn id(&self) -> &String;
+    fn id(&self) -> &str;
 }
 
 
 pub trait MetaPackage: Sync + Send {
     /// Json acceptable string
-    fn meta(&self) -> Option<&String>;
+    fn meta(&self) -> Option<&str>;
 
     /// Indicates how much space the package occupies on the machine:
     /// - Use [`None`] if package size **can't be** known without it's loading.

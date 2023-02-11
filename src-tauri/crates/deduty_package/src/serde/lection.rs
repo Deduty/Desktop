@@ -27,8 +27,8 @@ impl AsyncTrySerialize<DedutyLectionSerde> for &dyn SerdeLection {
 
         Ok(
             DedutyLectionSerde {
-                id: self.id().clone(),
-                meta: self.meta().cloned(),
+                id: self.id().to_string(),
+                meta: self.meta().map(str::to_string),
                 files,
                 size: self.size()
             }
