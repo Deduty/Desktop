@@ -15,7 +15,7 @@ pub async fn getServiceAddRequirements(services: StateServiceManager<'_>, servic
         .await
         .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?;
     
-        Ok(<dyn Service as AddService>::requirements(service.as_ref()).to_string())
+        Ok(<dyn Service as AddService>::requirements(service.borrow()).to_string())
 }
 
 
@@ -27,7 +27,7 @@ pub async fn getServiceUpdateRequirements(services: StateServiceManager<'_>, ser
         .await
         .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?;
     
-    Ok(<dyn Service as UpdateService>::requirements(service.as_ref()).to_string())
+    Ok(<dyn Service as UpdateService>::requirements(service.borrow()).to_string())
 }
 
 
@@ -38,7 +38,7 @@ pub async fn listServices(services: StateServiceManager<'_>) -> Result<Vec<Strin
         services
             .list()
             .await
-            .map(|service| service.id().to_string())
+            .map(|service| service.borrow().id().to_string())
             .collect()
     )
 }

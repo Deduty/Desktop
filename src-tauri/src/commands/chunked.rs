@@ -35,6 +35,7 @@ pub async fn openFileChunked(
         .with_file(package, lection, file)
         .await
         .map_err(|error| error.to_string())?
+        .borrow()
         .reader()
         .await
         .map_err(|error| error.to_string())?;

@@ -18,9 +18,10 @@ pub async fn addPackage(services: StateServiceManager<'_>, service: &str, serial
         .get(service)
         .await
         .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?
+        .borrow()
         .add(serialized)
         .await
-        .map(|package| package.id().to_string())
+        .map(|package| package.borrow().id().to_string())
         .map_err(|error| error.to_string())
 }
 
@@ -31,7 +32,7 @@ pub async fn getPackage(services: StateServiceManager<'_>, service: &str, packag
     let entry = services.access(service).await;
     let package = entry.with_package(package).await.map_err(|error| error.to_string())?;
 
-    (package as &dyn SerdePackage)
+    (package.borrow() as &dyn SerdePackage)
         .try_serde()
         .await
         .map_err(|error| error.to_string())
@@ -46,10 +47,11 @@ pub async fn listPackages(services: StateServiceManager<'_>, service: &str) -> R
             .get(service)
             .await
             .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?
+            .borrow()
             .all()
             .await
             .map_err(|error| error.to_string())?
-            .map(|package| package.id().to_string())
+            .map(|package| package.borrow().id().to_string())
             .collect()
     )
 }
@@ -62,6 +64,7 @@ pub async fn subPackage(services: StateServiceManager<'_>, service: &str, packag
         .get(service)
         .await
         .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?
+        .borrow()
         .sub(package)
         .await
         .map_err(|error| error.to_string())
@@ -75,6 +78,7 @@ pub async fn updatePackage(services: StateServiceManager<'_>, service: &str, pac
         .get(service)
         .await
         .ok_or_else(|| XError::from(("Internal error", format!("Service with id `{service}` not found"))).to_string())?
+        .borrow()
         .update(package, serialized)
         .await
         .map_err(|error| error.to_string())

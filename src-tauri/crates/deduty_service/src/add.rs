@@ -1,8 +1,9 @@
 use async_trait::async_trait;
 use xresult::XResult;
 
-
 use deduty_package::DedutyPackage;
+
+use crate::Borrowed;
 
 
 /// ### Important
@@ -11,5 +12,5 @@ use deduty_package::DedutyPackage;
 #[async_trait]
 pub trait AddService: Send + Sync {
     fn requirements(&self) -> &str;
-    async fn add(&self, serialized: &str) -> XResult<&dyn DedutyPackage>;
+    async fn add(&self, serialized: &str) -> XResult<Borrowed<dyn DedutyPackage>>;
 }

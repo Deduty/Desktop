@@ -14,6 +14,7 @@ use deduty_service::Service;
 
 mod commands;
 mod managers;
+mod utils;
 
 
 fn left_errors(reasons: impl IntoIterator<IntoIter = impl Iterator<Item = XReason>, Item = XReason>) -> Vec<Box<dyn Error>> {
@@ -109,8 +110,9 @@ async fn execute() -> tauri::App {
         // SERVICES SAVING
 
         for service in services.list().await {
-            let service_root = settings.services().join(service.id());
+            let service_root = settings.services().join(service.borrow().id());
             let service_result = service
+                .borrow()
                 .save_all(&service_root)
                 .await
                 .map(left_errors);
@@ -118,13 +120,13 @@ async fn execute() -> tauri::App {
             match service_result.as_deref() {
                 Ok([]) => {},
                 Ok(reasons) => {
-                    println!("While saving service with id `{}`, unable to save several packages:", service.id());
+                    println!("While saving service with id `{}`, unable to save several packages:", service.borrow().id());
                     for reason in reasons {
                         println!("\t{reason}");
                     }
                 },
                 Err(error) => {
-                    println!("While saving service with id `{}` an error occurred: {error}", service.id());
+                    println!("While saving service with id `{}` an error occurred: {error}", service.borrow().id());
                 }
             }
         }

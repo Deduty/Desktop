@@ -22,7 +22,7 @@ impl AsyncTrySerialize<DedutyPackageSerde> for &dyn SerdePackage {
     async fn try_serde(&self) -> XResult<DedutyPackageSerde> {
         let mut lections = Vec::new();
         for lection in self.lections().await? {
-            lections.push(lection.try_serde().await?);
+            lections.push(lection.borrow().try_serde().await?);
         }
 
         Ok(

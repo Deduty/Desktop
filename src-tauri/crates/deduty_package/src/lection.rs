@@ -1,6 +1,13 @@
 use async_trait::async_trait;
 use xresult::XResult;
 
+use crate::{
+    Borrowed,
+    BorrowedIterator,
+    DedutyFile,
+    SerdeFile
+};
+
 
 pub trait UniqueLection: Sync + Send {
     fn id(&self) -> &str;
@@ -26,15 +33,15 @@ pub trait MetaLection: Sync + Send {
 /// Must be **cached** (if possible) and **can be used very often**.
 #[async_trait]
 pub trait PeekLection: Sync + Send {
-    async fn files(&self) -> XResult<Box<dyn Iterator<Item = &dyn crate::SerdeFile> + Send>>;
+    async fn files(&self) -> XResult<BorrowedIterator<dyn SerdeFile>>;
 }
 
 
 /// This trait is used when application needs to read file or make expensive operation.
 #[async_trait]
 pub trait ReadLection: Sync + Send {
-    async fn file(&self, id: &str) -> XResult<Option<&dyn crate::DedutyFile>>;
-    async fn files(&self) -> XResult<Box<dyn Iterator<Item = &dyn crate::DedutyFile> + Send>>;
+    async fn file(&self, id: &str) -> XResult<Option<Borrowed<dyn DedutyFile>>>;
+    async fn files(&self) -> XResult<BorrowedIterator<dyn DedutyFile>>;
 }
 
 

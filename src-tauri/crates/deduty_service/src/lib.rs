@@ -1,4 +1,5 @@
 #![feature(trait_upcasting)]
+use std::borrow::Borrow;
 
 mod add;
 mod index;
@@ -43,3 +44,6 @@ impl<T> Service for T
 
         Send + Sync + ?Sized
 {}
+
+pub type Borrowed<T> = Box<dyn Borrow<T> + Send + Sync>;
+pub type BorrowedIterator<T> = Box<dyn Iterator<Item = Borrowed<T>> + Send + Sync>;

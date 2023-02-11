@@ -22,7 +22,7 @@ impl AsyncTrySerialize<DedutyLectionSerde> for &dyn SerdeLection {
         let mut files = Vec::new();
 
         for file in self.files().await? {
-            files.push(file.try_serde().await?);
+            files.push(file.borrow().try_serde().await?);
         }
 
         Ok(

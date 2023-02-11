@@ -1,6 +1,13 @@
 use async_trait::async_trait;
 use xresult::XResult;
 
+use crate::{
+    Borrowed,
+    BorrowedIterator,
+    DedutyLection,
+    SerdeLection
+};
+
 
 pub trait UniquePackage: Sync + Send {
     fn id(&self) -> &str;
@@ -27,7 +34,7 @@ pub trait MetaPackage: Sync + Send {
 ///     or get whole package size must be cached if possible
 #[async_trait]
 pub trait PeekPackage: Sync + Send {
-    async fn lections(&self) -> XResult<Box<dyn Iterator<Item = &dyn crate::SerdeLection> + Send>>;
+    async fn lections(&self) -> XResult<BorrowedIterator<dyn SerdeLection>>;
 }
 
 
@@ -36,8 +43,8 @@ pub trait PeekPackage: Sync + Send {
 ///     files ids must be cached if possible
 #[async_trait]
 pub trait ReadPackage: Sync + Send {
-    async fn lection(&self, id: &str) -> XResult<Option<&dyn crate::DedutyLection>>;
-    async fn lections(&self) -> XResult<Box<dyn Iterator<Item = &dyn crate::DedutyLection> + Send>>;
+    async fn lection(&self, id: &str) -> XResult<Option<Borrowed<dyn DedutyLection>>>;
+    async fn lections(&self) -> XResult<BorrowedIterator<dyn DedutyLection>>;
 }
 
 

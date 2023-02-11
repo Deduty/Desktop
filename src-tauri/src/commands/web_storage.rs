@@ -19,6 +19,7 @@ pub async fn webStorageDelete(
         .await
         .as_web_storage()
         .map_err(|error| error.to_string())?
+        .borrow()
         .delete(package, lection, key)
         .await
         .map_err(|error| error.to_string())
@@ -41,6 +42,7 @@ pub async fn webStorageGet(
         .await
         .as_web_storage()
         .map_err(|error| error.to_string())?
+        .borrow()
         .get(package, lection, key, fallback)
         .await
         .map_err(|error| error.to_string())
@@ -64,6 +66,7 @@ pub async fn webStorageSet(
         .await
         .as_web_storage()
         .map_err(|error| error.to_string())?
+        .borrow()
         .set(package, lection, key, value, replaced)
         .await
         .map_err(|error| error.to_string())

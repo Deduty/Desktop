@@ -1,4 +1,5 @@
 #![feature(trait_upcasting)]
+use std::borrow::Borrow;
 
 mod file;
 mod lection;
@@ -34,3 +35,7 @@ pub use package::{
     SerdePackage,
     DedutyPackage,
 };
+
+
+pub type Borrowed<T> = Box<dyn Borrow<T> + Send + Sync>;
+pub type BorrowedIterator<T> = Box<dyn Iterator<Item = Borrowed<T>> + Send + Sync>;
