@@ -3,8 +3,8 @@ import { invoke } from '@tauri-apps/api'
 export const closeFileChunked = (token: string): Promise<void> => {
   return invoke('closeFileChunked', { token })
     .then((value) => {
-      if (typeof value !== undefined)
-        throw new TypeError(`Internal error: \`closeFileChunked\` has returned \`${value}\` but \`undefined\` was expected`)
+      if (value)
+        throw new TypeError(`Internal error: \`closeFileChunked\` has returned \`${value}\` but \`undefined | null\` was expected`)
     })
 }
 
@@ -41,7 +41,6 @@ export const getFileChunked = (token: string, chunk = 8 * 1024 * 1024): Promise<
         }
       }
 
-      console.warn('chunked.ts', typeof value, typeof new Uint8Array(chunk))
       return new Uint8Array(value)
     })
 }
