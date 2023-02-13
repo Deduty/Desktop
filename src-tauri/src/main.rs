@@ -6,26 +6,13 @@
 #![feature(trait_upcasting)]
 
 use std::sync::Arc;
-use std::error::Error;
 
-use xresult::XReason;
-
-use deduty_service::Service;
+use deduty_service::{ Service, StateFullService };
+use xresult::XError;
 
 mod commands;
 mod managers;
 mod utils;
-
-
-fn left_errors(reasons: impl IntoIterator<IntoIter = impl Iterator<Item = XReason>, Item = XReason>) -> Vec<Box<dyn Error>> {
-    reasons
-        .into_iter()
-        .filter_map(|reason| match reason {
-            Ok(()) => None,
-            Err(error) => Some(error as Box<dyn Error>)
-        })
-        .collect()
-}
 
 
 async fn execute() -> tauri::App {
@@ -38,15 +25,29 @@ async fn execute() -> tauri::App {
 
     {
         let manager = &services;
-        let services: Vec<Box<dyn Service>> = vec![];
+        let mut services: Vec<Box<dyn Service>> = vec![];
+
+        // Auto service
+        services.push(deduty_schema_auto::service());
 
         // Premier service
         // let premier = Box::new(deduty_scheme_premier::service::PremierIndexService::new(packages_root.join("premier"))) as Box<dyn IndexService>;
         // packages.write().await.services_mut().insert("premier".to_string(), premier);
 
         for service in services {
-            let service_root = settings.services().join(service.id());
             let service_id = service.id().to_string();
+            let service_root = settings.services().join(&service_id);
+
+            if let Err(error) = service.set_root(service_root.clone()).await {
+                // TODO: Log error
+                println!("While set root path of service `{service_id}`, next error occurred: {error}");
+                println!("Skipping service with id {service_id}...");
+                continue;
+            }
+
+            // Error may indicate that path already exist
+            let _ = async_std::fs::create_dir_all(&service_root).await;
+            
 
             match service.load_all(&service_root).await {
                 Ok(_) => {
@@ -108,27 +109,33 @@ async fn execute() -> tauri::App {
 
     {
         // SERVICES SAVING
-
         for service in services.list().await {
             let service_root = settings.services().join(service.borrow().id());
-            let service_result = service
-                .borrow()
-                .save_all(&service_root)
-                .await
-                .map(left_errors);
 
-            match service_result.as_deref() {
-                Ok([]) => {},
+            let statefull = service.borrow() as &dyn StateFullService;
+            let mut saving_issues = Vec::new();
+
+            match statefull.save_all(&service_root).await {
                 Ok(reasons) => {
-                    println!("While saving service with id `{}`, unable to save several packages:", service.borrow().id());
                     for reason in reasons {
-                        println!("\t{reason}");
+                        if let Err(reason) = reason {
+                            saving_issues.push(reason);
+                        }
                     }
                 },
                 Err(error) => {
                     println!("While saving service with id `{}` an error occurred: {error}", service.borrow().id());
                 }
             }
+
+            if !saving_issues.is_empty() {
+                let error = XError::from((
+                    "Internal error",
+                    format!("While saving service with id `{}`, unable to save several packages:", service.borrow().id()),
+                    saving_issues.as_slice()
+                ));
+                println!("{error}");
+            }            
         }
     }
 
