@@ -18,7 +18,7 @@ onErrorCaptured((error) => {
   errorMessage.value = error.message
 })
 
-const aboutLection = pack.lections.find(lection => lection.id.toLowerCase() === 'about')
+const aboutLection = pack.lections.find(lection => lection.id === 'about')
 if (aboutLection) {
   componentInstance.value
     = new DynamicComponent(LectionReader, { service: pack.service, pack: pack.id, lection: aboutLection, apiEnabled: true })
