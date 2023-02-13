@@ -25,8 +25,9 @@ export class DedutyPackage {
       return 'Unknown'
 
     const sizes = [
+      // Size must be bytes, not bites
       { prefix: 'B', division: 1 },
-      { prefix: 'KiB', division: 8 },
+      { prefix: 'KiB', division: 1024 },
       { prefix: 'MiB', division: 1024 },
       { prefix: 'GiB', division: 1024 },
       { prefix: 'TiB', division: 1024 },
