@@ -41,7 +41,7 @@ const packageFormClosed = () => {
           text-3xl
           border-rounded
           class="package form button"
-          @click="router.push(`/package/${pack?.id}`)"
+          @click="router.push(`services/${pack.service}/packages/${pack.id}/lections`)"
         >
           <div i-carbon-book />
         </div>
