@@ -10,6 +10,7 @@ export const updateValues = <T extends object>(target: T, values: object): T => 
   for (const [key, value] of Object.entries(values)) {
     if (
       Object.hasOwn(target, key)
+      && value
       && (typeof value === typeof (target as any)[key])
     )
       (target as any)[key] = value
