@@ -24,7 +24,7 @@ document.Deduty = Deduty
   -->
   <!-- eslint-disable -->
   <component is="script" v-if="apiEnabled">
-    const Deduty = document.Deduty;
+    let Deduty = document.Deduty;
     delete document.Deduty;
   </component>
   <!-- eslint-enable -->
