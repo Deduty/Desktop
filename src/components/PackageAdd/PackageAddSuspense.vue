@@ -8,14 +8,12 @@ import * as Commands from '~/composables/commands'
 
 const emit = defineEmits<{ (event: 'packageAddSuspenseClosed'): void }>()
 
-interface IRequirements {
-  [key: string]: string
-}
-
 // { Service: { SerializationKey: SerializationType } }
-const serviceRequirements: Map<string, IRequirements> = new Map()
-for (const service of await Commands.listServices())
-  serviceRequirements.set(service, JSON.parse(await Commands.getServiceAddRequirements(service)) as IRequirements)
+const serviceRequirements: Map<string, Map<string, string>> = new Map()
+for (const service of await Commands.listServices()) {
+  const requirements = JSON.parse(await Commands.getServiceAddRequirements(service)) as object
+  serviceRequirements.set(service, new Map(Object.entries(requirements)))
+}
 
 const packageStore = usePackageStore()
 
@@ -33,7 +31,7 @@ class ServiceComponent extends DynamicComponent {
 
 const requirementSatisfied = (service: ServiceComponent, serialized: Map<string, string>) => {
   service.addPackageDynamicSignal.value = async () => {
-    const pack = await Commands.addPackage(service.name, JSON.stringify(serialized))
+    const pack = await Commands.addPackage(service.name, JSON.stringify(Object.fromEntries(serialized.entries())))
     const packageOptions = await Commands.getPackage(service.name, pack)
     await packageStore.include(DedutyPackage.fromOptions(service.name, packageOptions))
     emit('packageAddSuspenseClosed')
