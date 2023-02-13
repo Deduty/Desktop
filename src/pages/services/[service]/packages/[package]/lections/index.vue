@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { Ref } from 'vue'
+
+import type { DedutyPackage } from '~/composables/deduty'
 import { LectionSearchCriteria } from '~/composables/search'
 
 const properties = defineProps<{ service: string; package: string }>()
@@ -10,13 +13,18 @@ const searchStringUpdated = (newSearchString: string) => {
 
 const packageStore = usePackageStore()
 
-const packageObject = (
-  packageStore
-    .indexedPackages
-    .get(properties.service)
-    ?.get(properties.package))
+const packageObject: Ref<DedutyPackage | null> = ref(null)
+const errorMessage = ref('')
 
-const errorMessage = `Package with id \`${properties.package}\` not found. Probably service or package is not exist.`
+onMounted(async () => {
+  packageObject.value = packageStore.indexedPackages.get(properties.service)?.get(properties.package) || null
+  if (!packageObject.value) {
+    await packageStore.refresh(false, [properties.service])
+    packageObject.value = packageStore.indexedPackages.get(properties.service)?.get(properties.package) || null
+  }
+  if (!packageObject.value)
+    errorMessage.value = `Package with id \`${properties.package}\` not found. Probably service or package is not exist.`
+})
 </script>
 
 <template>
@@ -49,11 +57,11 @@ const errorMessage = `Package with id \`${properties.package}\` not found. Proba
             ]" @search-string-updated="searchStringUpdated"
           />
         </div>
-        <div v-if="!packageObject">
+        <div v-if="errorMessage">
           <Error :message="errorMessage" />
         </div>
         <div
-          v-if="packageObject"
+          v-else-if="packageObject"
           flex-grow
           overflow-hidden
           m-0
@@ -62,6 +70,12 @@ const errorMessage = `Package with id \`${properties.package}\` not found. Proba
             :pack="packageObject"
             :criteria="searchCriteria"
           />
+        </div>
+        <div
+          v-else
+          flex-grow m-0
+        >
+          <Loading flex flex-grow />
         </div>
       </div>
     </div>
