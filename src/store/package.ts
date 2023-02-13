@@ -19,7 +19,7 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
   }
 
   async function exclude(pack: DedutyPackage): Promise<void> {
-    if (!indexedPackages.value.get(pack.service) || indexedPackages.value.get(pack.service)!.get(pack.id) !== undefined) {
+    if (!indexedPackages.value.get(pack.service) || indexedPackages.value.get(pack.service)!.get(pack.id) === undefined) {
       console.warn('Package is not contained by frontend', pack)
       return
     }
@@ -43,24 +43,13 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
       indexedPackages.value.clear()
     }
 
-    if (services.length === 0) {
-      const allServices = await Commands.listServices()
-
-      if (!Array.isArray(allServices))
-        throw new TypeError('TODO: Type error')
-
-      services.push(...allServices)
-    }
+    if (services.length === 0)
+      services.push(...await Commands.listServices())
 
     const updatedServices: Map<string, Set<string>> = new Map()
     for (const service of services) {
       try {
-        const servicePackages = await Commands.listPackages(service)
-
-        if (!Array.isArray(servicePackages))
-          throw new TypeError('TODO: Type error')
-
-        updatedServices.set(service, new Set(servicePackages))
+        updatedServices.set(service, new Set(await Commands.listPackages(service)))
       }
       catch (error) {
         console.error(`Unable to receive packages ids from service\`${service}\`\n`, error)
@@ -72,16 +61,11 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
 
     for (const [service, packages] of updatedServices) {
       for (const pack of packages) {
-        Commands.getPackage(service, pack)
-          .then((packageOptions: IDedutyPackage) => {
-            const objectPackage = DedutyPackage.fromOptions(service, packageOptions)
+        const packageOptions: IDedutyPackage = await Commands.getPackage(service, pack)
+        const objectPackage = DedutyPackage.fromOptions(service, packageOptions)
 
-            indexedPackages.value.get(service)!.set(pack, objectPackage)
-            storedPackages.value.push(objectPackage)
-          })
-          .catch((error: any) => {
-            console.error(`Unable to receive package with id \`${pack}\` from service with id \`${service}\`:\n`, error)
-          })
+        indexedPackages.value.get(service)!.set(pack, objectPackage)
+        storedPackages.value.push(objectPackage)
       }
     }
   }
