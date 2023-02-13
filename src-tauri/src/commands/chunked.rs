@@ -46,11 +46,11 @@ pub async fn openFileChunked(
 
 #[tauri::command]
 #[allow(non_snake_case)]
-pub async fn getFileChunked<'s>(readers: StateReaderManager<'s>, file: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
+pub async fn getFileChunked<'s>(readers: StateReaderManager<'s>, token: &str, chunk: usize) -> Result<Option<Vec<u8>>, String> {
     readers
-        .get(file)
+        .get(token)
         .await
-        .ok_or_else(|| XError::from(("Internal error", format!("Reader with id `{file}` not found"))).to_string())?
+        .ok_or_else(|| XError::from(("Internal error", format!("Reader with id `{token}` not found"))).to_string())?
         .next(chunk)
         .await
         .map_err(|error| error.to_string())
