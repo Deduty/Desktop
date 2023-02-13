@@ -36,3 +36,17 @@ impl<T> From<XError> for crate::XResult<T> {
         Err(Box::new(value))
     }
 }
+
+impl<K: Display, M: Display> From<(K, M, &[Box<dyn Error + Sync + Send>])> for XError {
+    fn from((name, message, errors): (K, M, &[Box<dyn Error + Sync + Send>])) -> Self {
+        Self {
+            name: name.to_string(),
+            message:
+                [message]
+                    .into_iter()
+                    .map(|message| format!("{message}:"))
+                    .chain(errors.iter().map(|error| format!("\n\t{error}")))
+                    .collect::<String>()
+        }
+    }
+}
