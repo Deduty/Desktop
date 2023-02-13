@@ -26,7 +26,7 @@ class ServiceComponent {
 
 const requirementSatisfied = (service: ServiceComponent, serialized: Map<string, string>) => {
   service.addPackageDynamicSignal.value = async () => {
-    await Commands.updatePackage(pack.service, pack.id, JSON.stringify(serialized))
+    await Commands.updatePackage(pack.service, pack.id, JSON.stringify(Object.fromEntries(serialized.entries())))
     await packageStore.exclude(pack)
     await packageStore.refresh(false, [pack.service])
     emit('packageUpdated')
