@@ -1,5 +1,7 @@
 <script setup lang="ts">
 // COMPONENT IMPORTS
+import Error from '../Error.vue'
+
 import ReaderHtmlComponent from './ReaderHtmlComponent.vue'
 import ReaderImageComponent from './ReaderImageComponent.vue'
 import ReaderMarkdownComponent from './ReaderMarkdownComponent.vue'
@@ -65,8 +67,8 @@ onErrorCaptured((error) => {
         <template #default>
           <component
             :is="componentInstance.comp"
-            v-bind="componentInstance.prop"
-            v-on="componentInstance.even"
+            v-bind="componentInstance?.prop"
+            v-on="componentInstance?.even"
           />
         </template>
         <!-- LOADING - SHOW LOADING ANIMATION -->
