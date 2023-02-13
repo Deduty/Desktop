@@ -43,15 +43,15 @@ export const listPackages = (service: string): Promise<string[]> => {
 export const subPackage = (service: string, pack: string): Promise<void> => {
   return invoke('subPackage', { service, package: pack })
     .then((value) => {
-      if (typeof value !== undefined)
-        throw new TypeError(`Internal error: \`subPackage\` has returned \`${value}\` but \`undefined\` was expected`)
+      if (value)
+        throw new TypeError(`Internal error: \`subPackage\` has returned \`${value}\` but \`undefined | null\` was expected`)
     })
 }
 
 export const updatePackage = (service: string, pack: string, serialized: string): Promise<void> => {
   return invoke('updatePackage', { service, package: pack, serialized })
     .then((value) => {
-      if (typeof value !== undefined)
-        throw new TypeError(`Internal error: \`subPackage\` has returned \`${value}\` but \`undefined\` was expected`)
+      if (value)
+        throw new TypeError(`Internal error: \`subPackage\` has returned \`${value}\` but \`undefined | null\` was expected`)
     })
 }
