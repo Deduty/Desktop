@@ -36,7 +36,7 @@ for (const lection of pack.lections) {
       <li
         v-for="(pair, index) in lectionDisplayItems" v-show="pair.showed"
         :key="index"
-        @click="router.push(`services/${pack.service}/packages/${pack.id}/lections/${pair.lection.id}`)"
+        @click="router.push(`/services/${pack.service}/packages/${pack.id}/lections/${pair.lection.id}`)"
       >
         <LectionItem :lection="pair.lection" />
       </li>
