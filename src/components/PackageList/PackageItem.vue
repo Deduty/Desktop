@@ -31,7 +31,7 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
         class="black-text"
         text="sm right"
       >
-        {{ pack.service }}
+        {{ `${pack.service.charAt(0).toUpperCase()}${pack.service.slice(1)}` }}
       </div>
     </div>
     <div
