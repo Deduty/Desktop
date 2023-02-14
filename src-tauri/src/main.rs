@@ -81,6 +81,9 @@ async fn execute() -> tauri::App {
             self::commands::chunked::openFileChunked,
 
             // WEB STORAGE
+            self::commands::web_storage::webStorageExport,
+            self::commands::web_storage::webStorageImport,
+            self::commands::web_storage::webStorageClear,
             self::commands::web_storage::webStorageDelete,
             self::commands::web_storage::webStorageGet,
             self::commands::web_storage::webStorageSet,
