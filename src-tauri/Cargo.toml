@@ -20,6 +20,7 @@ deduty_package = { path = "./crates/deduty_package", features = ["serde"] }
 deduty_service = { path = "./crates/deduty_service" }
 
 ## Schemes
+deduty_schema_auto = { path = "./crates/deduty_schema_auto" }
 # deduty_scheme_premier = { path = "./crates/deduty_scheme_premier" }
 
 ## Support
@@ -31,7 +32,7 @@ async-trait = "0.1.58"
 directories = "4.0.1"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2.4", features = ["dialog-open"] }
+tauri = { version = "1.2.4", features = ["dialog-open", "dialog-save"] }
 toml = "0.5"
 tokio = { version = "1.25.0", features = ["full"] }
 uuid = "1.2.2"

@@ -616,6 +616,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "deduty_schema_auto"
+version = "0.1.0"
+dependencies = [
+ "async-std",
+ "async-trait",
+ "deduty_package",
+ "deduty_service",
+ "serde",
+ "serde_json",
+ "toml",
+ "uuid 1.2.2",
+ "xresult",
+]
+
+[[package]]
 name = "deduty_service"
 version = "0.1.0"
 dependencies = [
@@ -645,6 +660,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "deduty_package",
+ "deduty_schema_auto",
  "deduty_service",
  "directories",
  "serde",
@@ -2360,9 +2376,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.91"
+version = "1.0.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "877c235533714907a8c2464236f5c4b2a17262ef1bd71f38f35ea592c8da6883"
+checksum = "cad406b69c91885b5107daf2c29572f6c8cdb3c66826821e286c533490c0bc76"
 dependencies = [
  "itoa 1.0.4",
  "ryu",
