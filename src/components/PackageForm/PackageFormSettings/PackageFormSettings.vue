@@ -9,8 +9,6 @@ const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
 
 const packageStore = usePackageStore()
 
-const updateComponentShowed = ref(false)
-
 /* ============================= DELETE BUTTON ============================= */
 const deleteButtonHolden = ref(false)
 const deleteTimeout: Ref<any> = ref(null)
@@ -30,12 +28,6 @@ watch(deleteButtonHolden, (isHolden) => {
     clearTimeout(deleteTimeout.value)
   }
 })
-/* ========================================================================= */
-
-const errorMessage = ref('')
-onErrorCaptured((error) => {
-  errorMessage.value = error.message
-})
 </script>
 
 <template>
@@ -48,46 +40,16 @@ onErrorCaptured((error) => {
       w-full
       flex flex-col
     >
-      <div
-        icon-btn
-        m-2 p-2
-        flex flex-row flex-grow
-        justify-between
-        @click="() => updateComponentShowed = !updateComponentShowed"
-      >
-        <p>
-          Update package
-        </p>
-        <div
-          class="update-sign"
-          :class="{ 'rotate-180': updateComponentShowed }"
-          text-lg
-          i-carbon:chevron-down
-        />
-      </div>
-      <div
-        m-2 mt-0
-        border="~ rounded gray-200 dark:gray-700"
+      <PackageFormSettingsUpdate
+        :pack="pack"
+        @package-form-closed="() => emit('packageFormClosed')"
       />
-      <div
-        class="update-menu"
-        :class="{ showed: updateComponentShowed }"
-      >
-        <!-- ERROR - SHOW ERROR WHEN CHILD COMPONENT ERROR MESSAGE CAUGHT -->
-        <div v-if="errorMessage" flex-grow>
-          <Error :message="errorMessage" />
-        </div>
-        <Suspense v-else>
-          <!-- DONE - SHOW DYNAMIC COMPONENT -->
-          <template #default>
-            <PackageFormSettingsUpdate :pack="pack" @package-updated="() => emit('packageFormClosed')" />
-          </template>
-          <!-- LOADING - SHOW LOADING ANIMATION -->
-          <template #fallback>
-            <Loading />
-          </template>
-        </Suspense>
-      </div>
+    </div>
+    <div
+      w-full
+      flex flex-col
+    >
+      <PackageFormSettingsWebStorage :pack="pack" />
     </div>
     <div mt-a />
     <div
@@ -109,18 +71,6 @@ onErrorCaptured((error) => {
 </template>
 
 <style lang="sass">
-.update-sign
-  transition: transform 200ms ease-in-out
-
-.update-menu
-  transition: all 600ms ease-in-out
-  overflow: hidden
-  max-height: 0
-
-.update-menu.showed
-  transition: all 600ms ease-in-out
-  max-height: 100vh
-
 .progress
     animation: progressBar 3s ease-in-out
     animation-fill-mode: forwards
