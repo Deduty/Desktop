@@ -4,9 +4,12 @@ use std::borrow::Borrow;
 mod file;
 mod lection;
 mod package;
+mod reader;
 
 #[cfg(feature = "serde")]
 pub mod serde;
+
+pub use reader::DedutyFileReader;
 
 pub use file::{
     UniqueFile,
@@ -14,8 +17,6 @@ pub use file::{
     ReadFile,
     SerdeFile,
     DedutyFile,
-
-    DedutyFileReader
 };
 
 pub use lection::{
