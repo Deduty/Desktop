@@ -6,6 +6,53 @@ type StateServiceManager<'l> = tauri::State<'l, std::sync::Arc<ServiceManager>>;
 
 #[tauri::command]
 #[allow(non_snake_case)]
+pub async fn webStorageExport(services: StateServiceManager<'_>, service: &str, package: &str, path: &str) -> Result<(), String> {
+    println!("export! {path}");
+    services
+        .access(service)
+        .await
+        .as_web_storage()
+        .map_err(|error| error.to_string())?
+        .borrow()
+        .export(package, path)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+
+#[tauri::command]
+#[allow(non_snake_case)]
+pub async fn webStorageImport(services: StateServiceManager<'_>, service: &str, package: &str, path: &str) -> Result<(), String> {
+    println!("import! {path}");
+    services
+        .access(service)
+        .await
+        .as_web_storage()
+        .map_err(|error| error.to_string())?
+        .borrow()
+        .import(package, path)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+
+#[tauri::command]
+#[allow(non_snake_case)]
+pub async fn webStorageClear(services: StateServiceManager<'_>, service: &str, package: &str) -> Result<(), String> {
+    services
+        .access(service)
+        .await
+        .as_web_storage()
+        .map_err(|error| error.to_string())?
+        .borrow()
+        .clear(package)
+        .await
+        .map_err(|error| error.to_string())
+}
+
+
+#[tauri::command]
+#[allow(non_snake_case)]
 pub async fn webStorageDelete(
     services: StateServiceManager<'_>,
     service: &str,
