@@ -16,23 +16,47 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
       flex flex-col flex-grow
     >
       <div
-        mr-a p-2
-        text-2xl
+        flex flex-grow flex-row
+        items-baseline
       >
-        {{ pack.meta.name }}
+        <div
+          p-2
+          text-2xl
+        >
+          {{ pack.meta.name }}
+        </div>
+        <div
+          m-a
+          min-w-1
+          w-1
+        />
+        <div
+          text-lg
+        >
+          {{ `${pack.service.charAt(0).toUpperCase()}${pack.service.slice(1)}` }}
+        </div>
       </div>
       <div
         flex flex-row
         mt-a
-        m-0 pl-2 pr-2
+        m-0 pl-2
 
         class="gray-text"
         text="gray-400 dark:gray-500"
       >
-        <div mr-a>
+        <div
+          class="gray-text"
+          text="sm gray-400 dark:gray-500"
+        >
           Version: {{ pack.meta.version }}
         </div>
-        <div>Local</div>
+        <div
+          class="gray-text"
+          text="sm right gray-400 dark:gray-500"
+          ml-a
+        >
+          {{ pack.packageSize() }}
+        </div>
       </div>
     </div>
   </div>
