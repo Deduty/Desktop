@@ -1,14 +1,14 @@
 use async_trait::async_trait;
-use xresult::XResult;
+use xresult::{ XResult, XReason };
 
 
 #[async_trait]
 pub trait WebStorageService: Send + Sync {
-    async fn export(&self, package: &str, path: &str) -> XResult<()>;
+    async fn export(&self, package: &str, path: &str) -> XReason;
 
-    async fn import(&self, package: &str, path: &str) -> XResult<()>;
+    async fn import(&self, package: &str, path: &str) -> XReason;
 
-    async fn clear(&self, package: &str) -> XResult<()>;
+    async fn clear(&self, package: &str) -> XReason;
 
     async fn delete(&self, package: &str, lection: Option<&str>, key: &str) -> XResult<Option<String>>;
 
