@@ -4,6 +4,7 @@ use async_std::io::{ReadExt, WriteExt};
 use async_std::fs::File;
 use async_std::path::PathBuf;
 use async_std::stream::StreamExt;
+use async_trait::async_trait;
 use regex::Regex;
 use uuid::Uuid;
 
@@ -337,6 +338,7 @@ impl PremierPackage {
     }
 }
 
+#[async_trait]
 impl DedutyPackage for PremierPackage {
     fn as_any_ref(&self) -> &(dyn std::any::Any + Send + Sync) {
         self
@@ -348,6 +350,44 @@ impl DedutyPackage for PremierPackage {
 
     fn id(&self) -> String {
         self.id.to_string()
+    }
+
+
+    fn service(&self) -> String {
+        "premier".to_string()
+    }
+
+    async fn size(&self) -> XResult<Option<usize>> {
+        // Rough calculations without package and lection toml files
+        let mut size = 0usize;
+
+        // Calculate package files size
+        for file in self.files.collection.values() {
+            let location = file.location().await?;
+            size += async_std::fs::File::open(location.clone())
+                .await
+                .map_err(|error| XError::from(("PremierPackageError", format!("Unable to open file `{}` due to unexpected error {error}", location.to_string_lossy()))))?
+                .metadata()
+                .await
+                .map_err(|error| XError::from(("PremierPackageError", format!("Unable to get metadata from file `{}` due to unexpected error {error}", location.to_string_lossy()))))?
+                .len() as usize;
+        }
+
+        // Calculate lection files size
+        for lection in self.lections.iter() {
+            for file in lection.as_any_ref().downcast_ref::<PremierLection>().unwrap().files.collection.iter() {
+                let location = file.location().await?;
+                size += async_std::fs::File::open(location.clone())
+                    .await
+                    .map_err(|error| XError::from(("PremierPackageError", format!("Unable to open file `{}` due to unexpected error {error}", location.to_string_lossy()))))?
+                    .metadata()
+                    .await
+                    .map_err(|error| XError::from(("PremierPackageError", format!("Unable to get metadata from file `{}` due to unexpected error {error}", location.to_string_lossy()))))?
+                    .len() as usize;
+            }
+        }
+
+        Ok(Some(size))
     }
 
     fn files(&self) -> &dyn DedutyFileCollection {
