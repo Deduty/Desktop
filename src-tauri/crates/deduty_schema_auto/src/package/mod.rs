@@ -207,6 +207,10 @@ impl AutoPackage {
         )
     }
 
+    pub fn raw_lection(&self, lection: &str) -> Option<Arc<AutoLection>> {
+        self.lections_index.get(lection).cloned()
+    }
+
     /// Removes only files that locates under root
     /// Makes it recursively
     ///

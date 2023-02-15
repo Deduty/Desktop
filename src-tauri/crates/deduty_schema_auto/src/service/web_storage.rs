@@ -69,16 +69,30 @@ impl WebStorageService for AutoPackageService {
         self.ensure_existence(package, lection).await?;
 
         match lection {
-            Some(lection) => Ok(
-                self.load_web_storage(package)
-                    .await?
-                    .write()
-                    .await
-                    .lections
-                    .entry(lection.to_string())
-                    .or_default()
-                    .remove(key)
-            ),
+            Some(lection) => {
+                let origin = {
+                    self.packages
+                        .read()
+                        .await
+                        .get(package)
+                        .expect("Ensure existence is broken")
+                        .raw_lection(lection)
+                        .expect("Ensure existence is broken")
+                        .origin()
+                        .to_string()
+                };
+
+                Ok(
+                    self.load_web_storage(package)
+                        .await?
+                        .write()
+                        .await
+                        .lections
+                        .entry(origin)
+                        .or_default()
+                        .remove(key)
+                )
+            }
             None => Ok(
                 self.load_web_storage(package)
                     .await?
@@ -94,18 +108,32 @@ impl WebStorageService for AutoPackageService {
         self.ensure_existence(package, lection).await?;
 
         match lection {
-            Some(lection) => Ok(
-                self.load_web_storage(package)
-                    .await?
-                    .write()
-                    .await
-                    .lections
-                    .entry(lection.to_string())
-                    .or_default()
-                    .get(key)
-                    .cloned()
-                    .or(fallback.map(ToString::to_string))
-            ),
+            Some(lection) => {
+                let origin = {
+                    self.packages
+                        .read()
+                        .await
+                        .get(package)
+                        .expect("Ensure existence is broken")
+                        .raw_lection(lection)
+                        .expect("Ensure existence is broken")
+                        .origin()
+                        .to_string()
+                };
+
+                Ok(
+                    self.load_web_storage(package)
+                        .await?
+                        .write()
+                        .await
+                        .lections
+                        .entry(origin)
+                        .or_default()
+                        .get(key)
+                        .cloned()
+                        .or(fallback.map(ToString::to_string))
+                )
+            }
             None => Ok(
                 self.load_web_storage(package)
                     .await?
@@ -126,12 +154,24 @@ impl WebStorageService for AutoPackageService {
             Some(lection) => {
                 let mut previous = None;
 
+                let origin = {
+                    self.packages
+                        .read()
+                        .await
+                        .get(package)
+                        .expect("Ensure existence is broken")
+                        .raw_lection(lection)
+                        .expect("Ensure existence is broken")
+                        .origin()
+                        .to_string()
+                };
+
                 self.load_web_storage(package)
                     .await?
                     .write()
                     .await
                     .lections
-                    .entry(lection.to_string())
+                    .entry(origin)
                     .or_default()
                     .entry(key.to_string())
                     .and_modify(|stored| if replaced {

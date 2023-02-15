@@ -43,7 +43,7 @@ pub struct AutoLection {
     path: PathBuf,
 
     name: String,
-    origin: Option<String>,
+    origin: String,
 
     meta: String,
 
@@ -63,7 +63,7 @@ impl AutoLection {
         };
 
         let mut name = None;
-        let origin = path.file_name().and_then(os_to_string);
+        let origin = path.file_name().and_then(os_to_string).unwrap_or(id.to_string());
 
 
         let lection: Option<Lection> = {
@@ -115,7 +115,7 @@ impl AutoLection {
 
             if let Some(lection) = lection.and_then(|lection| lection.lection) {
                 id = lection.id.unwrap_or(id);
-                name = lection.name.or_else(|| origin.clone());
+                name = lection.name.or_else(|| Some(origin.to_string()));
 
                 if let Some(first) = lection.first {
                     for (order, name) in first.into_iter().enumerate() {
@@ -182,17 +182,17 @@ impl AutoLection {
         })
     }
 
+    pub fn origin(&self) -> &str {
+        &self.origin
+    }
+
     /// Ensures lection dir existence
     pub async fn save(&self, root: &PathBuf) -> XReason {
         if self.path.starts_with(root) {
             return Ok(())
         }
 
-        let dirname = match &self.origin {
-            Some(origin) => origin,
-            None => &self.id
-        };
-        let lection_root = root.join(dirname);
+        let lection_root = root.join(&self.origin);
 
         // Safe since `create_dir` return error on path existence
         let _  = async_std::fs::create_dir(&lection_root).await;
