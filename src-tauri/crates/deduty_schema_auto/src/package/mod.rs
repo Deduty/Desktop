@@ -9,7 +9,7 @@ use async_std::{
 };
 use deduty_package::{ MetaLection, UniqueLection };
 use serde::{ Deserialize, Serialize };
-use xresult::{ XError, XReason, XResult };
+use xresult::{ XReason, XResult };
 
 use crate::lection::AutoLection;
 use crate::schemes::{ Package, PackageMeta, PackageLections, PackageManifest };
@@ -78,7 +78,7 @@ impl AutoPackage {
                 .map_err(|error|
                     crate::error::error(format!("Unable to get package meta from `{package_toml:#?}`: {error}")))?;
 
-            if package_meta.manifest.name.eq_ignore_ascii_case("auto") {
+            if !package_meta.manifest.name.eq_ignore_ascii_case("auto") {
                 return crate::error::error_err(format!("Manifest name `{}` is not supported", package_meta.manifest.name));
             }
 
@@ -254,8 +254,11 @@ impl AutoPackage {
             })
         };
 
-        let serialized = toml::to_vec(&package_toml_content)
-            .map_err(|error| Box::new(XError::from(("Auto service error", format!("Unable to serialize package metadata for `{}`: {error}", self.id.clone())))))?;
+        let serialized = {
+            toml::to_vec(&package_toml_content)
+                .map_err(|error|
+                    crate::error::error(format!("Unable to serialize package metadata for `{}`: {error}", self.id.to_string())))?
+        };
         
         File::create(package_root.join("package.toml"))
             .await
