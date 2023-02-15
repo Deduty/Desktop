@@ -271,8 +271,6 @@ impl AutoPackage {
 
     /// Sets id according on origin name equality (excluding package itself)
     pub async fn update(&mut self, source: &AutoPackage) {
-        // self.id = source.id.clone();
-
-        todo!()
+        self.id = source.id.clone();
     }
 }

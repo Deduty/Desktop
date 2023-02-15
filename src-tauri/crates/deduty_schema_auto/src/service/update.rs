@@ -27,11 +27,15 @@ impl UpdateService for AutoPackageService {
             return crate::error::error_err(format!("Package with id `{id}` not found"));
         };
 
-        // Init storage if it exist
+        // Init storage if it exist -> Save web data in memory
         let _ = self.load_web_storage(id).await;
+        let Some(root) = self.root.read().await.clone() else {
+            return crate::error::error_err(format!("Unable to remove old package for `{id}`: Service root is unset"));
+        };
 
         let mut updated = AutoPackage::load(PathBuf::from(path)).await?;
         updated.update(&package).await;
+        package.remove(&root).await?;
         self.packages.write().await.insert(id.to_string(), Arc::new(updated));
 
         Ok(())
