@@ -62,28 +62,32 @@ impl AutoLection {
             false => uuid::Uuid::new_v4().to_string()
         };
 
-        let mut name = None;
+        
         let origin = path.file_name().and_then(os_to_string).unwrap_or(id.to_string());
-
+        let mut name = Some(origin.to_string());
 
         let lection: Option<Lection> = {
             let lection_toml = path.join("lection.toml");
-
-            let mut buffer = Vec::new();
-            File::open(&lection_toml)
-                .await
-                .map_err(|error|
-                    crate::error::error(format!("Unable to open file `{lection_toml:#?}`: {error}")))?
-                .read_to_end(&mut buffer)
-                .await
-                .map_err(|error|
-                    crate::error::error(format!("Unable to read file `{lection_toml:#?}`: {error}")))?;
-    
-            Some(
-                toml::from_slice(&buffer)
-                    .map_err(|error|
-                        crate::error::error(format!("Unable to get lection meta from `{lection_toml:#?}`: {error}")))?
-            )
+            match lection_toml.exists().await {
+                true => {
+                    let mut buffer = Vec::new();
+                    File::open(&lection_toml)
+                        .await
+                        .map_err(|error|
+                            crate::error::error(format!("Unable to open file `{lection_toml:#?}`: {error}")))?
+                        .read_to_end(&mut buffer)
+                        .await
+                        .map_err(|error|
+                            crate::error::error(format!("Unable to read file `{lection_toml:#?}`: {error}")))?;
+            
+                    Some(
+                        toml::from_slice(&buffer)
+                            .map_err(|error|
+                                crate::error::error(format!("Unable to get lection meta from `{lection_toml:#?}`: {error}")))?
+                    )
+                }
+                false => None
+            }
         };
 
         let mut files = Vec::new();
@@ -101,7 +105,10 @@ impl AutoLection {
                     continue;
                 };
 
-                if !path.is_file().await {
+                if !path.is_file().await
+                   || name.eq_ignore_ascii_case("lection.toml")
+                   || name.starts_with('.')
+                {
                     continue;
                 }
 
@@ -132,26 +139,27 @@ impl AutoLection {
 
             files.sort_by(|(lhs, _), (rhs, _)| {
                 match (first_names.get(lhs), last_names.get(lhs), first_names.get(rhs), last_names.get(rhs)) {
-                    // <l, >l, <r, >r
-
-                    // <l, <r
                     // Both first -> compare positions in first array
                     (Some(lhs_first), None, Some(rhs_first), None) => lhs_first.cmp(rhs_first),
 
-                    // >l, >r
                     // Both last -> compare positions in last array
                     (None, Some(lhs_last), None, Some(rhs_last)) => lhs_last.cmp(rhs_last),
 
-                    // <l, >r
-                    // Lhs in first, rhs in last
-                    (Some(_), None, None, Some(_)) => std::cmp::Ordering::Less,
+                    
+                    // Other case, but lhs is first
+                    (Some(_), None, None, None) => std::cmp::Ordering::Less,
 
-                    // >l, <r
-                    // Lhs in last, rhs in first
-                    (None, Some(_), Some(_), None) => std::cmp::Ordering::Greater,
+                    // Other case, but lhs is last
+                    (None, Some(_), None, None) => std::cmp::Ordering::Greater,
 
-                    // Any strange case and no order case -> cmp by name
-                    _ => lhs.cmp(rhs)
+                    // Other case, but rhs is first
+                    (None, None, Some(_), None) => std::cmp::Ordering::Greater,
+
+                    // Other case, but rhs is last
+                    (None, None, None, Some(_)) => std::cmp::Ordering::Less,
+
+                    // Fallback to windows like natural sort
+                    _ => natord::compare(lhs, rhs)
                 }
             });
         }

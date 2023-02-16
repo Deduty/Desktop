@@ -85,6 +85,32 @@ impl AutoPackage {
             Some(package_meta)
         };
 
+        let (meta_package, meta_lection) = {
+            package
+                .map(|meta| (meta.package, meta.lection))
+                .unwrap_or((None, None))
+        };
+
+        let package_meta: Option<AutoPackageMeta> = match meta_package {
+            Some(meta) => {
+                id = meta.id.clone().unwrap_or(id);
+                about = meta.about.clone().unwrap_or(about);
+                name = meta.name.clone().unwrap_or(name);
+
+                Some(
+                    AutoPackageMeta {
+                        name: name.to_string(),
+                        language: meta.language,
+                        version: meta.version,
+                        tags: meta.tags
+                    }
+                )
+            }
+            None => Some(
+                AutoPackageMeta { name: name.to_string(), ..Default::default() }
+            ),
+        };
+
         let mut lections = Vec::new();
         {
             let mut entries = async_std::fs::read_dir(&path)
@@ -100,7 +126,7 @@ impl AutoPackage {
                     continue;
                 };
 
-                if !path.is_dir().await {
+                if !path.is_dir().await || name.starts_with('.') {
                     continue;
                 }
 
@@ -108,12 +134,6 @@ impl AutoPackage {
                 lections.push((name, lection));
             }
         }
-
-        let (meta_package, meta_lection) = {
-            package
-                .map(|meta| (meta.package, meta.lection))
-                .unwrap_or((None, None))
-        };
 
         {
             let mut first_names = HashMap::new();
@@ -135,47 +155,30 @@ impl AutoPackage {
 
             lections.sort_by(|(lhs, _), (rhs, _)| {
                 match (first_names.get(lhs), last_names.get(lhs), first_names.get(rhs), last_names.get(rhs)) {
-                    // <l, >l, <r, >r
-
-                    // <l, <r
                     // Both first -> compare positions in first array
                     (Some(lhs_first), None, Some(rhs_first), None) => lhs_first.cmp(rhs_first),
 
-                    // >l, >r
                     // Both last -> compare positions in last array
                     (None, Some(lhs_last), None, Some(rhs_last)) => lhs_last.cmp(rhs_last),
 
-                    // <l, >r
-                    // Lhs in first, rhs in last
-                    (Some(_), None, None, Some(_)) => std::cmp::Ordering::Less,
+                    
+                    // Other case, but lhs is first
+                    (Some(_), None, None, None) => std::cmp::Ordering::Less,
 
-                    // >l, <r
-                    // Lhs in last, rhs in first
-                    (None, Some(_), Some(_), None) => std::cmp::Ordering::Greater,
+                    // Other case, but lhs is last
+                    (None, Some(_), None, None) => std::cmp::Ordering::Greater,
 
-                    // Any strange case and no order case -> cmp by name
-                    _ => lhs.cmp(rhs)
+                    // Other case, but rhs is first
+                    (None, None, Some(_), None) => std::cmp::Ordering::Greater,
+
+                    // Other case, but rhs is last
+                    (None, None, None, Some(_)) => std::cmp::Ordering::Less,
+
+                    // Fallback to windows like natural sort
+                    _ => natord::compare(lhs, rhs)
                 }
             });
         }
-
-        let package_meta: Option<AutoPackageMeta> = match meta_package {
-            Some(meta) => {
-                id = meta.id.clone().unwrap_or(id);
-                about = meta.about.clone().unwrap_or(about);
-                name = meta.name.clone().unwrap_or(name);
-
-                Some(
-                    AutoPackageMeta {
-                        name: name.to_string(),
-                        language: meta.language,
-                        version: meta.version,
-                        tags: meta.tags
-                    }
-                )
-            }
-            None => None,
-        };
 
         let mut size = 0usize;
         for (_, lection) in lections.iter() {
@@ -257,7 +260,7 @@ impl AutoPackage {
         let serialized = {
             toml::to_vec(&package_toml_content)
                 .map_err(|error|
-                    crate::error::error(format!("Unable to serialize package metadata for `{}`: {error}", self.id.to_string())))?
+                    crate::error::error(format!("Unable to serialize package metadata for `{}`: {error}", self.id)))?
         };
         
         File::create(package_root.join("package.toml"))
