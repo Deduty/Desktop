@@ -1,4 +1,12 @@
 export default {
+  'hljs': {
+    'display': 'block',
+    'overflow-x': 'auto',
+    'background': '#1d1f21',
+    'border-radius': '0.25rem',
+    'color': '#c5c8c6',
+    'padding': '0.5em',
+  },
   'hljs-comment': {
     color: '#969896',
   },
@@ -79,13 +87,6 @@ export default {
   },
   'hljs-selector-tag': {
     color: '#b294bb',
-  },
-  'hljs': {
-    display: 'block',
-    overflowX: 'auto',
-    background: '#1d1f21',
-    color: '#c5c8c6',
-    padding: '0.5em',
   },
   'hljs-emphasis': {
     fontStyle: 'italic',

@@ -1,10 +1,11 @@
 export default {
   'hljs': {
-    display: 'block',
-    overflowX: 'auto',
-    background: '#f8f8f8 ',
-    color: '#84613d',
-    padding: '0.5em',
+    'display': 'block',
+    'overflow-x': 'auto',
+    'background': '#f8f8f8 ',
+    'border-radius': '0.25rem',
+    'color': '#84613d',
+    'padding': '0.5em',
   },
   'hljs-comment': {
     color: '#a57a4c',
