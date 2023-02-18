@@ -1,7 +1,7 @@
 {
   "name": "deduty.desktop",
   "type": "module",
-  "version": "0.4.0",
+  "version": "0.5.1",
   "private": true,
   "packageManager": "pnpm@7.8.0",
   "scripts": {
