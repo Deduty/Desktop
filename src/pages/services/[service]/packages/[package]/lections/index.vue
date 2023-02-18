@@ -61,7 +61,7 @@ onMounted(async () => {
           <Error :message="errorMessage" />
         </div>
         <div
-          v-else-if="packageObject"
+          v-if="packageObject"
           flex-grow
           overflow-hidden
           m-0
