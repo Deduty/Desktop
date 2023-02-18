@@ -38,7 +38,20 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
       </div>
       <div
         flex flex-row
-        mt-a
+        m-0 pl-2
+
+        class="gray-text"
+        text="gray-400 dark:gray-500"
+      >
+        <div
+          class="gray-text"
+          text="sm gray-400 dark:gray-500"
+        >
+          Language: {{ pack.meta.language }}
+        </div>
+      </div>
+      <div
+        flex flex-row
         m-0 pl-2
 
         class="gray-text"
