@@ -1,13 +1,48 @@
 <script setup lang="ts">
-// MARKDOWN IMPORTS
-import MarkdownIt from 'markdown-it'
-import { escapeHtml } from 'markdown-it/lib/common/utils'
-import HightLightJS from 'highlight.js'
+// Unified
+import { unified } from 'unified'
 
+// Unified - Remark
+import remarkParse from 'remark-parse'
+import remarkMath from 'remark-math'
+import remarkRehype from 'remark-rehype'
+
+// Unified - Rehype
+import rehypeKatex from 'rehype-katex'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeStringify from 'rehype-stringify'
+
+// Highlight styles
 import { getCurrentStyles } from '~/composables/highlight'
+
+// Properties
 import type { DedutyFile } from '~/composables/deduty'
 
 const { file } = defineProps<{ file: DedutyFile }>()
+
+const parsedContent = ref('')
+
+const readerBlob = await (await file.createReader()).readAll()
+if (!readerBlob)
+  throw new Error('Reader return null value. Probably file empty or already was read. Try to reload page')
+
+const readerBuffer = await readerBlob.arrayBuffer()
+const readerContent = (new TextDecoder()).decode(readerBuffer)
+
+await unified()
+  // Remark
+  .use(remarkParse)
+  .use(remarkMath, { singleDollarTextMath: true })
+  .use(remarkRehype, { allowDangerousHtml: true })
+  // Rehype
+  .use(rehypeKatex, { displayMode: true })
+  .use(rehypeHighlight, { ignoreMissing: true })
+  .use(rehypeStringify, { allowDangerousHtml: true })
+  // Conclusion
+  .process(readerContent)
+  .then((file) => {
+    parsedContent.value = file.toString()
+  })
 
 /* ========================= DARK DYNAMIC SUPPORT ========================== */
 const updateMarkdownHighlight = (isDark: boolean) => {
@@ -26,43 +61,6 @@ const updateMarkdownHighlight = (isDark: boolean) => {
 const isDark = useDark()
 watch(isDark, updateMarkdownHighlight)
 /* ========================= ==== ======= ======= ========================== */
-
-/* ========================= MARKDOWN CONFIGURATION ======================== */
-const highlight = (source: string, language: string, _: string): string => {
-  let compiledSource = ''
-
-  try {
-    compiledSource = HightLightJS.highlight(source, { language }).value
-  }
-  catch (error) {
-    console.error(`Unable to highlight \`${language}\`. Unexpected error:`, error, '\nFallback...')
-    compiledSource = escapeHtml(source)
-  }
-
-  return `<pre class="hljs"><code class="language-${language}">${compiledSource}</code></pre>`
-}
-
-const ConfiguredMarkdownIt = MarkdownIt({
-  html: true,
-  langPrefix: 'language-',
-  linkify: true,
-  typographer: true,
-  highlight,
-})
-/* ========================= ======== ============= ======================== */
-
-/* ====================== PREPARING DYNAMIC COMPONENT ====================== */
-const readerBlob = await (await file.createReader()).readAll()
-if (!readerBlob)
-  throw new Error('Reader return null value. Probably file empty or already was read. Try to reload page')
-
-const readerBuffer = await readerBlob.arrayBuffer()
-const decodedContent = (new TextDecoder()).decode(readerBuffer)
-
-const RuntimeMarkdown = {
-  template: ConfiguredMarkdownIt.render(decodedContent),
-}
-/* ====================== ========= ======= ========= ====================== */
 
 onMounted(async () => {
   updateMarkdownHighlight(isDark.value)
@@ -90,6 +88,11 @@ onMounted(async () => {
   <div
     class="shiki text-left"
   >
-    <component :is="RuntimeMarkdown" />
+    <div v-html="parsedContent" />
   </div>
 </template>
+
+<style lang="sass">
+.katex-html
+  display: none
+</style>
