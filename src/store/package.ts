@@ -70,10 +70,10 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
     }
   }
 
-  refresh()
+  const initialRefreshPromise = refresh()
     .catch(error => console.error(`Internal error: Unable to init Frontend Package storage due to: ${error}`))
 
-  return { storedPackages, indexedPackages, include, exclude, refresh }
+  return { storedPackages, indexedPackages, include, exclude, refresh, initialRefreshPromise }
 })
 
 if (import.meta.hot)
