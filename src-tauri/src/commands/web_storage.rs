@@ -7,7 +7,6 @@ type StateServiceManager<'l> = tauri::State<'l, std::sync::Arc<ServiceManager>>;
 #[tauri::command]
 #[allow(non_snake_case)]
 pub async fn webStorageExport(services: StateServiceManager<'_>, service: &str, package: &str, path: &str) -> Result<(), String> {
-    println!("export! {path}");
     services
         .access(service)
         .await
@@ -23,7 +22,6 @@ pub async fn webStorageExport(services: StateServiceManager<'_>, service: &str, 
 #[tauri::command]
 #[allow(non_snake_case)]
 pub async fn webStorageImport(services: StateServiceManager<'_>, service: &str, package: &str, path: &str) -> Result<(), String> {
-    println!("import! {path}");
     services
         .access(service)
         .await
