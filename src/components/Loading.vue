@@ -12,6 +12,7 @@
     h-full w-full
     flex flex-grow
     align-middle
+    content-center
     justify-center
   >
     <svg class="spinner" viewBox="0 0 50 50">
