@@ -11,7 +11,7 @@ import LectionReader from '~/components/LectionReader.vue'
 const { pack } = defineProps<{ pack: DedutyPackage }>()
 
 const componentInstance: Ref<DynamicComponent> = shallowRef(
-  new DynamicComponent(Message, { message: 'About file not represented' }))
+  new DynamicComponent(Message, { message: 'About is not represented' }))
 
 const errorMessage = ref('')
 onErrorCaptured((error) => {
