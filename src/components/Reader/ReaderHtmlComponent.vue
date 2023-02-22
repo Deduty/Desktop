@@ -14,22 +14,17 @@ const readerContentElement: Ref<HTMLElement | undefined> = ref()
 
 onMounted(() => {
   if (readerContentElement.value) {
-    const scripts = readerContentElement.value.getElementsByTagName('script')
+    for (const script of readerContentElement.value.getElementsByTagName('script')) {
+      const reloadedScript = document.createElement('script')
+      reloadedScript.textContent = script.textContent
 
-    for (const script of scripts) {
-      const inserted = document.createElement('script')
-      inserted.textContent = script.textContent
-      document.head.appendChild(inserted)
+      script.parentNode?.appendChild(reloadedScript)
+      script.remove()
     }
   }
 })
 </script>
 
 <template>
-  <div
-    ref="HtmlElement"
-    class="shiki text-left"
-  >
-    <div ref="readerContentElement" v-html="readerContent" />
-  </div>
+  <div ref="readerContentElement" v-html="readerContent" />
 </template>
