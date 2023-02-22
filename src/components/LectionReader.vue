@@ -3,6 +3,8 @@ import type { Ref } from 'vue'
 
 import type { DedutyLection } from '~/composables/deduty'
 import type { IDedutyApi } from '~/composables/deduty/api'
+
+import { LectionApi, LectionRouter } from '~/composables/deduty/api/lection'
 import { DedutyWebStorageApi } from '~/composables/deduty/api/web-storage'
 
 interface Target {
@@ -57,6 +59,13 @@ const Deduty: IDedutyApi = {
     lection: new DedutyWebStorageApi(target.service, target.package, target.lection),
     package: new DedutyWebStorageApi(target.service, target.package),
   },
+  lections: {
+    current: new LectionApi(packageLections.value[currentLection.value], new LectionRouter(target.service, target.package, target.lection)),
+    all: packageLections.value.map(lection => new LectionApi(
+      lection,
+      new LectionRouter(target.service, target.package, lection.id),
+    )),
+  },
 }
 
 watch(currentLection, (currentLection) => {
@@ -65,6 +74,7 @@ watch(currentLection, (currentLection) => {
     target.package,
     packageLections.value[currentLection].id,
   )
+  Deduty.lections.current = Deduty.lections.all[currentLection]
 })
 
 // @ts-expect-error: The `document` object is being used for passing DedutyApi into lection
