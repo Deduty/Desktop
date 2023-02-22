@@ -25,11 +25,15 @@ export class LectionApi {
     this.#lectionRouter = lectonRouter
   }
 
-  get router(): LectionRouter | undefined {
-    return this.#lectionRouter
+  get id(): string {
+    return this.#lectionObject.id
   }
 
   get name(): string {
     return this.#lectionObject.meta.name
+  }
+
+  get router(): LectionRouter | undefined {
+    return this.#lectionRouter
   }
 }
