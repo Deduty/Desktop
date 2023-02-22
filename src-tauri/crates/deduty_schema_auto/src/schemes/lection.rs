@@ -5,6 +5,7 @@ use serde::{ Deserialize, Serialize };
 pub struct LectionFiles {
     pub id: Option<String>,
     pub name: Option<String>,
+    pub hidden: Option<bool>,
     pub first: Option<Vec<String>>,
     pub last: Option<Vec<String>>
 }

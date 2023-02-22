@@ -46,6 +46,7 @@ pub struct AutoLection {
     origin: String,
 
     meta: String,
+    hidden: Option<bool>,
 
     files_index: HashMap<String, Arc<AutoFile>>,
     files_order: Vec<Arc<AutoFile>>,
@@ -65,6 +66,7 @@ impl AutoLection {
         
         let origin = path.file_name().and_then(os_to_string).unwrap_or(id.to_string());
         let mut name = Some(origin.to_string());
+        let mut hidden = None;
 
         let lection: Option<Lection> = {
             let lection_toml = path.join("lection.toml");
@@ -123,6 +125,7 @@ impl AutoLection {
             if let Some(lection) = lection.and_then(|lection| lection.lection) {
                 id = lection.id.unwrap_or(id);
                 name = lection.name.or_else(|| Some(origin.to_string()));
+                hidden = lection.hidden;
 
                 if let Some(first) = lection.first {
                     for (order, name) in first.into_iter().enumerate() {
@@ -172,7 +175,7 @@ impl AutoLection {
         let name = name.unwrap_or_else(|| id.clone());
 
         
-        let meta = serde_json::to_string(&AutoLectionMeta { name: name.to_string(), hidden: is_about })
+        let meta = serde_json::to_string(&AutoLectionMeta { name: name.to_string(), hidden: hidden.clone().unwrap_or(is_about) })
             .map_err(|error| crate::error::error(format!("Unable to serialize meta for `{path:#?}`: {error}")))?;
 
         Ok(Self {
@@ -184,6 +187,7 @@ impl AutoLection {
             origin,
 
             meta,
+            hidden,
 
             files_index: files.iter().map(|(_, file)| (file.id().to_string(), file.clone())).collect(),
             files_order: files.into_iter().map(|(_, file)| file).collect()
@@ -210,6 +214,7 @@ impl AutoLection {
             lection: Some(LectionFiles {
                 id: Some(self.id.to_string()),
                 name: Some(self.name.to_string()),
+                hidden: self.hidden.to_owned(),
                 first: Some(self.files_order.iter().map(|file| file.filename()).collect()),
                 last: None
             })
