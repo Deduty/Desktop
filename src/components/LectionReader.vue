@@ -21,7 +21,8 @@ const { target, apiEnabled, lectionChangingAllowed } = defineProps<{
 
 const packageStore = usePackageStore()
 
-const packageLections: Ref<DedutyLection[]> = ref([])
+const allPackageLections: Ref<DedutyLection[]> = ref([])
+const showedPackageLections: Ref<DedutyLection[]> = ref([])
 const currentLection: Ref<number> = ref(0)
 
 // Getting valid lection index or throw error
@@ -37,11 +38,12 @@ const currentLection: Ref<number> = ref(0)
 
   let rawLectionId: number | undefined
 
-  packageLections.value = [...pack.lections.filter(
+  allPackageLections.value = [...pack.lections]
+  showedPackageLections.value = [...pack.lections.filter(
     // Lection is hidden or lection is hidden but it's our TARGET
     lection => !lection.meta.hidden || lection.id === target.lection)]
 
-  for (const [index, lection] of packageLections.value.entries()) {
+  for (const [index, lection] of showedPackageLections.value.entries()) {
     if (lection.id === target.lection) {
       rawLectionId = index
       break
@@ -60,8 +62,8 @@ const Deduty: IDedutyApi = {
     package: new DedutyWebStorageApi(target.service, target.package),
   },
   lections: {
-    current: new LectionApi(packageLections.value[currentLection.value], new LectionRouter(target.service, target.package, target.lection)),
-    all: packageLections.value.map(lection => new LectionApi(
+    current: new LectionApi(allPackageLections.value[currentLection.value], new LectionRouter(target.service, target.package, target.lection)),
+    all: allPackageLections.value.map(lection => new LectionApi(
       lection,
       new LectionRouter(target.service, target.package, lection.id),
     )),
@@ -69,12 +71,20 @@ const Deduty: IDedutyApi = {
 }
 
 watch(currentLection, (currentLection) => {
+  const lection_id = showedPackageLections.value[currentLection].id
+  const lection_api = Deduty.lections.all.find(lection => lection.id === lection_id)
+
+  if (!lection_api) {
+    window.location.reload()
+    return
+  }
+
   Deduty.webStorage.lection = new DedutyWebStorageApi(
     target.service,
     target.package,
-    packageLections.value[currentLection].id,
+    lection_id,
   )
-  Deduty.lections.current = Deduty.lections.all[currentLection]
+  Deduty.lections.current = lection_api
 })
 
 // @ts-expect-error: The `document` object is being used for passing DedutyApi into lection
@@ -105,7 +115,7 @@ document.Deduty = Deduty
         m-a
         gap-4
       >
-        <div v-for="file in packageLections[currentLection].files" :key="file.id">
+        <div v-for="file in showedPackageLections[currentLection].files" :key="file.id">
           <Reader :file="file" />
         </div>
       </div>
@@ -119,14 +129,14 @@ document.Deduty = Deduty
           class="icon-btn"
           @click="currentLection -= 1"
         >
-          Read previous: {{ packageLections[currentLection - 1]?.meta.name }}
+          Read previous: {{ showedPackageLections[currentLection - 1]?.meta.name }}
         </div>
         <div
-          v-if="currentLection < packageLections.length - 1"
+          v-if="currentLection < showedPackageLections.length - 1"
           class="icon-btn"
           @click="currentLection += 1"
         >
-          Read next: {{ packageLections[currentLection + 1]?.meta.name }}
+          Read next: {{ showedPackageLections[currentLection + 1]?.meta.name }}
         </div>
       </div>
     </div>
