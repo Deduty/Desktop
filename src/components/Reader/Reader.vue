@@ -50,6 +50,8 @@ onErrorCaptured((error) => {
 
 <template>
   <div
+    :id="file.meta.name"
+
     h-full w-full
     m-0
     align-middle

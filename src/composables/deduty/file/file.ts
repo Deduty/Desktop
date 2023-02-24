@@ -1,6 +1,11 @@
 import { DedutyFileReader } from './reader'
 import type { IDedutyFile } from './scheme'
 import * as Commands from '~/composables/commands'
+import { updateValues } from '~/composables/utils'
+
+export interface IDedutyFileMeta {
+  name: string
+}
 
 export class DedutyFile {
   constructor(
@@ -9,6 +14,7 @@ export class DedutyFile {
     public lection: string,
     public id: string,
     public ext: string,
+    public meta: IDedutyFileMeta,
     public size?: number,
   ) {}
 
@@ -17,12 +23,9 @@ export class DedutyFile {
     return new DedutyFileReader(token)
   }
 
-  static fromOptions(
-    service: string,
-    pack: string,
-    lection: string,
-    { id, ext, size }: IDedutyFile,
-  ): DedutyFile {
-    return new DedutyFile(service, pack, lection, id, ext, size)
+  static fromOptions(service: string, pack: string, lection: string, { id, ext, size, meta }: IDedutyFile): DedutyFile {
+    const optionMeta: IDedutyFileMeta = updateValues({ name: id }, JSON.parse(meta))
+
+    return new DedutyFile(service, pack, lection, id, ext, optionMeta, size)
   }
 }
