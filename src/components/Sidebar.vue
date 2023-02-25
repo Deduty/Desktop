@@ -1,17 +1,42 @@
 <script setup lang="ts">
+import type { RouteLocationNormalized } from 'vue-router'
+
 const router = useRouter()
 
 const haveHistory = ref(false)
 const isHomePage = ref(true)
 
-const hookRouterPath = (to: { path: String }) => {
-  haveHistory.value = window.history.state.back !== null
+const specialBackAddress = ref('')
+
+const routerBackWithFallback = () => {
+  if (specialBackAddress.value)
+    router.push(specialBackAddress.value)
+
+  else
+    router.back()
+}
+
+const hookRouterPath = (to: RouteLocationNormalized) => {
+  // Clear alternative back address
+  specialBackAddress.value = ''
+
+  // Detect case when force reload on lection page
+  // In that case router is empty
+  if (
+    to.name === 'services-serviceId-packages-packageId-lections-lectionId'
+    && window.history.state.back === null
+  ) {
+    // In case when no history, fallback to lections
+    specialBackAddress.value = `/services/${to.params.serviceId}/packages/${to.params.packageId}/lections`
+  }
+
+  haveHistory.value = window.history.state.back !== null || specialBackAddress.value !== ''
   isHomePage.value = to.path === '/'
 }
 
 router.afterEach(hookRouterPath)
 
-onMounted(() => hookRouterPath({ path: window.location.pathname }))
+onMounted(() => hookRouterPath(router.currentRoute.value))
 </script>
 
 <template>
@@ -33,7 +58,7 @@ onMounted(() => hookRouterPath({ path: window.location.pathname }))
         class="button"
         mt-a
         :disabled="!haveHistory"
-        @click="router.back()"
+        @click="routerBackWithFallback()"
       >
         <div
           i-carbon-arrow-left
