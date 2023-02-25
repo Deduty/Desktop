@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api'
 import type { IDedutyPackage } from '../deduty'
 
-export const addPackage = (service: string, serialized: string): Promise<string> => {
-  return invoke('addPackage', { service, serialized })
+export const addPackage = (serviceId: string, serialized: string): Promise<string> => {
+  return invoke('addPackage', { service: serviceId, serialized })
     .then((value) => {
       if (typeof value !== 'string')
         throw new TypeError(`Internal error: \`addPackage\` has returned \`${value}\` but \`string\` was expected`)
@@ -11,8 +11,8 @@ export const addPackage = (service: string, serialized: string): Promise<string>
     })
 }
 
-export const getPackage = (service: string, pack: string): Promise<IDedutyPackage> => {
-  return invoke('getPackage', { service, package: pack })
+export const getPackage = (serviceId: string, packageId: string): Promise<IDedutyPackage> => {
+  return invoke('getPackage', { service: serviceId, package: packageId })
     .then((value) => {
       console.warn('TODO: Make dev only full check')
 
@@ -20,8 +20,8 @@ export const getPackage = (service: string, pack: string): Promise<IDedutyPackag
     })
 }
 
-export const listPackages = (service: string): Promise<string[]> => {
-  return invoke('listPackages', { service })
+export const listPackages = (serviceId: string): Promise<string[]> => {
+  return invoke('listPackages', { service: serviceId })
     .then((value) => {
       if (!Array.isArray(value))
         throw new TypeError(`Internal error: \`listPackages\` has returned \`${value}\` but \`string[]\` was expected`)
@@ -40,16 +40,16 @@ export const listPackages = (service: string): Promise<string[]> => {
     })
 }
 
-export const subPackage = (service: string, pack: string): Promise<void> => {
-  return invoke('subPackage', { service, package: pack })
+export const subPackage = (serviceId: string, packageId: string): Promise<void> => {
+  return invoke('subPackage', { service: serviceId, package: packageId })
     .then((value) => {
       if (value)
         throw new TypeError(`Internal error: \`subPackage\` has returned \`${value}\` but \`undefined | null\` was expected`)
     })
 }
 
-export const updatePackage = (service: string, pack: string, serialized: string): Promise<void> => {
-  return invoke('updatePackage', { service, package: pack, serialized })
+export const updatePackage = (serviceId: string, packageId: string, serialized: string): Promise<void> => {
+  return invoke('updatePackage', { service: serviceId, package: packageId, serialized })
     .then((value) => {
       if (value)
         throw new TypeError(`Internal error: \`subPackage\` has returned \`${value}\` but \`undefined | null\` was expected`)

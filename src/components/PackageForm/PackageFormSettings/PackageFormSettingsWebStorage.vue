@@ -4,7 +4,7 @@ import { dialog } from '@tauri-apps/api'
 import type { DedutyPackage } from '~/composables/deduty'
 import * as Commands from '~/composables/commands'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 
 const webStorageShowed = ref(false)
 
@@ -16,7 +16,7 @@ const exportWebStorage = async () => {
   if (typeof path !== 'string')
     throw new Error(`Internal error: Path is not an array, but ${path}`)
 
-  Commands.webStorageExport(pack.service, pack.id, path)
+  Commands.webStorageExport(packageObject.serviceId, packageObject.id, path)
 }
 
 const importWebStorage = async () => {
@@ -27,7 +27,7 @@ const importWebStorage = async () => {
   if (typeof path !== 'string')
     throw new Error(`Internal error: Path is not an array, but ${path}`)
 
-  Commands.webStorageImport(pack.service, pack.id, path)
+  Commands.webStorageImport(packageObject.serviceId, packageObject.id, path)
 }
 
 const errorMessage = ref('')
@@ -96,7 +96,7 @@ onErrorCaptured((error) => {
         class="confirm-button"
         icon-btn
         p-2 ml-a
-        @click="Commands.webStorageClear(pack.service, pack.id)"
+        @click="Commands.webStorageClear(packageObject.serviceId, packageObject.id)"
       >
         Clear
       </button>

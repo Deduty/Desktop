@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DedutyPackage } from '~/composables/deduty'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 </script>
 
 <template>
@@ -23,7 +23,7 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
           p-2
           text-2xl
         >
-          {{ pack.meta.name }}
+          {{ packageObject.meta.name }}
         </div>
         <div
           m-a
@@ -33,7 +33,7 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
         <div
           text-lg
         >
-          {{ `${pack.service.charAt(0).toUpperCase()}${pack.service.slice(1)}` }}
+          {{ `${packageObject.serviceId.charAt(0).toUpperCase()}${packageObject.serviceId.slice(1)}` }}
         </div>
       </div>
       <div
@@ -47,7 +47,7 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
           class="gray-text"
           text="sm gray-400 dark:gray-500"
         >
-          Language: {{ pack.meta.language }}
+          Language: {{ packageObject.meta.language }}
         </div>
       </div>
       <div
@@ -61,14 +61,14 @@ const { pack } = defineProps<{ pack: DedutyPackage }>()
           class="gray-text"
           text="sm gray-400 dark:gray-500"
         >
-          Version: {{ pack.meta.version }}
+          Version: {{ packageObject.meta.version }}
         </div>
         <div
           class="gray-text"
           text="sm right gray-400 dark:gray-500"
           ml-a
         >
-          {{ pack.packageSize() }}
+          {{ packageObject.packageSize() }}
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ import type { PackageSearchCriteria } from '~/composables/search'
 import { usePackageStore } from '~/store/package'
 
 const { criteria } = defineProps<{ criteria: PackageSearchCriteria }>()
-const emit = defineEmits<{ (event: 'dedutyPackageChosen', pack: DedutyPackage): void }>()
+const emit = defineEmits<{ (event: 'dedutyPackageChosen', packageObject: DedutyPackage): void }>()
 
 interface PackageDisplayItem {
   package: DedutyPackage
@@ -45,7 +45,7 @@ onMounted(() => replaceDisplayItems(packageStore.storedPackages))
         :key="index"
         @click="emit('dedutyPackageChosen', pair.package)"
       >
-        <PackageItem :pack="pair.package" />
+        <PackageItem :package-object="pair.package" />
       </li>
     </ul>
   </div>

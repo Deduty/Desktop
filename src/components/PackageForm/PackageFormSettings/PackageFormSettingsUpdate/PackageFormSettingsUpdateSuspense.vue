@@ -5,12 +5,12 @@ import PackageRequirements from '~/components/PackageRequirements/PackageRequire
 import type { DedutyPackage } from '~/composables/deduty'
 import * as Commands from '~/composables/commands'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageUpdated'): void }>()
 
 // { SerializationKey: SerializationType }
 const serviceRequirements: Map<string, string> = new Map(
-  Object.entries(JSON.parse(await Commands.getServiceUpdateRequirements(pack.service))))
+  Object.entries(JSON.parse(await Commands.getServiceUpdateRequirements(packageObject.serviceId))))
 
 const packageStore = usePackageStore()
 
@@ -26,9 +26,9 @@ class ServiceComponent {
 
 const requirementSatisfied = (service: ServiceComponent, serialized: Map<string, string>) => {
   service.addPackageDynamicSignal.value = async () => {
-    await Commands.updatePackage(pack.service, pack.id, JSON.stringify(Object.fromEntries(serialized.entries())))
-    await packageStore.exclude(pack)
-    await packageStore.refresh(false, [pack.service])
+    await Commands.updatePackage(packageObject.serviceId, packageObject.id, JSON.stringify(Object.fromEntries(serialized.entries())))
+    await packageStore.exclude(packageObject)
+    await packageStore.refresh(false, [packageObject.serviceId])
     emit('packageUpdated')
   }
 }
@@ -39,7 +39,7 @@ const requirementNotSatisfied = (service: ServiceComponent) => {
 
 const currentServiceComponent: Ref<ServiceComponent> = shallowRef(
   new ServiceComponent(
-    pack.service,
+    packageObject.serviceId,
     PackageRequirements,
     {
       requirements: serviceRequirements,

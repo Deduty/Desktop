@@ -4,16 +4,18 @@ import { updateValues } from '~/composables/utils'
 
 export class DedutyLection {
   constructor(
+    public serviceId: string,
+    public packageId: string,
     public id: string,
     public meta: IDedutyLectionMeta,
     public files: DedutyFile[],
     public size?: number,
   ) {}
 
-  static fromOptions(service: string, pack: string, { id, meta, files, size }: IDedutyLection): DedutyLection {
+  static fromOptions(serviceId: string, packageId: string, { id, meta, files, size }: IDedutyLection): DedutyLection {
     const optionMeta: IDedutyLectionMeta = updateValues({ name: id, hidden: false }, JSON.parse(meta))
-    const objectFiles = files.map(file => DedutyFile.fromOptions(service, pack, id, file))
+    const objectFiles = files.map(file => DedutyFile.fromOptions(serviceId, packageId, id, file))
 
-    return new DedutyLection(id, optionMeta, objectFiles, size)
+    return new DedutyLection(serviceId, packageId, id, optionMeta, objectFiles, size)
   }
 }

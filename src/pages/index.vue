@@ -22,8 +22,8 @@ const componentInstanceClosed = () => {
   componentInstance.value = null
 }
 
-const dedutyDisplayChosen = (pack: DedutyPackage) => {
-  componentInstance.value = new DynamicComponent(PackageForm, { pack }, { packageFormClosed: componentInstanceClosed })
+const dedutyDisplayChosen = (packageObject: DedutyPackage) => {
+  componentInstance.value = new DynamicComponent(PackageForm, { packageObject }, { packageFormClosed: componentInstanceClosed })
 }
 </script>
 

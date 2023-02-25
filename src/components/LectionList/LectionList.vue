@@ -5,9 +5,10 @@ import type { DedutyLection, DedutyPackage } from '~/composables/deduty'
 
 import type { LectionSearchCriteria } from '~/composables/search'
 
-const { pack, criteria } = defineProps<{ pack: DedutyPackage; criteria: LectionSearchCriteria }>()
+const { packageObject, criteria } = defineProps<{ packageObject: DedutyPackage; criteria: LectionSearchCriteria }>()
 
 const router = useRouter()
+
 const lectionDisplayItems: Ref<{ lection: DedutyLection; showed: boolean }[]> = ref([])
 
 const filterSearchCriteria = (criteria: LectionSearchCriteria) => {
@@ -17,7 +18,7 @@ const filterSearchCriteria = (criteria: LectionSearchCriteria) => {
 
 watch(() => criteria, filterSearchCriteria, { deep: true })
 
-for (const lection of pack.lections) {
+for (const lection of packageObject.lections) {
   lectionDisplayItems.value.push({
     lection,
     showed: criteria.match(lection) && !lection.meta.hidden,
@@ -36,7 +37,7 @@ for (const lection of pack.lections) {
       <li
         v-for="(pair, index) in lectionDisplayItems" v-show="pair.showed"
         :key="index"
-        @click="router.push(`/services/${pack.service}/packages/${pack.id}/lections/${pair.lection.id}`)"
+        @click="router.push(`/services/${packageObject.serviceId}/packages/${packageObject.id}/lections/${pair.lection.id}`)"
       >
         <LectionItem :lection="pair.lection" />
       </li>

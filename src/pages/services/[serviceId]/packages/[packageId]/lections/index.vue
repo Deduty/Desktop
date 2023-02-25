@@ -4,7 +4,7 @@ import type { Ref } from 'vue'
 import type { DedutyPackage } from '~/composables/deduty'
 import { LectionSearchCriteria } from '~/composables/search'
 
-const properties = defineProps<{ service: string; package: string }>()
+const { serviceId, packageId } = defineProps<{ serviceId: string; packageId: string }>()
 
 const searchCriteria = ref(new LectionSearchCriteria(''))
 const searchStringUpdated = (newSearchString: string) => {
@@ -17,13 +17,13 @@ const packageObject: Ref<DedutyPackage | null> = ref(null)
 const errorMessage = ref('')
 
 onMounted(async () => {
-  packageObject.value = packageStore.indexedPackages.get(properties.service)?.get(properties.package) || null
+  packageObject.value = packageStore.indexedPackages.get(serviceId)?.get(packageId) || null
   if (!packageObject.value) {
-    await packageStore.refresh(false, [properties.service])
-    packageObject.value = packageStore.indexedPackages.get(properties.service)?.get(properties.package) || null
+    await packageStore.refresh(false, [serviceId])
+    packageObject.value = packageStore.indexedPackages.get(serviceId)?.get(packageId) || null
   }
   if (!packageObject.value)
-    errorMessage.value = `Package with id \`${properties.package}\` not found. Probably service or package is not exist.`
+    errorMessage.value = `Package with id \`${packageId}\` not found. Probably service or package is not exist.`
 })
 </script>
 
@@ -67,7 +67,7 @@ onMounted(async () => {
           m-0
         >
           <LectionList
-            :pack="packageObject"
+            :package-object="packageObject"
             :criteria="searchCriteria"
           />
         </div>

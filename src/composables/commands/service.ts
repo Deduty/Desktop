@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api'
 
-export const getServiceAddRequirements = (service: string): Promise<string> => {
-  return invoke('getServiceAddRequirements', { service })
+export const getServiceAddRequirements = (serviceId: string): Promise<string> => {
+  return invoke('getServiceAddRequirements', { service: serviceId })
     .then((value) => {
       if (typeof value !== 'string')
         throw new TypeError(`Internal error: \`getServiceAddRequirements\` has returned \`${value}\` but \`string\` was expected`)
@@ -10,8 +10,8 @@ export const getServiceAddRequirements = (service: string): Promise<string> => {
     })
 }
 
-export const getServiceUpdateRequirements = (service: string): Promise<string> => {
-  return invoke('getServiceUpdateRequirements', { service })
+export const getServiceUpdateRequirements = (serviceId: string): Promise<string> => {
+  return invoke('getServiceUpdateRequirements', { service: serviceId })
     .then((value) => {
       if (typeof value !== 'string')
         throw new TypeError(`Internal error: \`getServiceUpdateRequirements\` has returned \`${value}\` but \`string\` was expected`)

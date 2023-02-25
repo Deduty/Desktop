@@ -4,20 +4,20 @@ import { updateValues } from '~/composables/utils'
 
 export class DedutyPackage {
   constructor(
-    public service: string,
+    public serviceId: string,
     public id: string,
     public meta: IDedutyPackageMeta,
     public lections: DedutyLection[],
     public size?: number,
   ) {}
 
-  static fromOptions(service: string, { id, meta, lections, size }: IDedutyPackage): DedutyPackage {
+  static fromOptions(serviceId: string, { id, meta, lections, size }: IDedutyPackage): DedutyPackage {
     const defaultOptionMeta: IDedutyPackageMeta = { name: id, version: 'Unknown', language: 'Unknown', tags: ['Deprecated'] }
     const optionMeta: IDedutyPackageMeta = updateValues(defaultOptionMeta, JSON.parse(meta))
 
-    const objectLections = lections.map(lection => DedutyLection.fromOptions(service, id, lection))
+    const objectLections = lections.map(lection => DedutyLection.fromOptions(serviceId, id, lection))
 
-    return new DedutyPackage(service, id, optionMeta, objectLections, size)
+    return new DedutyPackage(serviceId, id, optionMeta, objectLections, size)
   }
 
   packageSize(): string {

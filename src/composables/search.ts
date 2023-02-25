@@ -7,8 +7,8 @@ export class PackageSearchCriteria {
     this.regexQuery = new RegExp(query, 'iu')
   }
 
-  public match(pack: DedutyPackage): boolean {
-    return this.regexQuery.test(pack.meta.name)
+  public match(packageObject: DedutyPackage): boolean {
+    return this.regexQuery.test(packageObject.meta.name)
   }
 }
 

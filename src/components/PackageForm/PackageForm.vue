@@ -3,7 +3,7 @@ import type { Ref } from 'vue'
 
 import type { DedutyPackage } from '~/composables/deduty'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
 
 const router = useRouter()
@@ -26,7 +26,7 @@ const packageFormClosed = () => {
     gap-4
   >
     <div flex flex-row>
-      <PackageFormMeta :pack="pack" />
+      <PackageFormMeta :package-object="packageObject" />
       <div
         ml-2 mr-2
         border="~ rounded gray-200 dark:gray-700"
@@ -41,7 +41,7 @@ const packageFormClosed = () => {
           text-3xl
           border-rounded
           class="package form button"
-          @click="router.push(`services/${pack.service}/packages/${pack.id}/lections`)"
+          @click="router.push(`services/${packageObject.serviceId}/packages/${packageObject.id}/lections`)"
         >
           <div i-carbon-book />
         </div>
@@ -72,11 +72,11 @@ const packageFormClosed = () => {
     >
       <PackageFormAbout
         v-show="currentFormTab === 'About'"
-        :pack="pack"
+        :package-object="packageObject"
       />
       <PackageFormSettings
         v-show="currentFormTab === 'Settings'"
-        :pack="pack"
+        :package-object="packageObject"
         @package-form-closed="packageFormClosed"
       />
     </div>

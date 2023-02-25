@@ -9,9 +9,9 @@ export interface IDedutyFileMeta {
 
 export class DedutyFile {
   constructor(
-    public service: string,
-    public pack: string,
-    public lection: string,
+    public serviceId: string,
+    public packageId: string,
+    public lectionId: string,
     public id: string,
     public ext: string,
     public meta: IDedutyFileMeta,
@@ -19,13 +19,13 @@ export class DedutyFile {
   ) {}
 
   async createReader(): Promise<DedutyFileReader> {
-    const token = await Commands.openFileChunked(this.service, this.pack, this.lection, this.id)
+    const token = await Commands.openFileChunked(this.serviceId, this.packageId, this.lectionId, this.id)
     return new DedutyFileReader(token)
   }
 
-  static fromOptions(service: string, pack: string, lection: string, { id, ext, size, meta }: IDedutyFile): DedutyFile {
+  static fromOptions(serviceId: string, packageId: string, lectionId: string, { id, ext, size, meta }: IDedutyFile): DedutyFile {
     const optionMeta: IDedutyFileMeta = updateValues({ name: id }, JSON.parse(meta))
 
-    return new DedutyFile(service, pack, lection, id, ext, optionMeta, size)
+    return new DedutyFile(serviceId, packageId, lectionId, id, ext, optionMeta, size)
   }
 }

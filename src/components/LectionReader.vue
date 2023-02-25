@@ -1,91 +1,77 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 
-import type { DedutyLection } from '~/composables/deduty'
-import type { IDedutyApi } from '~/composables/deduty/api'
-
-import { LectionApi, LectionRouter } from '~/composables/deduty/api/lection'
-import { DedutyWebStorageApi } from '~/composables/deduty/api/web-storage'
-
-interface Target {
-  service: string
-  package: string
-  lection: string
-}
+import type { DedutyLection, DedutyPackage } from '~/composables/deduty'
+import { DedutyApi } from '~/composables/deduty/api'
 
 const { target, apiEnabled, lectionChangingAllowed } = defineProps<{
-  target: Target
+  target: ITarget
   apiEnabled: boolean
   lectionChangingAllowed: boolean
 }>()
 
+interface ITarget {
+  serviceId: string
+  packageId: string
+  lectionId: string
+}
+
+const router = useRouter()
+
+class SmartLection {
+  constructor(public lection: DedutyLection) {}
+
+  go() {
+    window.location.assign(`/services/${this.lection.serviceId}/packages/${this.lection.packageId}/lections/${this.lection.id}`)
+  }
+
+  get name(): string {
+    return this.lection.meta.name
+  }
+}
+
 const packageStore = usePackageStore()
 
-const allPackageLections: Ref<DedutyLection[]> = ref([])
-const showedPackageLections: Ref<DedutyLection[]> = ref([])
-const currentLection: Ref<number> = ref(0)
+const packageObject: Ref<DedutyPackage | undefined> = ref()
+const lectionObject: Ref<DedutyLection | undefined> = ref()
+
+const previousLection: Ref<SmartLection | undefined> = ref()
+const nextLection: Ref<SmartLection | undefined> = ref()
 
 // Getting valid lection index or throw error
 {
   await Promise.all([packageStore.initialRefreshPromise])
-  const service = packageStore.indexedPackages.get(target.service)
-  if (!service)
-    throw new Error(`Service with id \`${target.service}\` not found`)
 
-  const pack = service.get(target.package)
-  if (!pack)
-    throw new Error(`Package with id \`${target.package}\` not found`)
+  const servicePackages = packageStore.indexedPackages.get(target.serviceId)
+  if (!servicePackages)
+    throw new Error(`Service with id \`${target.serviceId}\` not found`)
 
-  let rawLectionId: number | undefined
+  packageObject.value = servicePackages.get(target.packageId)
+  if (!packageObject.value)
+    throw new Error(`Package with id \`${target.packageId}\` not found`)
 
-  allPackageLections.value = [...pack.lections]
-  showedPackageLections.value = [...pack.lections.filter(
-    // Lection is hidden or lection is hidden but it's our TARGET
-    lection => !lection.meta.hidden || lection.id === target.lection)]
+  for (const lection of packageObject.value?.lections) {
+    if (lection.id === target.lectionId) {
+      lectionObject.value = lection
+      continue
+    }
 
-  for (const [index, lection] of showedPackageLections.value.entries()) {
-    if (lection.id === target.lection) {
-      rawLectionId = index
+    if (lection.meta.hidden)
+      continue
+
+    if (lectionObject.value) {
+      nextLection.value = new SmartLection(lection)
       break
     }
+
+    previousLection.value = new SmartLection(lection)
   }
 
-  if (rawLectionId === undefined)
-    throw new Error(`Lection with id \`${target.lection}\` not found`)
-
-  currentLection.value = rawLectionId
+  if (!lectionObject.value)
+    throw new Error(`Lection with id \`${target.packageId}\` not found`)
 }
 
-const Deduty: IDedutyApi = {
-  webStorage: {
-    lection: new DedutyWebStorageApi(target.service, target.package, target.lection),
-    package: new DedutyWebStorageApi(target.service, target.package),
-  },
-  lections: {
-    current: new LectionApi(allPackageLections.value[currentLection.value], new LectionRouter(target.service, target.package, target.lection)),
-    all: allPackageLections.value.map(lection => new LectionApi(
-      lection,
-      new LectionRouter(target.service, target.package, lection.id),
-    )),
-  },
-}
-
-watch(currentLection, (currentLection) => {
-  const lection_id = showedPackageLections.value[currentLection].id
-  const lection_api = Deduty.lections.all.find(lection => lection.id === lection_id)
-
-  if (!lection_api) {
-    window.location.reload()
-    return
-  }
-
-  Deduty.webStorage.lection = new DedutyWebStorageApi(
-    target.service,
-    target.package,
-    lection_id,
-  )
-  Deduty.lections.current = lection_api
-})
+const Deduty: DedutyApi = new DedutyApi(packageObject.value, lectionObject.value)
 
 // @ts-expect-error: The `document` object is being used for passing DedutyApi into lection
 document.Deduty = Deduty
@@ -115,28 +101,28 @@ document.Deduty = Deduty
         m-a
         gap-4
       >
-        <div v-for="file in showedPackageLections[currentLection].files" :key="file.id">
+        <div v-for="file in lectionObject!!.files" :key="file.id">
           <Reader :file="file" />
         </div>
       </div>
       <div
-        v-if="lectionChangingAllowed"
+        v-if="lectionChangingAllowed && !lectionObject?.meta.hidden"
         p-4 m-a prose
         flex flex-row gap-6
       >
         <div
-          v-if="currentLection > 0"
+          v-if="previousLection"
           class="icon-btn"
-          @click="currentLection -= 1"
+          @click="router.push(`/services/${previousLection!.lection.serviceId}/packages/${previousLection!.lection.packageId}/lections/${previousLection!.lection.id}`)"
         >
-          Read previous: {{ showedPackageLections[currentLection - 1]?.meta.name }}
+          Read previous: {{ previousLection.name }}
         </div>
         <div
-          v-if="currentLection < showedPackageLections.length - 1"
+          v-if="nextLection"
           class="icon-btn"
-          @click="currentLection += 1"
+          @click="nextLection!!.go()"
         >
-          Read next: {{ showedPackageLections[currentLection + 1]?.meta.name }}
+          Read next: {{ nextLection.name }}
         </div>
       </div>
     </div>

@@ -9,23 +9,23 @@ export const usePackageStore = defineStore('DedutyPackage', () => {
   const storedPackages: Ref<DedutyPackage[]> = ref([])
   const indexedPackages: Ref<Map<string, Map<string, DedutyPackage>>> = ref(new Map())
 
-  async function include(pack: DedutyPackage): Promise<void> {
-    storedPackages.value.push(pack)
+  async function include(packageObject: DedutyPackage): Promise<void> {
+    storedPackages.value.push(packageObject)
 
-    if (!indexedPackages.value.get(pack.service))
-      indexedPackages.value.set(pack.service, new Map())
+    if (!indexedPackages.value.get(packageObject.serviceId))
+      indexedPackages.value.set(packageObject.serviceId, new Map())
 
-    indexedPackages.value.get(pack.service)!.set(pack.id, pack)
+    indexedPackages.value.get(packageObject.serviceId)!.set(packageObject.id, packageObject)
   }
 
-  async function exclude(pack: DedutyPackage): Promise<void> {
-    if (!indexedPackages.value.get(pack.service) || indexedPackages.value.get(pack.service)!.get(pack.id) === undefined) {
-      console.warn('Package is not contained by frontend', pack)
+  async function exclude(packageObject: DedutyPackage): Promise<void> {
+    if (!indexedPackages.value.get(packageObject.serviceId) || indexedPackages.value.get(packageObject.serviceId)!.get(packageObject.id) === undefined) {
+      console.warn('Package is not contained by frontend', packageObject)
       return
     }
 
     // Must be contained according to check above
-    indexedPackages.value.get(pack.service)!.delete(pack.id)
+    indexedPackages.value.get(packageObject.serviceId)!.delete(packageObject.id)
 
     const newStoredPackages: DedutyPackage[] = []
     for (const packages of indexedPackages.value.values())

@@ -8,8 +8,8 @@ export const closeFileChunked = (token: string): Promise<void> => {
     })
 }
 
-export const openFileChunked = (service: string, pack: string, lection: string, file: string): Promise<string> => {
-  return invoke('openFileChunked', { service, package: pack, lection, file })
+export const openFileChunked = (serviceId: string, packageId: string, lectionId: string, file: string): Promise<string> => {
+  return invoke('openFileChunked', { service: serviceId, package: packageId, lection: lectionId, file })
     // Ensure its string
     .then((value) => {
       if (typeof value !== 'string')

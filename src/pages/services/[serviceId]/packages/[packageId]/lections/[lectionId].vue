@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const properties = defineProps<{ service: string; package: string; lection: string }>()
+const properties = defineProps<{ serviceId: string; packageId: string; lectionId: string }>()
 
 const errorMessage = ref('')
 onErrorCaptured((error) => {

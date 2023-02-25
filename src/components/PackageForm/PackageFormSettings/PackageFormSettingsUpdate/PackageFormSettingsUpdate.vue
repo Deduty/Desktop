@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DedutyPackage } from '~/composables/deduty'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
 
 const updateComponentShowed = ref(false)
@@ -46,7 +46,7 @@ onErrorCaptured((error) => {
       <!-- DONE - SHOW DYNAMIC COMPONENT -->
       <template #default>
         <PackageFormSettingsUpdateSuspense
-          :pack="pack"
+          :package-object="packageObject"
           @package-updated="() => emit('packageFormClosed')"
         />
       </template>

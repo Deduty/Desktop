@@ -4,7 +4,7 @@ import type { Ref } from 'vue'
 import type { DedutyPackage } from '~/composables/deduty'
 import * as Commands from '~/composables/commands'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
 
 const packageStore = usePackageStore()
@@ -18,8 +18,8 @@ watch(deleteButtonHolden, (isHolden) => {
     deleteTimeout.value = setTimeout(
       () => {
         emit('packageFormClosed')
-        packageStore.exclude(pack)
-        Commands.subPackage(pack.service, pack.id)
+        packageStore.exclude(packageObject)
+        Commands.subPackage(packageObject.serviceId, packageObject.id)
       },
       2400,
     )
@@ -41,7 +41,7 @@ watch(deleteButtonHolden, (isHolden) => {
       flex flex-col
     >
       <PackageFormSettingsUpdate
-        :pack="pack"
+        :package-object="packageObject"
         @package-form-closed="() => emit('packageFormClosed')"
       />
     </div>
@@ -49,7 +49,7 @@ watch(deleteButtonHolden, (isHolden) => {
       w-full
       flex flex-col
     >
-      <PackageFormSettingsWebStorage :pack="pack" />
+      <PackageFormSettingsWebStorage :package-object="packageObject" />
     </div>
     <div mt-a />
     <div

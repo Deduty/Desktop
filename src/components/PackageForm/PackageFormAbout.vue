@@ -8,7 +8,7 @@ import Loading from '~/components/Loading.vue'
 import Message from '~/components/Message.vue'
 import LectionReader from '~/components/LectionReader.vue'
 
-const { pack } = defineProps<{ pack: DedutyPackage }>()
+const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 
 const componentInstance: Ref<DynamicComponent> = shallowRef(
   new DynamicComponent(Message, { message: 'About is not represented' }))
@@ -18,8 +18,8 @@ onErrorCaptured((error) => {
   errorMessage.value = error.message
 })
 
-if (pack.lections.find(lection => lection.id === 'about')) {
-  const target = { service: pack.service, package: pack.id, lection: 'about' }
+if (packageObject.lections.find(lection => lection.id === 'about')) {
+  const target = { service: packageObject.serviceId, package: packageObject.id, lection: 'about' }
 
   componentInstance.value = new DynamicComponent(
     LectionReader,
