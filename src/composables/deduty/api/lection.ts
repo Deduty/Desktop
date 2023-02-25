@@ -1,39 +1,29 @@
+import { DedutyWebStorageApi } from './web-storage'
 import type { DedutyLection } from '~/composables/deduty'
 
-export class LectionRouter {
-  #service: string
-  #package: string
-  #lection: string
-
-  constructor(service: string, pack: string, lection: string) {
-    this.#service = service
-    this.#package = pack
-    this.#lection = lection
-  }
-
-  public go() {
-    window.location.assign(`/services/${this.#service}/packages/${this.#package}/lections/${this.#lection}`)
-  }
+export interface ILectionMeta {
+  id: string
+  name: string
 }
 
 export class LectionApi {
-  #lectionRouter?: LectionRouter
-  #lectionObject: DedutyLection
+  #lection: DedutyLection
+  #webStorage: DedutyWebStorageApi
 
-  constructor(lectionObject: DedutyLection, lectonRouter?: LectionRouter) {
-    this.#lectionObject = lectionObject
-    this.#lectionRouter = lectonRouter
+  constructor(lectionObject: DedutyLection) {
+    this.#lection = lectionObject
+    this.#webStorage = new DedutyWebStorageApi(lectionObject.serviceId, lectionObject.packageId, lectionObject.id)
   }
 
-  get id(): string {
-    return this.#lectionObject.id
+  get meta(): ILectionMeta {
+    return { id: this.#lection.id, name: this.#lection.meta.name }
   }
 
-  get name(): string {
-    return this.#lectionObject.meta.name
+  public go() {
+    window.location.assign(`/services/${this.#lection.serviceId}/packages/${this.#lection.packageId}/lections/${this.#lection.id}`)
   }
 
-  get router(): LectionRouter | undefined {
-    return this.#lectionRouter
+  get webStorage(): DedutyWebStorageApi {
+    return this.#webStorage
   }
 }

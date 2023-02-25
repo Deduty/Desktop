@@ -5,10 +5,10 @@ export class DedutyWebStorageApi {
   #package: string
   #lection?: string
 
-  constructor(service: string, pack: string, lection?: string) {
-    this.#service = service
-    this.#package = pack
-    this.#lection = lection
+  constructor(serviceId: string, packageId: string, lectionId?: string) {
+    this.#service = serviceId
+    this.#package = packageId
+    this.#lection = lectionId
   }
 
   public async delete(key: string): Promise<string | undefined> {
