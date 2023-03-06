@@ -42,7 +42,7 @@ onErrorCaptured((error) => {
     m-2 p-2
     flex flex-row flex-grow
     justify-between
-    @click="() => webStorageShowed = !webStorageShowed"
+    @click="webStorageShowed = !webStorageShowed"
   >
     <p>
       Web storage
@@ -78,7 +78,7 @@ onErrorCaptured((error) => {
         class="confirm-button"
         icon-btn
         p-2
-        @click="exportWebStorage()"
+        @click="exportWebStorage"
       >
         Export
       </button>
@@ -87,7 +87,7 @@ onErrorCaptured((error) => {
         class="confirm-button"
         icon-btn
         p-2
-        @click="importWebStorage()"
+        @click="importWebStorage"
       >
         Import
       </button>

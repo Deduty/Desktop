@@ -70,7 +70,7 @@ const selectPath = () => {
           class="select"
           text-2xl
           p-2
-          @click="selectPath()"
+          @click="selectPath"
         >
           . . .
         </button>

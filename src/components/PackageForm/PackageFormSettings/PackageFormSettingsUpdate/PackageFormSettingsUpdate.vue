@@ -18,7 +18,7 @@ onErrorCaptured((error) => {
     m-2 p-2
     flex flex-row flex-grow
     justify-between
-    @click="() => updateComponentShowed = !updateComponentShowed"
+    @click="updateComponentShowed = !updateComponentShowed"
   >
     <p>
       Update package

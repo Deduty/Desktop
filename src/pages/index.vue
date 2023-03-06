@@ -22,6 +22,10 @@ const componentInstanceClosed = () => {
   componentInstance.value = null
 }
 
+const dedutyDisplayAdd = () => {
+  componentInstance.value = new DynamicComponent(PackageAdd, {}, { packageAddClosed: componentInstanceClosed })
+}
+
 const dedutyDisplayChosen = (packageObject: DedutyPackage) => {
   componentInstance.value = new DynamicComponent(PackageForm, { packageObject }, { packageFormClosed: componentInstanceClosed })
 }
@@ -88,7 +92,7 @@ const dedutyDisplayChosen = (packageObject: DedutyPackage) => {
           <button
             icon-btn
             border="~ rounded gray-200 dark:gray-700"
-            @click="componentInstance = new DynamicComponent(PackageAdd, {}, { packageAddClosed: componentInstanceClosed })"
+            @click="dedutyDisplayAdd"
           >
             <div
               m-2
