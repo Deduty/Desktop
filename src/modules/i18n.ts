@@ -15,9 +15,12 @@ const messages = Object.fromEntries(
 )
 
 export const install: UserModule = ({ app }) => {
+  localStorage['i18n-language'] = localStorage['i18n-language'] || 'en'
+
   const i18n = createI18n({
     legacy: false,
-    locale: 'en',
+    locale: localStorage['i18n-language'],
+    fallbackLocale: 'en',
     messages,
   })
 
