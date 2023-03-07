@@ -6,6 +6,8 @@ import * as Commands from '~/composables/commands'
 
 const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 
+const { t } = useI18n()
+
 const webStorageShowed = ref(false)
 
 const exportWebStorage = async () => {
@@ -45,7 +47,7 @@ onErrorCaptured((error) => {
     @click="webStorageShowed = !webStorageShowed"
   >
     <p>
-      Web storage
+      {{ t('component.PackageFormSettingsWebStorage.Web storage') }}
     </p>
     <div
       class="web-sign"
@@ -80,7 +82,7 @@ onErrorCaptured((error) => {
         p-2
         @click="exportWebStorage"
       >
-        Export
+        {{ t('component.PackageFormSettingsWebStorage.Export') }}
       </button>
       <button
         border="~ rounded gray-200 dark:gray-700"
@@ -89,7 +91,7 @@ onErrorCaptured((error) => {
         p-2
         @click="importWebStorage"
       >
-        Import
+        {{ t('component.PackageFormSettingsWebStorage.Import') }}
       </button>
       <button
         border="~ rounded gray-200 dark:gray-700"
@@ -98,7 +100,7 @@ onErrorCaptured((error) => {
         p-2 ml-a
         @click="Commands.webStorageClear(packageObject.serviceId, packageObject.id)"
       >
-        Clear
+        {{ t('component.PackageFormSettingsWebStorage.Clear') }}
       </button>
     </div>
   </div>

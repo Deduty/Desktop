@@ -12,7 +12,7 @@ const toggleLanguage = () => {
 <template>
   <div flex flex-col gap-2>
     <div text-2xl>
-      {{ t('translate.Language') }}
+      {{ t('component.SettingsLanguage.Language') }}
     </div>
     <div
       flex flex-row
@@ -20,7 +20,7 @@ const toggleLanguage = () => {
       border="~ rounded gray-200 dark:gray-700"
     >
       <div flex mr-a>
-        {{ t('translate.Change-language') }}
+        {{ t('component.SettingsLanguage.Change language') }}
       </div>
       <div
         icon-btn

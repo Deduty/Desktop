@@ -2,6 +2,62 @@ language:
   name: Русский
   code: ru
 
-components:
-  Language: Язык
-  Change-language: Изменить язык
+component:
+  PackageAdd:
+    Add package: Добавить пакет
+  
+  PackageAddSuspense:
+    Add package: Добавить пакет
+
+  PackageFormSettingsUpdate:
+    Update package: Обновить пакет
+  
+  PackageFormSettingsUpdateSuspense:
+    Update package: Обновить пакет
+
+  PackageFormSettings:
+    DELETE PACKAGE: УДАЛИТЬ ПАКЕТ
+    DELETE-PACKAGE-HINT: Пакет будет удален с диска, только если он был скопирован приложением (это происходит при выходе)
+
+  PackageFormSettingsWebStorage:
+    Web storage: Веб-хранилище
+    Export: Экспорт
+    Import: Импорт
+    Clear: Очистить
+
+  PackageFormAbout:
+    About is not represented: Информация о пакете не предоставлена
+
+  PackageFormMeta:
+    Language: Язык
+    Version: Версия
+  
+  PackageItem:
+    Version: Версия
+
+  DirectoryPathRequirement:
+    Select folder: Выберите папку
+    Press the button: Нажмите на кнопку
+  
+  SettingsDeleteAll:
+    DELETE ALL PACKAGES: УДАЛИТЬ ВСЕ ПАКЕТЫ
+    DELETE-PACKAGE-HINT: Пакет будет удален с диска, только если он был скопирован приложением (это происходит при выходе)
+
+  SettingsLanguage:
+    Language: Язык
+    Change language: Поменять язык
+
+  SettingsList:
+    Settings: Настройки
+    Other: Прочие
+
+  SettingsTheme:
+    Theme: Тема
+    Change theme: Поменять тему
+    Day: День
+    Night: Ночь
+    Use system settings: Использовать системные настройки
+
+  LectionReader:
+    Read previous: Читать предыдущее
+    Read next: Читать следующее

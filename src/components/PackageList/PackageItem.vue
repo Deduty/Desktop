@@ -2,6 +2,8 @@
 import type { DedutyPackage } from '~/composables/deduty'
 
 const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -42,7 +44,7 @@ const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
         class="gray-text"
         text="sm gray-400 dark:gray-500"
       >
-        Version: {{ packageObject.meta.version }}
+        {{ t('component.PackageItem.Version') }}: {{ packageObject.meta.version }}
       </div>
       <div m-a />
       <div

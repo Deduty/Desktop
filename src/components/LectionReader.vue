@@ -16,6 +16,8 @@ interface ITarget {
   lectionId: string
 }
 
+const { t } = useI18n()
+
 const router = useRouter()
 
 class SmartLection {
@@ -107,22 +109,24 @@ document.Deduty = Deduty
       </div>
       <div
         v-if="lectionChangingAllowed && !lectionObject?.meta.hidden"
-        p-4 m-a prose
-        flex flex-row gap-6
+        flex flex-row
+        prose
+        p-4 m-a
+        gap-6
       >
         <div
           v-if="previousLection"
           class="icon-btn"
           @click="router.push(`/services/${previousLection!.lection.serviceId}/packages/${previousLection!.lection.packageId}/lections/${previousLection!.lection.id}`)"
         >
-          Read previous: {{ previousLection.name }}
+          {{ t('component.LectionReader.Read previous') }}: {{ previousLection.name }}
         </div>
         <div
           v-if="nextLection"
           class="icon-btn"
           @click="nextLection!!.go()"
         >
-          Read next: {{ nextLection.name }}
+          {{ t('component.LectionReader.Read previous') }}: {{ nextLection.name }}
         </div>
       </div>
     </div>

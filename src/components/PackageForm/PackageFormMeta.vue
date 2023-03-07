@@ -2,6 +2,8 @@
 import type { DedutyPackage } from '~/composables/deduty'
 
 const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -47,7 +49,7 @@ const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
           class="gray-text"
           text="sm gray-400 dark:gray-500"
         >
-          Language: {{ packageObject.meta.language }}
+          {{ t('component.PackageFormMeta.Language') }}: {{ packageObject.meta.language }}
         </div>
       </div>
       <div
@@ -61,7 +63,7 @@ const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
           class="gray-text"
           text="sm gray-400 dark:gray-500"
         >
-          Version: {{ packageObject.meta.version }}
+          {{ t('component.PackageFormMeta.Version') }}: {{ packageObject.meta.version }}
         </div>
         <div
           class="gray-text"

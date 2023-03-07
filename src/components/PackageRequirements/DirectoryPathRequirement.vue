@@ -6,6 +6,8 @@ const emit = defineEmits<{
   (event: 'requirementNotSatisfied'): void
 }>()
 
+const { t } = useI18n()
+
 const errorMessage = ref('')
 const placeHolderText = ref('')
 
@@ -51,7 +53,7 @@ const selectPath = () => {
       <span
         text-lg
       >
-        Select folder
+        {{ t('component.DirectoryPathRequirement.Select folder') }}
       </span>
       <div
         flex flex-row flex-grow
@@ -60,7 +62,7 @@ const selectPath = () => {
       >
         <input
           v-model="pathString"
-          :placeholder="placeHolderText || 'Press the button -->'"
+          :placeholder="placeHolderText || `${t('component.DirectoryPathRequirement.Press the button')} -->`"
           disabled
           w-full
           p-2
