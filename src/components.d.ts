@@ -34,6 +34,7 @@ declare module '@vue/runtime-core' {
     RouterView: typeof import('vue-router')['RouterView']
     Search: typeof import('./components/Search.vue')['default']
     Settings: typeof import('./components/SettingsList/Settings.vue')['default']
+    SettingsDeleteAll: typeof import('./components/SettingsList/SettingsDeleteAll.vue')['default']
     SettingsList: typeof import('./components/SettingsList/SettingsList.vue')['default']
     SettingsTheme: typeof import('./components/SettingsList/SettingsTheme.vue')['default']
     Sidebar: typeof import('./components/Sidebar.vue')['default']
