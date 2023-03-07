@@ -17,11 +17,10 @@ const packageObject: Ref<DedutyPackage | null> = ref(null)
 const errorMessage = ref('')
 
 onMounted(async () => {
+  // Storage must be init
+  await Promise.all([packageStore.initialRefreshPromise])
+
   packageObject.value = packageStore.indexedPackages.get(serviceId)?.get(packageId) || null
-  if (!packageObject.value) {
-    await packageStore.refresh(false, [serviceId])
-    packageObject.value = packageStore.indexedPackages.get(serviceId)?.get(packageId) || null
-  }
   if (!packageObject.value)
     errorMessage.value = `Package with id \`${packageId}\` not found. Probably service or package is not exist.`
 })
