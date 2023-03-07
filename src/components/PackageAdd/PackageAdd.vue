@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const emit = defineEmits<{ (event: 'packageAddClosed'): void }>()
 
+const { t } = useI18n()
+
 const packageAddClosed = () => {
   emit('packageAddClosed')
 }
@@ -22,7 +24,7 @@ onErrorCaptured((error) => {
     w-prose h-min
   >
     <div text-2xl>
-      Add package
+      {{ t('component.PackageAdd.Add package') }}
     </div>
     <div
       h-full w-full

@@ -10,8 +10,10 @@ import LectionReader from '~/components/LectionReader.vue'
 
 const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 
+const { t } = useI18n()
+
 const componentInstance: Ref<DynamicComponent> = shallowRef(
-  new DynamicComponent(Message, { message: 'About is not represented' }))
+  new DynamicComponent(Message, { message: t('component.PackageFormAbout.About is not represented') }))
 
 const errorMessage = ref('')
 onErrorCaptured((error) => {

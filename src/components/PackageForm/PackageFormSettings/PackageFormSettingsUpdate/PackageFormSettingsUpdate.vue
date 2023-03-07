@@ -4,6 +4,8 @@ import type { DedutyPackage } from '~/composables/deduty'
 const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageFormClosed'): void }>()
 
+const { t } = useI18n()
+
 const updateComponentShowed = ref(false)
 
 const errorMessage = ref('')
@@ -21,7 +23,7 @@ onErrorCaptured((error) => {
     @click="updateComponentShowed = !updateComponentShowed"
   >
     <p>
-      Update package
+      {{ t('component.PackageFormSettingsUpdate.Update package') }}
     </p>
     <div
       class="update-sign"

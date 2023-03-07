@@ -2,6 +2,62 @@ language:
   name: English
   code: en
 
-translate:
-  Language: Language
-  Change-language: Change language
+component:
+  PackageAdd:
+    Add package: Add package
+  
+  PackageAddSuspense:
+    Add package: Add package
+
+  PackageFormSettingsUpdate:
+    Update package: Update package
+  
+  PackageFormSettingsUpdateSuspense:
+    Update package: Update package
+
+  PackageFormSettings:
+    DELETE PACKAGE: DELETE PACKAGE
+    DELETE-PACKAGE-HINT: Package will be deleted from local disk only if it was copied by application (that happen before exit)
+
+  PackageFormSettingsWebStorage:
+    Web storage: Web storage
+    Export: Export
+    Import: Import
+    Clear: Clear
+
+  PackageFormAbout:
+    About is not represented: About is not represented
+
+  PackageFormMeta:
+    Language: Language
+    Version: Version
+  
+  PackageItem:
+    Version: Version
+
+  DirectoryPathRequirement:
+    Select folder: Select folder
+    Press the button: Press the button
+  
+  SettingsDeleteAll:
+    DELETE ALL PACKAGES: DELETE ALL PACKAGES
+    DELETE-PACKAGE-HINT: Package will be deleted from local disk only if it was copied by application (that happen before exit)
+
+  SettingsLanguage:
+    Language: Language
+    Change language: Change language
+
+  SettingsList:
+    Settings: Settings
+    Other: Other
+
+  SettingsTheme:
+    Theme: Theme
+    Change theme: Change theme
+    Day: Day
+    Night: Night
+    Use system settings: Use system settings
+
+  LectionReader:
+    Read previous: Read previous
+    Read next: Read next

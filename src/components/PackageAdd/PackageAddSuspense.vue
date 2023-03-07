@@ -8,6 +8,8 @@ import * as Commands from '~/composables/commands'
 
 const emit = defineEmits<{ (event: 'packageAddSuspenseClosed'): void }>()
 
+const { t } = useI18n()
+
 // { Service: { SerializationKey: SerializationType } }
 const serviceRequirements: Map<string, Map<string, string>> = new Map()
 for (const service of await Commands.listServices()) {
@@ -130,7 +132,7 @@ onErrorCaptured((error) => {
               :disabled="currentServiceComponent.addPackageDynamicSignal.value === null"
               @click="currentServiceComponent?.addPackageDynamicSignal.value"
             >
-              Add package
+              {{ t('component.PackageAddSuspense.Add package') }}
             </button>
           </div>
         </div>

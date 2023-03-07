@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { isDark, preferredDark, toggleDark } from '~/composables/dark'
 
+const { t } = useI18n()
+
 const isAutoUseDark = ref(localStorage['vueuse-color-scheme'] === 'auto')
 
 const useDarkToggle = () => {
@@ -24,7 +26,7 @@ const useSystemThemeToggle = () => {
 <template>
   <div flex flex-col gap-2>
     <div text-2xl>
-      Theme
+      {{ t('component.SettingsTheme.Theme') }}
     </div>
     <div
       flex flex-row
@@ -32,7 +34,7 @@ const useSystemThemeToggle = () => {
       border="~ rounded gray-200 dark:gray-700"
     >
       <div flex mr-a>
-        Change theme
+        {{ t('component.SettingsTheme.Change theme') }}
       </div>
       <div
         icon-btn
@@ -43,7 +45,7 @@ const useSystemThemeToggle = () => {
           flex flex-row
           gap-2
         >
-          <div>Day</div>
+          <div>{{ t('component.SettingsTheme.Day') }}</div>
           <div m-a i-carbon-sun />
         </div>
         <div
@@ -51,7 +53,7 @@ const useSystemThemeToggle = () => {
           flex flex-row
           gap-2
         >
-          <div>Night</div>
+          <div>{{ t('component.SettingsTheme.Night') }}</div>
           <div m-a i-carbon-moon />
         </div>
       </div>
@@ -62,7 +64,7 @@ const useSystemThemeToggle = () => {
       border="~ rounded gray-200 dark:gray-700"
     >
       <div flex mr-a>
-        Use system settings
+        {{ t('component.SettingsTheme.Use system settings') }}
       </div>
       <div flex>
         <input

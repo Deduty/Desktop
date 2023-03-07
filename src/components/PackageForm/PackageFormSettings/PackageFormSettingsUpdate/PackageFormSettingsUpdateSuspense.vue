@@ -8,6 +8,8 @@ import * as Commands from '~/composables/commands'
 const { packageObject } = defineProps<{ packageObject: DedutyPackage }>()
 const emit = defineEmits<{ (event: 'packageUpdated'): void }>()
 
+const { t } = useI18n()
+
 // { SerializationKey: SerializationType }
 const serviceRequirements: Map<string, string> = new Map(
   Object.entries(JSON.parse(await Commands.getServiceUpdateRequirements(packageObject.serviceId))))
@@ -91,7 +93,7 @@ onErrorCaptured((error) => {
               :disabled="currentServiceComponent.addPackageDynamicSignal.value === null"
               @click="currentServiceComponent.addPackageDynamicSignal.value"
             >
-              Update package
+              {{ t('component.PackageFormSettingsUpdateSuspense.Update package') }}
             </button>
           </div>
         </div>

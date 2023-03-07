@@ -3,6 +3,8 @@ import type { Ref } from 'vue'
 
 import * as Commands from '~/composables/commands'
 
+const { t } = useI18n()
+
 const packageStore = usePackageStore()
 
 /* ============================= DELETE BUTTON ============================= */
@@ -38,10 +40,10 @@ watch(deleteButtonHolden, (isHolden) => {
     @mouseup="() => deleteButtonHolden = false"
   >
     <div>
-      DELETE ALL PACKAGES
+      {{ t('component.SettingsDeleteAll.DELETE ALL PACKAGES') }}
     </div>
     <div text-sm text-gray>
-      Package will be deleted from local disk only if it was copied by application (that happen before exit)
+      {{ t('component.SettingsDeleteAll.DELETE-PACKAGE-HINT') }}
     </div>
   </div>
 </template>
