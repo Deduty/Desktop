@@ -30,6 +30,14 @@ const hookRouterPath = (to: RouteLocationNormalized) => {
     specialBackAddress.value = `/services/${to.params.serviceId}/packages/${to.params.packageId}/lections`
   }
 
+  if (
+    to.name === 'services-serviceId-packages-packageId-lections'
+    && window.history.state.back === null
+  ) {
+    // In case when no history, fallback to lections
+    specialBackAddress.value = '/'
+  }
+
   haveHistory.value = window.history.state.back !== null || specialBackAddress.value !== ''
   isHomePage.value = to.path === '/'
 }
