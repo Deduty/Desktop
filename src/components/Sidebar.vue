@@ -56,9 +56,15 @@ onMounted(() => hookRouterPath(router.currentRoute.value))
     >
       <button
         class="button"
+        @click="router.push('/settings')"
+      >
+        <div i-carbon-settings />
+      </button>
+      <button
+        class="button"
         mt-a
         :disabled="!haveHistory"
-        @click="routerBackWithFallback()"
+        @click="routerBackWithFallback"
       >
         <div
           i-carbon-arrow-left
