@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import type { DedutyFile } from '~/composables/deduty'
 
-const { file } = defineProps<{ file: DedutyFile }>()
+const { file, scriptsAllowed } = defineProps<{ file: DedutyFile; scriptsAllowed: boolean }>()
 
 const readerBlob = await (await file.createReader()).readAll()
 if (!readerBlob)
@@ -13,7 +13,7 @@ const readerContent = (new TextDecoder()).decode(readerBuffer)
 const readerContentElement: Ref<HTMLElement | undefined> = ref()
 
 onMounted(() => {
-  if (readerContentElement.value) {
+  if (readerContentElement.value && scriptsAllowed) {
     for (const script of readerContentElement.value.getElementsByTagName('script')) {
       const reloadedScript = document.createElement('script')
       reloadedScript.textContent = script.textContent

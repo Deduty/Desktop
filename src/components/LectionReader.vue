@@ -4,9 +4,10 @@ import type { Ref } from 'vue'
 import type { DedutyLection, DedutyPackage } from '~/composables/deduty'
 import { DedutyApi } from '~/composables/deduty/api'
 
-const { target, apiEnabled, lectionChangingAllowed } = defineProps<{
+const { target, apiEnabled, scriptsAllowed, lectionChangingAllowed } = defineProps<{
   target: ITarget
   apiEnabled: boolean
+  scriptsAllowed: boolean
   lectionChangingAllowed: boolean
 }>()
 
@@ -104,7 +105,7 @@ document.Deduty = Deduty
         gap-4
       >
         <div v-for="file in lectionObject!!.files" :key="file.id">
-          <Reader :file="file" />
+          <Reader :file="file" :scripts-allowed="scriptsAllowed" />
         </div>
       </div>
       <div

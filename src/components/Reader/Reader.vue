@@ -9,7 +9,7 @@ import ReaderMarkdownComponent from './ReaderMarkdownComponent.vue'
 import { DynamicComponent } from '~/composables/dynamic'
 import type { DedutyFile } from '~/composables/deduty'
 
-const { file } = defineProps<{ file: DedutyFile }>()
+const { file, scriptsAllowed } = defineProps<{ file: DedutyFile; scriptsAllowed: boolean }>()
 
 class Extension {
   constructor(public origin: string) {}
@@ -28,7 +28,7 @@ class Extension {
 
   createComponent(): DynamicComponent {
     if (this.isHtml())
-      return new DynamicComponent(ReaderHtmlComponent, { file })
+      return new DynamicComponent(ReaderHtmlComponent, { file, scriptsAllowed })
 
     if (this.isImage())
       return new DynamicComponent(ReaderImageComponent, { file })

@@ -18,6 +18,7 @@ onErrorCaptured((error) => {
         <LectionReader
           :target="properties"
           :api-enabled="true"
+          :scripts-allowed="true"
           :lection-changing-allowed="true"
         />
       </template>

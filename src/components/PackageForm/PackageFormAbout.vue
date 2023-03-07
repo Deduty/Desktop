@@ -25,7 +25,7 @@ if (packageObject.lections.find(lection => lection.id === 'about')) {
 
   componentInstance.value = new DynamicComponent(
     LectionReader,
-    { target, apiEnabled: true, lectionChangingAllowed: false })
+    { target, apiEnabled: false, scriptsAllowed: false, lectionChangingAllowed: false })
 }
 </script>
 
