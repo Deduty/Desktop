@@ -12,6 +12,7 @@
     </div>
     <div overflow-y-auto p-2>
       <SettingsTheme pb-8 />
+      <SettingsLanguage pb-8 />
       <div text-2xl p-2 pl-0>
         Other
       </div>
