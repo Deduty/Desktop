@@ -67,6 +67,7 @@ const useSystemThemeToggle = () => {
       <div flex>
         <input
           m-a
+          cursor-pointer
           type="checkbox"
           :checked="isAutoUseDark"
           @click="useSystemThemeToggle()"
