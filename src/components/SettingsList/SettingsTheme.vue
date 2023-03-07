@@ -34,7 +34,10 @@ const useSystemThemeToggle = () => {
       <div flex mr-a>
         Change theme
       </div>
-      <div @click="useDarkToggle()">
+      <div
+        icon-btn
+        @click="useDarkToggle()"
+      >
         <div
           v-if="!isDark"
           flex flex-row
