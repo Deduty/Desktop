@@ -127,7 +127,7 @@ document.Deduty = Deduty
           class="icon-btn"
           @click="nextLection!!.go()"
         >
-          {{ t('component.LectionReader.Read previous') }}: {{ nextLection.name }}
+          {{ t('component.LectionReader.Read next') }}: {{ nextLection.name }}
         </div>
       </div>
     </div>
