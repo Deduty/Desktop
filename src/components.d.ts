@@ -33,7 +33,6 @@ declare module '@vue/runtime-core' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Search: typeof import('./components/Search.vue')['default']
-    Settings: typeof import('./components/SettingsList/Settings.vue')['default']
     SettingsDeleteAll: typeof import('./components/SettingsList/SettingsDeleteAll.vue')['default']
     SettingsLanguage: typeof import('./components/SettingsList/SettingsLanguage.vue')['default']
     SettingsList: typeof import('./components/SettingsList/SettingsList.vue')['default']
