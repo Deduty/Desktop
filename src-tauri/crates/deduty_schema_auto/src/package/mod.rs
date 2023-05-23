@@ -59,7 +59,7 @@ impl AutoPackage {
 
         let mut id = uuid::Uuid::new_v4().to_string();
 
-        let mut name = id.to_string();
+        let mut name = path.file_name().and_then(os_to_string).unwrap_or_else(|| id.clone());
 
         let package: Option<Package> = {
             let package_toml = path.join("package.toml");
