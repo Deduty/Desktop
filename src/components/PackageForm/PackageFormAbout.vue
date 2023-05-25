@@ -21,7 +21,7 @@ onErrorCaptured((error) => {
 })
 
 if (packageObject.lections.find(lection => lection.id === 'about')) {
-  const target = { service: packageObject.serviceId, package: packageObject.id, lection: 'about' }
+  const target = { serviceId: packageObject.serviceId, packageId: packageObject.id, lectionId: 'about' }
 
   componentInstance.value = new DynamicComponent(
     LectionReader,
