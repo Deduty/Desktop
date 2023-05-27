@@ -63,26 +63,30 @@ impl AutoPackage {
 
         let package: Option<Package> = {
             let package_toml = path.join("package.toml");
+            match package_toml.exists().await {
+                false => None,
+                true => {
+                    let mut buffer = Vec::new();
+                    File::open(&package_toml)
+                        .await
+                        .map_err(|error|
+                            crate::error::error(format!("Unable to open file `{package_toml:#?}`: {error}")))?
+                        .read_to_end(&mut buffer)
+                        .await
+                        .map_err(|error|
+                            crate::error::error(format!("Unable to read file `{package_toml:#?}`: {error}")))?;
+            
+                    let package_meta: Package = toml::from_slice(&buffer)
+                        .map_err(|error|
+                            crate::error::error(format!("Unable to get package meta from `{package_toml:#?}`: {error}")))?;
 
-            let mut buffer = Vec::new();
-            File::open(&package_toml)
-                .await
-                .map_err(|error|
-                    crate::error::error(format!("Unable to open file `{package_toml:#?}`: {error}")))?
-                .read_to_end(&mut buffer)
-                .await
-                .map_err(|error|
-                    crate::error::error(format!("Unable to read file `{package_toml:#?}`: {error}")))?;
-    
-            let package_meta: Package = toml::from_slice(&buffer)
-                .map_err(|error|
-                    crate::error::error(format!("Unable to get package meta from `{package_toml:#?}`: {error}")))?;
+                    if !package_meta.manifest.name.eq_ignore_ascii_case("auto") {
+                        return crate::error::error_err(format!("Manifest name `{}` is not supported", package_meta.manifest.name));
+                    }
 
-            if !package_meta.manifest.name.eq_ignore_ascii_case("auto") {
-                return crate::error::error_err(format!("Manifest name `{}` is not supported", package_meta.manifest.name));
+                    Some(package_meta)
+                }
             }
-
-            Some(package_meta)
         };
 
         let (meta_package, meta_lection) = {
