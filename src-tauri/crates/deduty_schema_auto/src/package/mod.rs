@@ -80,8 +80,10 @@ impl AutoPackage {
                         .map_err(|error|
                             crate::error::error(format!("Unable to get package meta from `{package_toml:#?}`: {error}")))?;
 
-                    if !package_meta.manifest.name.eq_ignore_ascii_case("auto") {
-                        return crate::error::error_err(format!("Manifest name `{}` is not supported", package_meta.manifest.name));
+                    if let Some(manifest) = &package_meta.manifest {
+                        if !manifest.name.eq_ignore_ascii_case("auto") {
+                            return crate::error::error_err(format!("Manifest name `{}` is not supported", manifest.name));
+                        }
                     }
 
                     Some(package_meta)
@@ -246,7 +248,7 @@ impl AutoPackage {
 
         // Create package.toml file
         let package_toml_content = Package {
-            manifest: PackageManifest { name: "Auto".to_string() },
+            manifest: Some(PackageManifest { name: "Auto".to_string() }),
             package: Some(PackageMeta {
                 id: Some(self.id.to_string()),
                 about: Some(self.about.to_string()),

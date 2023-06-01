@@ -27,7 +27,7 @@ pub struct PackageManifest {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Package {
-    pub manifest: PackageManifest,
+    pub manifest: Option<PackageManifest>,
     pub package: Option<PackageMeta>,
     pub lection: Option<PackageLections>
 }
