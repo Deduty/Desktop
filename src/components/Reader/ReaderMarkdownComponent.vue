@@ -5,6 +5,7 @@ import { unified } from 'unified'
 // Unified - Remark
 import remarkParse from 'remark-parse'
 import remarkMath from 'remark-math'
+import remarkGfm from 'remark-gfm'
 import remarkRehype from 'remark-rehype'
 
 // Unified - Rehype
@@ -33,6 +34,7 @@ await unified()
   // Remark
   .use(remarkParse)
   .use(remarkMath, { singleDollarTextMath: true })
+  .use(remarkGfm)
   .use(remarkRehype, { allowDangerousHtml: true })
   // Rehype
   .use(rehypeKatex, { displayMode: true })
